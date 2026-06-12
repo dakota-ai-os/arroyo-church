@@ -38,6 +38,6 @@ Any static host works — Netlify / Vercel / Cloudflare Pages / GitHub Pages: dr
 
 ## Maintenance
 
-- **Sermon videos**: update the four `data-id` / `data-title` attributes in the Sermons section with new YouTube video IDs.
+- **Sermon videos**: the Sermons section has two tabs — *Current Series* and *Arroyo Podcast* — each backed by a YouTube playlist. When a new series starts (or new episodes drop), update the `data-id`/`data-title` attributes on the `.yt` tiles in each panel, the series name/description in the `.series-bar`, and the playlist `?list=` links. Thumbnails come automatically from the video IDs.
 - **Team changes**: each person is one `tcard` block (staff) or `ecard` block (elders).
 - **Service time/address**: appears in the hero, countdown strip, visit section, and footer.

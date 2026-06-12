@@ -458,13 +458,45 @@ section{position:relative}
 #sermons .eyebrow{color:var(--river-lt)}
 .sermon-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:3rem}
 .sermon-head p{max-width:46ch;color:var(--muted-lt)}
-.sermon-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:1.3rem;align-items:stretch}
+.sermon-tabs{display:flex;gap:.6rem;margin-bottom:1.8rem;flex-wrap:wrap}
+.stab{
+  padding:.7rem 1.5rem;border-radius:999px;font-weight:700;font-size:.95rem;letter-spacing:.02em;
+  border:1.5px solid rgba(191,231,238,.25);color:var(--muted-lt);
+  transition:color .25s,border-color .25s,background .25s;
+}
+.stab:hover{color:var(--text-lt);border-color:rgba(191,231,238,.5)}
+.stab[aria-selected="true"]{
+  background:linear-gradient(135deg,var(--river-lt),var(--river));color:var(--ink);
+  border-color:transparent;
+}
+.sermon-panel{display:none}
+.sermon-panel.active{display:block;animation:panelIn .5s var(--ease-out)}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sermon-panel.active{animation:none}}
+.sermon-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:1.3rem;align-items:start}
+.sermon-main{display:grid;gap:1.3rem}
+.series-bar{
+  border-radius:18px;border:1px solid rgba(191,231,238,.13);background:rgba(17,48,61,.5);
+  padding:1.3rem 1.6rem;display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;
+}
+.series-bar .sb-kicker{font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-lt)}
+.series-bar h3{font-family:var(--display);font-weight:460;font-size:1.35rem;margin:.15rem 0 .1rem}
+.series-bar p{font-size:.9rem;color:var(--muted-lt);max-width:46ch}
+.series-bar .btn{flex:none}
+.browse-tile{
+  position:relative;border-radius:20px;aspect-ratio:16/9;
+  border:1.5px dashed rgba(191,231,238,.3);display:flex;flex-direction:column;gap:.5rem;
+  align-items:center;justify-content:center;text-align:center;padding:1rem;
+  color:var(--muted-lt);font-weight:700;font-size:.95rem;
+  transition:border-color .3s,color .3s,transform .35s var(--ease-out);
+}
+.browse-tile:hover{border-color:var(--river-lt);color:var(--text-lt);transform:translateY(-3px)}
+.browse-tile svg{opacity:.8}
 .yt{
   position:relative;border-radius:20px;overflow:hidden;background:#000;cursor:pointer;
   aspect-ratio:16/9;border:1px solid rgba(191,231,238,.12);
   transition:transform .35s var(--ease-out),box-shadow .35s;
 }
-.sermon-grid>.yt{aspect-ratio:auto;height:100%;min-height:380px}
 .yt:hover{transform:translateY(-4px);box-shadow:0 24px 48px -20px rgba(46,143,163,.45)}
 .yt .thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;transition:opacity .3s,transform .6s var(--ease-out)}
 .yt:hover .thumb{opacity:1;transform:scale(1.04)}
@@ -477,11 +509,11 @@ section{position:relative}
 .yt:hover .play{background:var(--river);transform:translate(-50%,-50%) scale(1.08)}
 .yt .play::after{content:'';border-style:solid;border-width:11px 0 11px 19px;border-color:transparent transparent transparent #fff;margin-left:4px}
 .yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.yt-side{display:grid;gap:1.3rem;grid-template-rows:repeat(3,1fr)}
+.yt-side{display:grid;gap:1.3rem;align-content:start}
 .yt-side .yt .play{width:52px;height:38px;border-radius:10px}
 .yt-side .yt .play::after{border-width:7px 0 7px 12px}
 .sermons-cta{margin-top:2.6rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
-@media (max-width:920px){.sermon-grid{grid-template-columns:1fr}.sermon-grid>.yt{aspect-ratio:16/9;height:auto;min-height:0}.yt-side{grid-template-rows:none;grid-template-columns:repeat(3,1fr)}}
+@media (max-width:920px){.sermon-grid{grid-template-columns:1fr}.yt-side{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:640px){.yt-side{grid-template-columns:1fr}}
 
 /* ════════════════════════ CONNECT ════════════════════════ */
@@ -1010,23 +1042,70 @@ footer ul a:hover{color:var(--text-lt)}
       </div>
       <p class="reveal" style="--d:.16s">Stay connected with our latest sermons and podcasts — streamed every week on YouTube.</p>
     </div>
-    <div class="sermon-grid">
-      <div class="yt reveal" data-id="1casv_QOmrc" data-title="Answering Hard Questions Part Two" role="button" tabindex="0" aria-label="Play sermon: Answering Hard Questions Part Two">
-        <img class="thumb" src="https://i.ytimg.com/vi/1casv_QOmrc/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/1casv_QOmrc/hqdefault.jpg'" alt="" loading="lazy">
-        <span class="play" aria-hidden="true"></span>
+    <div class="sermon-tabs reveal" role="tablist" aria-label="Choose what to watch">
+      <button class="stab" id="stab-series" role="tab" aria-selected="true" aria-controls="spanel-series">Current Series</button>
+      <button class="stab" id="stab-podcast" role="tab" aria-selected="false" aria-controls="spanel-podcast" tabindex="-1">Arroyo Podcast</button>
+    </div>
+
+    <div class="sermon-panel active" id="spanel-series" role="tabpanel" aria-labelledby="stab-series">
+      <div class="sermon-grid">
+        <div class="sermon-main">
+          <div class="yt" data-id="Ed-g0Dcev3I" data-title="How You Can Experience Radical Restoration" role="button" tabindex="0" aria-label="Play the latest message: How You Can Experience Radical Restoration — 1 Samuel 7">
+            <img class="thumb" src="https://i.ytimg.com/vi/Ed-g0Dcev3I/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/Ed-g0Dcev3I/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
+          <div class="series-bar">
+            <div>
+              <div class="sb-kicker">Current series</div>
+              <h3>Walk Faithfully</h3>
+              <p>A sermon series through the life of Samuel — a new message every Sunday.</p>
+            </div>
+            <a class="btn btn-ghost magnet" href="https://www.youtube.com/playlist?list=PLqCyakXjbp1OOesDkGS-yHXk6kpVInzvx" target="_blank" rel="noopener">Watch the Series</a>
+          </div>
+        </div>
+        <div class="yt-side">
+          <div class="yt" data-id="xwzseLoIeWI" data-title="How Prayer Empowers You" role="button" tabindex="0" aria-label="Play sermon: How Prayer Empowers You">
+            <img class="thumb" src="https://i.ytimg.com/vi/xwzseLoIeWI/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/xwzseLoIeWI/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
+          <a class="browse-tile" href="https://www.youtube.com/@arroyochurch/playlists" target="_blank" rel="noopener">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="13" height="11" rx="2"/><path d="M19 8l3-2v12l-3-2"/><path d="M3 19h13" opacity=".5"/></svg>
+            Browse every series
+            <span style="font-weight:500;font-size:.82rem;opacity:.7">Romans · Psalms · Philippians &amp; more</span>
+          </a>
+        </div>
       </div>
-      <div class="yt-side">
-        <div class="yt reveal" style="--d:.08s" data-id="__oATaYVfpY" data-title="Is the Resurrection Real and Relevant?" role="button" tabindex="0" aria-label="Play sermon: Is the Resurrection Real and Relevant?">
-          <img class="thumb" src="https://i.ytimg.com/vi/__oATaYVfpY/hqdefault.jpg" alt="" loading="lazy">
-          <span class="play" aria-hidden="true"></span>
+    </div>
+
+    <div class="sermon-panel" id="spanel-podcast" role="tabpanel" aria-labelledby="stab-podcast">
+      <div class="sermon-grid">
+        <div class="sermon-main">
+          <div class="yt" data-id="RGFj3CopCQ0" data-title="Pastor Asks College Students About Jesus" role="button" tabindex="0" aria-label="Play the latest podcast: Pastor Asks College Students About Jesus">
+            <img class="thumb" src="https://i.ytimg.com/vi/RGFj3CopCQ0/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/RGFj3CopCQ0/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
+          <div class="series-bar">
+            <div>
+              <div class="sb-kicker">Arroyo Podcast</div>
+              <h3>Honest conversations, hard questions.</h3>
+              <p>The team talks through the questions people actually ask about faith.</p>
+            </div>
+            <a class="btn btn-ghost magnet" href="https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX" target="_blank" rel="noopener">All Episodes</a>
+          </div>
         </div>
-        <div class="yt reveal" style="--d:.16s" data-id="d-7hW6V50NE" data-title="Answering Hard Questions Part One" role="button" tabindex="0" aria-label="Play sermon: Answering Hard Questions Part One">
-          <img class="thumb" src="https://i.ytimg.com/vi/d-7hW6V50NE/hqdefault.jpg" alt="" loading="lazy">
-          <span class="play" aria-hidden="true"></span>
-        </div>
-        <div class="yt reveal" style="--d:.24s" data-id="w9tAcNkSqFw" data-title="Do All Religions Lead to the Same God?" role="button" tabindex="0" aria-label="Play sermon: Do All Religions Lead to the Same God?">
-          <img class="thumb" src="https://i.ytimg.com/vi/w9tAcNkSqFw/hqdefault.jpg" alt="" loading="lazy">
-          <span class="play" aria-hidden="true"></span>
+        <div class="yt-side">
+          <div class="yt" data-id="-nED4vgUEI8" data-title="What does the Bible REALLY say about the end times?" role="button" tabindex="0" aria-label="Play podcast: What does the Bible really say about the end times?">
+            <img class="thumb" src="https://i.ytimg.com/vi/-nED4vgUEI8/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/-nED4vgUEI8/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
+          <div class="yt" data-id="dn509_C_j8A" data-title="Do lukewarm Christians go to heaven?" role="button" tabindex="0" aria-label="Play podcast: Do lukewarm Christians go to heaven?">
+            <img class="thumb" src="https://i.ytimg.com/vi/dn509_C_j8A/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/dn509_C_j8A/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
+          <div class="yt" data-id="1casv_QOmrc" data-title="Answering Hard Questions Part Two" role="button" tabindex="0" aria-label="Play podcast: Answering Hard Questions Part Two">
+            <img class="thumb" src="https://i.ytimg.com/vi/1casv_QOmrc/maxresdefault.jpg" onerror="this.src='https://i.ytimg.com/vi/1casv_QOmrc/hqdefault.jpg'" alt="" loading="lazy">
+            <span class="play" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -1411,6 +1490,31 @@ document.querySelectorAll('.tcard').forEach(card => {
   btn.addEventListener('click', () => {
     const open = card.classList.toggle('flipped');
     btn.setAttribute('aria-expanded', String(open));
+  });
+});
+
+/* ── Sermon tabs (Current Series / Arroyo Podcast) ────── */
+const stabs = Array.from(document.querySelectorAll('.stab'));
+stabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => {
+    stabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(t.getAttribute('aria-controls'));
+      if(panel){
+        panel.classList.toggle('active', on);
+        // stop playback in the hidden panel by restoring its thumbnails
+        if(!on) panel.querySelectorAll('iframe').forEach(f => f.remove());
+      }
+    });
+  });
+  tab.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+      e.preventDefault();
+      const next = stabs[(i + (e.key === 'ArrowRight' ? 1 : stabs.length - 1)) % stabs.length];
+      next.click(); next.focus();
+    }
   });
 });
 
