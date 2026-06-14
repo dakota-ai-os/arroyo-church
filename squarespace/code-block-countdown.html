@@ -1,0 +1,66 @@
+<!-- ════════════════════════════════════════════════════════════════
+     ARROYO CHURCH — "Next Gathering" countdown
+     Paste this ENTIRE block into a Squarespace CODE BLOCK
+     (+ → Code) on your home page. It is fully self-contained:
+     it brings its own styling and logic, so it works on its own.
+     Counts down to the next Sunday 10:00 AM Pacific, and shows a
+     "we're gathered now" message during the service hour.
+     ════════════════════════════════════════════════════════════════ -->
+<div class="arroyo-countdown" id="arroyoCountdown" role="timer" aria-label="Time until the next worship gathering">
+  <span class="ac-label">Next Worship Gathering</span>
+  <div class="ac-units" id="acUnits">
+    <div class="ac-unit"><div class="ac-num" id="acD">–</div><div class="ac-word">Days</div></div>
+    <div class="ac-unit"><div class="ac-num" id="acH">–</div><div class="ac-word">Hours</div></div>
+    <div class="ac-unit"><div class="ac-num" id="acM">–</div><div class="ac-word">Minutes</div></div>
+    <div class="ac-unit"><div class="ac-num" id="acS">–</div><div class="ac-word">Seconds</div></div>
+  </div>
+  <div class="ac-live" id="acLive" style="display:none">We're gathered right now &mdash; come join us!</div>
+  <span class="ac-where">Sundays <strong>10:00 AM</strong> &middot; 945 Concannon Blvd, Livermore</span>
+</div>
+
+<style>
+  /* Self-contained styling so the block looks right even before the
+     site-wide Custom CSS is added. Matches the "River in the Desert" palette. */
+  .arroyo-countdown{
+    font-family: 'Manrope', -apple-system, sans-serif;
+    display:flex; flex-wrap:wrap; gap:1rem 2.5rem; align-items:center; justify-content:center;
+    padding:1.8rem; border-radius:18px; color:#eef6f7;
+    background:linear-gradient(135deg,#0D2530,#11303d);
+  }
+  .arroyo-countdown .ac-label{ font-size:.78rem; letter-spacing:.26em; text-transform:uppercase; color:#5FC2D4; font-weight:700; }
+  .arroyo-countdown .ac-units{ display:flex; gap:1.4rem; }
+  .arroyo-countdown .ac-unit{ text-align:center; min-width:54px; }
+  .arroyo-countdown .ac-num{ font-size:2.1rem; font-weight:300; line-height:1; font-variant-numeric:tabular-nums; }
+  .arroyo-countdown .ac-word{ font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; opacity:.7; margin-top:.35rem; }
+  .arroyo-countdown .ac-live{ font-size:1.2rem; color:#E3BD6A; }
+  .arroyo-countdown .ac-where{ font-size:.92rem; color:rgba(238,246,247,.7); }
+  .arroyo-countdown .ac-where strong{ color:#fff; }
+</style>
+
+<script>
+(function(){
+  var d=document.getElementById('acD'),h=document.getElementById('acH'),
+      m=document.getElementById('acM'),s=document.getElementById('acS'),
+      units=document.getElementById('acUnits'),live=document.getElementById('acLive');
+  // Current time in Pacific, regardless of the visitor's own timezone.
+  function pacific(){
+    var p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',
+      weekday:'short',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(new Date());
+    function g(t){return p.find(function(x){return x.type===t;}).value;}
+    return {wd:g('weekday'),h:(+g('hour'))%24,mi:+g('minute'),s:+g('second')};
+  }
+  function tick(){
+    var la=pacific(), days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], dow=days.indexOf(la.wd);
+    var now=la.h*3600+la.mi*60+la.s, tenAM=10*3600, elevenAM=11*3600;
+    if(dow===0 && now>=tenAM && now<elevenAM){ units.style.display='none'; live.style.display=''; return; }
+    units.style.display=''; live.style.display='none';
+    var ahead = (dow===0 && now<tenAM) ? 0 : ((7-dow)%7 || 7);
+    var total = ahead*86400 + tenAM - now; if(total<0) total+=7*86400;
+    d.textContent=Math.floor(total/86400);
+    h.textContent=String(Math.floor(total%86400/3600)).padStart(2,'0');
+    m.textContent=String(Math.floor(total%3600/60)).padStart(2,'0');
+    s.textContent=String(total%60).padStart(2,'0');
+  }
+  tick(); setInterval(tick,1000);
+})();
+</script>
