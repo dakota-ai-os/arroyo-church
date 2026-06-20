@@ -1,15 +1,13 @@
 <!-- ════════════════════════════════════════════════════════════════
-     ARROYO CHURCH — interactive layer (Footer Code Injection)
-     Paste into: Settings → Advanced → Code Injection → FOOTER
-     (Runs on the live Business-plan site. Does NOT touch URLs,
-     titles, schema, or the blog — zero SEO impact.)
-
-     Includes: custom cursor · hero particle overlay · safe
-     scroll-reveal. Each piece is guarded so that if anything fails
-     to run, your content still displays normally (never hidden).
+     ARROYO CHURCH — interactive + section build layer (Footer Code Injection)
+     MASTER FILE. Edit here, then paste the whole thing into:
+     Settings → Advanced → Code Injection → FOOTER (never touch HEADER = schema).
+     Grows milestone by milestone.
+     Current: cursor · particles · scroll-reveal · M1 Home Hero (overlay
+     content + word-reveal + transparent nav-over-hero). Zero SEO impact.
      ════════════════════════════════════════════════════════════════ -->
 <style>
-/* custom cursor (desktop only) */
+/* ---- custom cursor ---- */
 @media (pointer:fine){
   #ac-cur-dot,#ac-cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:2147483600;border-radius:50%}
   #ac-cur-dot{width:7px;height:7px;background:#5FC2D4}
@@ -17,21 +15,78 @@
   #ac-cur-ring.on{width:58px;height:58px;border-color:#E3BD6A;background:rgba(200,154,62,.08)}
 }
 #ac-particles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-/* scroll-reveal — ONLY hides content once JS confirms it is running
-   (html.ac-anim), so a JS failure can never leave content invisible.
-   A 1.6s safety net also force-reveals everything regardless. */
+
+/* ---- safe scroll-reveal for native blocks ---- */
 html.ac-anim .fe-block{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
 html.ac-anim .fe-block.ac-in,
 html.ac-anim.ac-reveal-all .fe-block{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  html.ac-anim .fe-block{opacity:1!important;transform:none!important}
-}
+@media (prefers-reduced-motion:reduce){ html.ac-anim .fe-block{opacity:1!important;transform:none!important} }
+
+/* ════ M1 HERO ════ keep hero tall; hide the WHOLE native grid; center overlay both axes */
+[data-section-id="68533fde9bfaa374d9c67d61"]{min-height:90vh;min-height:90svh}
+html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"]{position:relative;min-height:90vh!important;min-height:90svh!important;margin-top:-100px}
+html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"] .fluid-engine .fe-block{visibility:hidden!important}
+html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"] .ac-hero{padding-top:60px}
+.ac-hero{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 clamp(1.5rem,7vw,7rem);box-sizing:border-box;text-align:left;color:#fff;font-family:'Manrope',sans-serif;pointer-events:none}
+.ac-hero a{pointer-events:auto}
+.ac-hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(10,22,28,.66) 0%,rgba(10,22,28,.42) 45%,rgba(10,22,28,.82) 100%)}
+/* robust entrance: visible by default, CSS keyframe auto-plays (no class gating = can't get stuck hidden) */
+.ac-hero>*{animation:acRise .9s cubic-bezier(.16,1,.3,1) both}
+.ac-eyebrow{animation-delay:.05s}.ac-hero h1{animation-delay:.16s}.ac-sub{animation-delay:.46s}.ac-ctas{animation-delay:.64s}.ac-service{animation-delay:.82s}
+@keyframes acRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.ac-eyebrow{display:inline-flex;align-items:center;gap:.7rem;font-size:.82rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#E3BD6A;margin:0 0 1.3rem}
+.ac-eyebrow::before{content:"";width:42px;height:1.5px;background:#E3BD6A;display:inline-block}
+.ac-hero h1{font-family:'Fraunces',serif;font-weight:330;font-size:clamp(2.7rem,7.4vw,6.2rem);line-height:1.04;letter-spacing:-.015em;margin:0;max-width:15ch;color:#fff}
+.ac-hero h1 em{font-style:italic;color:#7fd0e0}
+.ac-sub{max-width:46ch;margin:1.5rem 0 0;font-size:clamp(1rem,1.4vw,1.18rem);line-height:1.7;color:rgba(255,255,255,.84)}
+.ac-ctas{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2.2rem}
+.ac-btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:700;font-size:.95rem;letter-spacing:.02em;padding:.9rem 1.8rem;border-radius:999px;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,background .3s,border-color .3s}
+.ac-btn-gold{background:linear-gradient(135deg,#E3BD6A,#C89A3E);color:#0A161C;box-shadow:0 8px 24px -8px rgba(200,154,62,.55)}
+.ac-btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 34px -8px rgba(200,154,62,.7)}
+.ac-btn-ghost{border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.ac-btn-ghost:hover{transform:translateY(-3px);border-color:#7fd0e0;background:rgba(95,194,212,.12)}
+.ac-service{margin-top:2.6rem;font-size:.95rem;font-weight:600;color:rgba(255,255,255,.72)}
+.ac-service strong{color:#fff;font-weight:800}
+.ac-scroll{position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.6);z-index:6;animation:acFade 1s 1.1s both}
+@keyframes acFade{from{opacity:0}to{opacity:1}}
+.ac-scroll i{width:1.5px;height:46px;background:linear-gradient(#5FC2D4,transparent);position:relative;overflow:hidden;display:block}
+.ac-scroll i::after{content:"";position:absolute;top:-50%;left:0;width:100%;height:50%;background:#BFE7EE;animation:acDrip 2.1s ease-in-out infinite}
+@keyframes acDrip{to{top:110%}}
+
+/* ════ M1 NAV over hero (homepage only) — fixes the white menu bar ════ */
+html.ac-hero-on .header{position:fixed!important;top:0;left:0;right:0;background:transparent!important;transition:background .4s,backdrop-filter .4s,box-shadow .4s}
+html.ac-hero-on .header .header-nav-item a,
+html.ac-hero-on .header .header-title-text a,
+html.ac-hero-on .header .header-actions a,
+html.ac-hero-on .header .burger-inner .top,
+html.ac-hero-on .header .burger-inner .middle,
+html.ac-hero-on .header .burger-inner .bottom{color:#fff!important}
+html.ac-hero-on .header .header-title-logo img{filter:brightness(0) invert(1)}
+html.ac-hero-on.ac-scrolled .header{background:transparent!important;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+html.ac-hero-on .header-background-solid{background:transparent!important}
+html.ac-hero-on.ac-scrolled .header-background-solid{background:rgba(13,37,48,.58)!important;-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6)}
+/* ── NAV match-prototype (global): centered links, Manrope, gradient hover-underline ── */
+@media(min-width:768px){.header .header-nav{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%);margin:0}}
+.header-nav-item a,.header-nav-folder-title{font-family:'Manrope',sans-serif!important;font-weight:600;letter-spacing:.02em}
+.header-nav-item>a,.header-nav-item .header-nav-folder-title{position:relative;display:inline-block}
+.header-nav-item>a::after,.header-nav-folder-title::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:2px;background:linear-gradient(90deg,#C89A3E,#5FC2D4);transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.header-nav-item:hover>a::after,.header-nav-item:hover .header-nav-folder-title::after{transform:scaleX(1)}
+html.ac-hero-on .header .header-nav-folder-title{color:#fff!important}
+/* slim the scrolled dark bar (thinner, like the prototype) */
+.header-announcement-bar-wrapper{transition:padding-top .35s,padding-bottom .35s}
+html.ac-hero-on.ac-scrolled .header-announcement-bar-wrapper{padding-top:9px!important;padding-bottom:9px!important}
+/* smaller logo (thins the whole bar) + smaller nav CTA button */
+.header-title-logo img{max-height:42px!important;transition:max-height .35s}
+html.ac-hero-on.ac-scrolled .header-title-logo img{max-height:34px!important}
+.header .header-actions .sqs-button-element--primary,.header-actions-action .sqs-button-element--primary{padding:.5rem 1.25rem!important;font-size:.78rem!important;letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){.ac-hero h1 .w>span{transform:none}.ac-hero-in .ac-eyebrow,.ac-hero-in .ac-sub,.ac-hero-in .ac-ctas,.ac-hero-in .ac-service{opacity:1;transform:none}}
 </style>
 <script>
 (function(){
   var fine=matchMedia('(pointer:fine)').matches, reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var HOME=function(){ return document.body.classList.contains('homepage'); };
 
-  /* ---------- custom cursor ---------- */
+  /* ---- custom cursor ---- */
   if(fine&&!reduce){
     var dot=document.createElement('div');dot.id='ac-cur-dot';
     var ring=document.createElement('div');ring.id='ac-cur-ring';
@@ -42,14 +97,15 @@ html.ac-anim.ac-reveal-all .fe-block{opacity:1;transform:none}
       dot.style.transform='translate('+(x-3.5)+'px,'+(y-3.5)+'px)';
       ring.style.left=rx+'px';ring.style.top=ry+'px';ring.style.transform='translate(-50%,-50%)';
       requestAnimationFrame(loop);})();
-    var sel='a,button,.sqs-block-button-element,input,textarea,.header-nav-item';
+    var sel='a,button,.sqs-block-button-element,.ac-btn,input,textarea,.header-nav-item';
     addEventListener('mouseover',function(e){if(e.target.closest&&e.target.closest(sel))ring.classList.add('on');});
     addEventListener('mouseout',function(e){if(e.target.closest&&e.target.closest(sel))ring.classList.remove('on');});
   }
 
-  /* ---------- hero particle overlay (only on a video-background hero) ---------- */
+  /* ---- hero particle overlay (video-bg hero, homepage) ---- */
   if(!reduce){
     function P(){
+      if(!HOME())return;
       var bg=null, secs=document.querySelectorAll('.page-section .section-background');
       for(var i=0;i<secs.length;i++){ if(secs[i].querySelector('video')){ bg=secs[i]; break; } }
       if(!bg) return;
@@ -65,17 +121,39 @@ html.ac-anim.ac-reveal-all .fe-block{opacity:1;transform:none}
     if(document.readyState!=='loading')setTimeout(P,500);else addEventListener('DOMContentLoaded',function(){setTimeout(P,500);});
   }
 
-  /* ---------- safe scroll-reveal ---------- */
+  /* ---- M1: build the hero overlay (homepage only) ---- */
+  function buildHero(){
+    if(!HOME()) return;
+    var hero=document.querySelector('[data-section-id="68533fde9bfaa374d9c67d61"]');
+    if(!hero) return;
+    if(hero.querySelector('.ac-hero')) return;
+    var ov=document.createElement('div'); ov.className='ac-hero';
+    ov.innerHTML =
+      '<p class="ac-eyebrow">Arroyo Church &middot; Livermore, CA</p>'+
+      '<h1>A river in the <em>desert.</em></h1>'+
+      '<p class="ac-sub">Know and show the love of Jesus in the Bay Area and beyond. Wherever you are on your journey, you are welcome here.</p>'+
+      '<div class="ac-ctas"><a class="ac-btn ac-btn-gold" href="/plan-your-visit">Plan Your Visit</a>'+
+      '<a class="ac-btn ac-btn-ghost" href="/messages">Watch a Sermon</a></div>'+
+      '<div class="ac-service"><strong>Sundays &middot; 10:00 AM</strong> &middot; 945 Concannon Blvd, Livermore, CA 94550</div>'+
+      '<div class="ac-scroll"><span>Scroll</span><i></i></div>';
+    hero.appendChild(ov);
+    document.documentElement.classList.add('ac-hero-on'); /* only after overlay exists, so a failure never leaves a broken nav */
+  }
+  if(document.readyState!=='loading')buildHero();else addEventListener('DOMContentLoaded',buildHero);
+
+  /* ---- nav solid-on-scroll ---- */
+  function navScroll(){ document.documentElement.classList.toggle('ac-scrolled', (window.scrollY||0)>40); }
+  addEventListener('scroll',navScroll,{passive:true}); navScroll();
+
+  /* ---- safe scroll-reveal ---- */
   if(!reduce && 'IntersectionObserver' in window){
     document.documentElement.classList.add('ac-anim');
     function reveal(){
       var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('ac-in');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
       document.querySelectorAll('.fe-block').forEach(function(el){io.observe(el);});
-      // safety net: never leave content hidden
       setTimeout(function(){document.documentElement.classList.add('ac-reveal-all');},1600);
     }
     if(document.readyState!=='loading')reveal();else addEventListener('DOMContentLoaded',reveal);
-    // ultimate fallback if something throws before reveal()
     setTimeout(function(){document.documentElement.classList.add('ac-reveal-all');},3000);
   }
 })();

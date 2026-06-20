@@ -1,0 +1,56 @@
+# Arroyo Church — Full Squarespace Build Plan
+
+**Goal:** Rebuild EVERY element of the prototype (tos-backtest.github.io/arroyo-church) inside the live Squarespace site, as faithfully as Squarespace allows. Animations best-effort. Milestone-by-milestone with a review stop after each.
+
+**Reference:** the prototype = `~/arroyo-church-redesign/index.html` (also live at https://tos-backtest.github.io/arroyo-church/).
+
+---
+
+## Page architecture (SEO-preserving)
+Keep all existing SEO pages and their URLs/titles/meta. Distribute the prototype's content so every element lands somewhere, and the dedicated pages keep their keyword targeting:
+
+| Page (URL kept) | Gets these prototype sections |
+|---|---|
+| **Home** (`/`) | Hero · Countdown · Mission/4 cards · "Why Arroyo" river story · teasers to each page · Final CTA · Footer |
+| **/about** | Beliefs accordion (6) · Values (5) · mission/why-arroyo depth |
+| **/team** | Staff grid (6, hover/flip) · Elder board (4) |
+| **/messages** | Sermons: featured + grid · Current Series vs Podcast |
+| **/connect** | Connect groups · 3 ministry cards · prayer band |
+| **/give** | 3 give cards (Cash/Stock/Crypto) · verse |
+| **/plan-your-visit** | Visit hero · descent fly-in · service meta · 3-step · FAQ accordion · map |
+
+Nav links to the real pages (good for SEO + internal linking).
+
+## How each piece is built
+- **Content + layout + native sections** → Squarespace Fluid Engine blocks (built in the editor).
+- **Custom animations** (headline reveal, river animation, descent, sticky-stack, flip cards, countdown, cursor/particles) → Code Blocks + the Footer Code Injection (already live).
+- Built on the **live** site (only place Code Injection runs); each milestone made presentable; all reversible.
+- Caveat: Squarespace editor is driven via the browser (occasionally drops connection) and Fluid-Engine layouts are fiddly — expect iteration and best-effort fidelity on the heaviest animations.
+
+---
+
+## Milestones (review stop after each)
+
+- [x] **M1 — Home Hero.** DONE/live. Hero overlay (eyebrow, H1 "A river in the desert." italic-teal, subhead, 2 CTAs, service line), left-aligned, full-height, acRise entrance, particles, legibility scrim, transparent nav-over-hero (white links, solid-on-scroll). Native hero blocks kept (visibility:hidden) for height; native H1 also edited to "A river in the desert.".
+- [ ] **M2 — Home Countdown.** Live "Next Worship Gathering" countdown code block below hero.
+- [ ] **M3 — Home Mission.** Eyebrow "Who we are", headline, lead, 1 John 4:10 quote, 4 mission cards (Love of Jesus / Knowing / Showing / Bay Area & Beyond).
+- [ ] **M4 — Home "Why Arroyo" + River animation.** Desert→river gradient section, Isaiah 43:18–19 verse with word reveal, SVG river path draw-on-scroll, "an arroyo is a river in the desert" body, stat card.
+- [ ] **M5 — Home teasers + Final CTA + Footer.** Teaser cards linking to Beliefs/Team/Sermons/Connect/Give, "Come find life at the river" CTA, footer (mission line, socials, Visit/Explore/Contact columns).
+- [ ] **M6 — /about: Beliefs + Values.** 6-belief accordion (Gospel/Trinity/Bible/Humanity/Eternity/Church), 5 values with verses (sticky-stack), mission/why-arroyo depth.
+- [ ] **M7 — /team: Team + Elders.** 6 staff cards w/ hover-flip (Josh, Cristian, Chris, Emily, Elijah, Janna), elder board (Josh, Dakota, Kelly, Mason).
+- [ ] **M8 — /messages: Sermons.** Featured video + grid, delineated **Current Series** (Walk Faithfully / Samuel) vs **Arroyo Podcast** playlists, Watch-on-YouTube CTA.
+- [ ] **M9 — /connect: Connect.** Connect-groups photo + copy + Join-a-Group, 3 ministry cards (Connect Groups / Children's / Women's), prayer-request band.
+- [ ] **M10 — /give: Give.** 3 cards (Cash / Stock / Crypto → overflow.co links), 2 Cor 9:7 verse.
+- [ ] **M11 — /plan-your-visit: Visit + Descent.** Hero, descent fly-in sequence (aerial→building→interior→seat), service meta, 3-step "what to expect", FAQ accordion (6 Qs), map.
+- [ ] **M12 — Polish & mobile.** Responsive tuning, cross-page consistency, animation refinement, full review.
+
+## Status log
+- 2026-06-19: **Nav polish complete & live + page-nesting flattened.** Dakota dragged Team/Beliefs out of the "About" folder (flat nav: About·Team·Beliefs·Sermons·Connect·Give, all top-level, centered). CSS: centered links + Manrope + gradient hover-underline + white-over-hero (done earlier); this pass = slimmer scrolled bar (logo 50→42px, →34px on scroll; smaller header CTA padding .5rem/1.25rem, .78rem), and **translucent blurred scrolled bar** (`.header-background-solid` scrolled bg rgba(13,37,48,.58) + backdrop-filter blur(20px) saturate(1.6); `.header` itself transparent-on-scroll so no double-darkening). Verified live on www.arroyochurch.com: flat nav, smaller logo/button, content blurs through the bar on scroll. footer-injection.html len 11268.
+- 2026-06-12: Theme layer live (fonts/colors/buttons/cursor/particles/fade-in). Plan approved → starting M1.
+- 2026-06-12: **M1 Home Hero live & reviewed-pending.** Method = sections built as code in the FOOTER code injection (master = footer-injection.html), gated to homepage by body.homepage, hero section id `68533fde9bfaa374d9c67d61`.
+- **KEY TECH LEARNINGS (reuse every milestone):**
+  1. Native Fluid-Engine block editing via browser automation is unreliable (cmd+A selects blocks, clicks scroll the canvas). Build designed sections as CODE instead.
+  2. Code-injection SAVE: `cm.setValue()` alone does NOT mark the form dirty. Must: `cm.save()` → get underlying textarea (`cm.getTextArea()`) → set via native value setter → dispatch keydown/keyup/input/change. Often takes a SECOND fire (value+' ' round-trip) before "SAVE" activates. Always re-open the page after save to confirm it persisted (transient "Couldn't Save" reverts silently).
+  3. CDN cache: live page serves old injection for ~20–40s after save; reload with a fresh `?v=` query.
+  4. Fluid section min-height is forced to ~285px ("small"); to keep a section tall while replacing content, set native `.fe-block{visibility:hidden}` (NOT display:none, which collapses height) + `min-height:90vh!important`. Overlay = `.ac-hero` absolute inset:0.
+  5. Transparent nav-over-hero: header bg lives on `.header-background-solid` (not `.header`); transparentize it + `margin-top:-100px` on the hero section to pull it under the fixed header.
