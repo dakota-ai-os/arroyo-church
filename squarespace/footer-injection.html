@@ -220,6 +220,165 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .vcard:nth-child(4){background:linear-gradient(135deg,#274b3b,#16332a);top:130px}
 .vcard:nth-child(5){background:linear-gradient(135deg,#23445e,#152c3f);top:144px}
 @media(max-width:600px){.vcard{grid-template-columns:1fr;gap:.6rem;min-height:0}}
+
+/* ════ SINGLE-PAGE HOME SECTIONS (team / sermons / connect / give / visit) ════ */
+.ac-sec{font-family:'Manrope',sans-serif;position:relative;z-index:4}
+.ac-sec .wrap{width:min(1200px,92vw);margin:0 auto}
+.ac-sec .eyebrow{display:inline-flex;align-items:center;gap:.7rem;font-size:.8rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;margin:0 0 1.2rem}
+.ac-sec .eyebrow::before{content:"";width:36px;height:1.5px;background:currentColor;opacity:.6}
+.ac-sec .h2{font-family:'Fraunces',Georgia,serif;font-weight:360;letter-spacing:-.01em;font-size:clamp(2.1rem,5vw,3.8rem);line-height:1.08;margin:0}
+.ac-sec .h2 em{font-style:italic;color:#2e8fa3}
+.ac-sec .lead{font-size:clamp(1.02rem,1.4vw,1.18rem);line-height:1.75}
+.ac-sec .btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:700;font-size:.95rem;letter-spacing:.02em;padding:.85rem 1.7rem;border-radius:999px;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,background .3s,border-color .3s;text-decoration:none;cursor:pointer;border:none}
+.ac-sec .btn-gold{background:linear-gradient(135deg,#e3bd6a,#c89a3e);color:#0a161c;box-shadow:0 8px 24px -8px rgba(200,154,62,.55)}
+.ac-sec .btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 34px -8px rgba(200,154,62,.7)}
+.ac-sec .btn-ghost{border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.ac-sec .btn-ghost:hover{transform:translateY(-3px);border-color:#7fd0e0;background:rgba(95,194,212,.12)}
+.ac-sec .btn-river{background:linear-gradient(135deg,#5fc2d4,#2e8fa3);color:#0a161c;box-shadow:0 8px 24px -8px rgba(46,143,163,.5)}
+.ac-sec .btn-river:hover{transform:translateY(-3px);box-shadow:0 14px 34px -8px rgba(46,143,163,.7)}
+.ac-sec .btn-ghost-dark{border:1.5px solid rgba(22,36,43,.3);color:#16242b}
+.ac-sec .btn-ghost-dark:hover{transform:translateY(-3px);border-color:#2e8fa3;background:rgba(46,143,163,.08)}
+/* TEAM */
+#ac-team{background:#faf7f0;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
+#ac-team .eyebrow{color:#1f6b7c}
+.team-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:3rem}
+.team-head p{max-width:46ch;color:rgba(22,36,43,.66);margin:0}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+.tcard{position:relative;border-radius:20px;overflow:hidden;background:#dfd7c6;aspect-ratio:4/4.7;cursor:pointer;transition:box-shadow .4s;box-shadow:0 10px 26px -16px rgba(22,36,43,.35)}
+.tcard:hover{box-shadow:0 26px 50px -20px rgba(22,36,43,.45)}
+.tcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.tcard:hover img{transform:scale(1.05)}
+.tcard .t-scrim{position:absolute;inset:0;background:linear-gradient(185deg,transparent 42%,rgba(10,22,28,.88) 78%)}
+.tcard .t-toggle{position:absolute;inset:0;z-index:2;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:1.15rem 1.3rem;text-align:left;color:#fff;background:none;border:none;font-family:inherit}
+.tcard .t-toggle .t-name{font-family:'Fraunces',Georgia,serif;font-weight:480;font-size:1.3rem;line-height:1.15}
+.tcard .t-toggle .role{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#e3bd6a;margin-top:.25rem}
+.tcard .t-facts{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;gap:.7rem;padding:1.5rem;color:#eef6f7;pointer-events:none;background:linear-gradient(180deg,rgba(13,37,48,.55),rgba(10,22,28,.94));opacity:0;transform:translateY(12px);visibility:hidden;transition:opacity .4s,transform .4s,visibility 0s .4s}
+.tcard:hover .t-facts,.tcard.flipped .t-facts,.tcard:focus-within .t-facts{opacity:1;transform:none;visibility:visible;transition:opacity .4s,transform .4s,visibility 0s 0s}
+.tcard .t-facts h3{font-family:'Fraunces',Georgia,serif;font-size:1.25rem;font-weight:480;margin:0}
+.tcard .t-facts .role{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#e3bd6a}
+.tcard .t-facts p{font-size:.88rem;line-height:1.6;color:rgba(238,246,247,.66);margin:0}
+.tcard .t-facts p strong{color:#bfe7ee;font-weight:700}
+.ac-sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.elders{margin-top:4.5rem}
+.elders .lead{max-width:72ch;color:rgba(22,36,43,.66);margin-top:1rem}
+.elder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.2rem}
+.ecard{text-align:center}
+.ecard .e-img{border-radius:18px;overflow:hidden;aspect-ratio:1/1.05;background:#dfd7c6;box-shadow:0 10px 24px -16px rgba(22,36,43,.35);transition:transform .35s,box-shadow .35s}
+.ecard:hover .e-img{transform:translateY(-5px);box-shadow:0 22px 40px -18px rgba(22,36,43,.4)}
+.ecard img{width:100%;height:100%;object-fit:cover;object-position:center 25%}
+.ecard h3{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:1.12rem;margin:.9rem 0 0}
+.ecard .role{font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:#1f6b7c}
+@media (max-width:920px){.team-grid{grid-template-columns:repeat(2,1fr)}.elder-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.team-grid{grid-template-columns:1fr}}
+/* SERMONS */
+#ac-sermons{background:#0a161c;color:#eef6f7;padding:clamp(5rem,11vh,9rem) 0}
+#ac-sermons .eyebrow{color:#5fc2d4}
+#ac-sermons .h2{color:#fff}
+.sermon-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:3rem}
+.sermon-head p{max-width:46ch;color:rgba(238,246,247,.66);margin:0}
+.sermon-tabs{display:flex;gap:.6rem;margin-bottom:1.8rem;flex-wrap:wrap}
+.stab{padding:.7rem 1.5rem;border-radius:999px;font-weight:700;font-size:.95rem;border:1.5px solid rgba(191,231,238,.25);color:rgba(238,246,247,.66);background:none;cursor:pointer;transition:color .25s,border-color .25s,background .25s}
+.stab:hover{color:#eef6f7;border-color:rgba(191,231,238,.5)}
+.stab[aria-selected="true"]{background:linear-gradient(135deg,#5fc2d4,#2e8fa3);color:#0a161c;border-color:transparent}
+.sermon-panel{display:none}
+.sermon-panel.active{display:block;animation:panelIn .5s cubic-bezier(.16,1,.3,1)}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sermon-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:1.3rem;align-items:start}
+.sermon-main{display:grid;gap:1.3rem}
+.series-bar{border-radius:18px;border:1px solid rgba(191,231,238,.13);background:rgba(17,48,61,.5);padding:1.3rem 1.6rem;display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap}
+.series-bar .sb-kicker{font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e3bd6a}
+.series-bar h3{font-family:'Fraunces',Georgia,serif;font-weight:460;font-size:1.35rem;margin:.15rem 0 .1rem}
+.series-bar p{font-size:.9rem;color:rgba(238,246,247,.66);max-width:46ch;margin:0}
+.browse-tile{position:relative;border-radius:20px;aspect-ratio:16/9;border:1.5px dashed rgba(191,231,238,.3);display:flex;flex-direction:column;gap:.5rem;align-items:center;justify-content:center;text-align:center;padding:1rem;color:rgba(238,246,247,.66);font-weight:700;font-size:.95rem;text-decoration:none;transition:border-color .3s,color .3s,transform .35s}
+.browse-tile:hover{border-color:#5fc2d4;color:#eef6f7;transform:translateY(-3px)}
+.yt{position:relative;border-radius:20px;overflow:hidden;background:#000;cursor:pointer;aspect-ratio:16/9;border:1px solid rgba(191,231,238,.12);transition:transform .35s,box-shadow .35s}
+.yt:hover{transform:translateY(-4px);box-shadow:0 24px 48px -20px rgba(46,143,163,.45)}
+.yt .thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;transition:opacity .3s,transform .6s}
+.yt:hover .thumb{opacity:1;transform:scale(1.04)}
+.yt .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74px;height:53px;border-radius:14px;background:rgba(10,22,28,.72);display:grid;place-items:center;transition:background .3s,transform .3s;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.yt:hover .play{background:#2e8fa3;transform:translate(-50%,-50%) scale(1.08)}
+.yt .play::after{content:"";border-style:solid;border-width:11px 0 11px 19px;border-color:transparent transparent transparent #fff;margin-left:4px}
+.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.yt-side{display:grid;gap:1.3rem;align-content:start}
+.yt-side .yt .play{width:52px;height:38px;border-radius:10px}
+.yt-side .yt .play::after{border-width:7px 0 7px 12px}
+.sermons-cta{margin-top:2.6rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+@media (max-width:920px){.sermon-grid{grid-template-columns:1fr}.yt-side{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.yt-side{grid-template-columns:1fr}}
+/* CONNECT */
+#ac-connect{background:#f6f1e6;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
+#ac-connect .eyebrow{color:#1f6b7c}
+.connect-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.connect-photo{border-radius:24px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(10,22,28,.35);aspect-ratio:4/3.4;position:relative}
+.connect-photo img{width:100%;height:100%;object-fit:cover;transition:transform .7s}
+.connect-photo:hover img{transform:scale(1.045)}
+.connect-copy p{margin:1.2rem 0 1.8rem;color:rgba(22,36,43,.66)}
+.ministries{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:4.5rem}
+.min-card{background:#fff;border-radius:20px;padding:1.9rem 1.7rem;border:1px solid rgba(22,36,43,.08);box-shadow:0 8px 20px -14px rgba(22,36,43,.2);transition:transform .35s,box-shadow .35s}
+.min-card:hover{transform:translateY(-5px);box-shadow:0 22px 40px -18px rgba(22,36,43,.3)}
+.min-card .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.16));color:#2e8fa3;margin-bottom:1.1rem}
+.min-card h3{font-family:'Fraunces',Georgia,serif;font-weight:520;font-size:1.25rem;margin:0 0 .45rem}
+.min-card p{font-size:.93rem;color:rgba(22,36,43,.66);margin:0}
+.prayer-band{margin-top:4.5rem;border-radius:26px;overflow:hidden;position:relative;background:linear-gradient(120deg,#0d2530 0%,#11303d 60%,#1d5a6b 100%);color:#eef6f7;padding:clamp(2.4rem,5vw,4rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1.6rem}
+.prayer-band::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;background:radial-gradient(70% 140% at 85% 20%,rgba(95,194,212,.28),transparent 60%)}
+.prayer-band h3{font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:clamp(1.5rem,3.4vw,2.3rem);position:relative;margin:0}
+.prayer-band p{color:rgba(238,246,247,.66);max-width:46ch;margin:.5rem 0 0;position:relative}
+.prayer-band .btn{position:relative}
+@media (max-width:920px){.connect-grid{grid-template-columns:1fr}.ministries{grid-template-columns:1fr}}
+/* GIVE */
+#ac-give{background:#0d2530;color:#eef6f7;padding:clamp(5rem,11vh,9rem) 0;overflow:hidden}
+#ac-give .eyebrow{color:#e3bd6a}
+#ac-give .h2{color:#fff}
+.give-head{text-align:center;max-width:62ch;margin:0 auto 3.4rem}
+.give-head .eyebrow{justify-content:center}
+.give-head p{color:rgba(238,246,247,.66);margin:1.2rem 0 0}
+.give-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.gcard{position:relative;border-radius:22px;padding:2.2rem 1.9rem;overflow:hidden;background:rgba(17,48,61,.6);border:1px solid rgba(191,231,238,.13);transition:transform .35s,border-color .35s;display:flex;flex-direction:column;gap:.7rem;text-decoration:none;color:inherit}
+.gcard::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;background:radial-gradient(80% 100% at 50% 0%,rgba(200,154,62,.16),transparent 70%)}
+.gcard:hover{transform:translateY(-6px);border-color:rgba(200,154,62,.5)}
+.gcard:hover::before{opacity:1}
+.gcard .ic{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:rgba(200,154,62,.14);color:#e3bd6a;margin-bottom:.5rem}
+.gcard h3{font-family:'Fraunces',Georgia,serif;font-weight:480;font-size:1.4rem;margin:0}
+.gcard p{font-size:.93rem;color:rgba(238,246,247,.66);flex:1;margin:0}
+.gcard .g-link{font-weight:800;font-size:.9rem;letter-spacing:.06em;color:#e3bd6a;display:inline-flex;align-items:center;gap:.5rem}
+.gcard .g-link svg{transition:transform .3s}
+.gcard:hover .g-link svg{transform:translateX(5px)}
+.give-verse{text-align:center;margin:3rem auto 0;color:rgba(238,246,247,.66);font-style:italic;font-family:'Fraunces',Georgia,serif;font-size:1.1rem;max-width:70ch}
+@media (max-width:920px){.give-grid{grid-template-columns:1fr}}
+/* VISIT */
+#ac-visit{background:#faf7f0;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
+#ac-visit .eyebrow{color:#1f6b7c}
+.visit-intro .lead{color:rgba(22,36,43,.66);margin-top:1.2rem;max-width:54ch}
+.ac-descent{position:relative;height:min(74vh,660px);overflow:hidden;background:#0a161c;margin:clamp(2.5rem,6vh,4rem) 0}
+.ac-descent img{width:100%;height:100%;object-fit:cover}
+.ac-descent .d-vignette{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,28,.8),rgba(10,22,28,.28) 38%,transparent 62%)}
+.ac-descent .d-cap{position:absolute;left:50%;bottom:clamp(2.6rem,8vh,5rem);transform:translateX(-50%);text-align:center;color:#fff;width:min(92vw,720px);z-index:2}
+.ac-descent .d-cap .big{font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:clamp(1.8rem,4.6vw,3.1rem);line-height:1.12;text-shadow:0 2px 26px rgba(10,22,28,.75)}
+.ac-descent .d-cap .small{font-size:.88rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.88);margin-top:.6rem}
+.ac-descent .d-cap .btn{margin-top:1.5rem}
+.visit-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+.vm{display:flex;gap:1rem;align-items:flex-start}
+.vm .ic{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.14));color:#2e8fa3}
+.vm h3{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(22,36,43,.66);font-weight:600;margin:0}
+.vm p{font-weight:700;font-size:1.02rem;margin:.2rem 0 0}
+.vm p a{color:inherit}.vm p a:hover{color:#2e8fa3}
+.visit-ctas{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2.6rem}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:4.2rem}
+.step{background:#fff;border-radius:20px;padding:1.9rem 1.7rem;border:1px solid rgba(22,36,43,.08);box-shadow:0 8px 20px -14px rgba(22,36,43,.18);position:relative;transition:transform .35s,box-shadow .35s}
+.step:hover{transform:translateY(-5px);box-shadow:0 20px 38px -18px rgba(22,36,43,.28)}
+.step .s-num{font-family:'Fraunces',Georgia,serif;font-size:2.6rem;font-weight:300;color:#2e8fa3;opacity:.45;line-height:1}
+.step h3{font-family:'Fraunces',Georgia,serif;font-weight:520;font-size:1.2rem;margin:.7rem 0 .4rem}
+.step p{font-size:.92rem;color:rgba(22,36,43,.66);margin:0}
+.faq{margin-top:4.2rem}
+.faq-h{font-family:'Fraunces',Georgia,serif;font-weight:420;font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 1.8rem}
+.faq-item{border-bottom:1px solid rgba(22,36,43,.12)}
+.faq-item>button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:1.2rem;padding:1.3rem .2rem;text-align:left;font-weight:700;font-size:1.05rem;color:#16242b;background:none;border:none;cursor:pointer;font-family:inherit}
+.faq-item .chev{flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid rgba(22,36,43,.25);display:grid;place-items:center;transition:transform .45s cubic-bezier(.16,1,.3,1),background .3s,border-color .3s,color .3s}
+.faq-item.open .chev{transform:rotate(45deg);background:#2e8fa3;border-color:#2e8fa3;color:#fff}
+.faq-item .f-body{max-height:0;overflow:hidden;visibility:hidden;transition:max-height .5s cubic-bezier(.16,1,.3,1),visibility 0s .5s}
+.faq-item.open .f-body{visibility:visible;transition:max-height .5s cubic-bezier(.16,1,.3,1),visibility 0s 0s}
+.faq-item .f-body-pad{padding:0 .2rem 1.4rem;color:rgba(22,36,43,.66);max-width:72ch}
+@media (max-width:920px){.visit-meta{grid-template-columns:1fr}.steps{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.ac-hero h1 .w>span{transform:none}.ac-hero-in .ac-eyebrow,.ac-hero-in .ac-sub,.ac-hero-in .ac-ctas,.ac-hero-in .ac-service{opacity:1;transform:none}}
 </style>
 <script>
@@ -433,7 +592,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
   /* ---- M5: final CTA (homepage only) ---- */
   function buildCTA(){
     if(!HOME()) return;
-    var anchor=document.getElementById('ac-teasers')||document.getElementById('ac-story');
+    var anchor=document.getElementById('ac-visit')||document.getElementById('ac-give')||document.getElementById('ac-story');
     if(!anchor || document.getElementById('ac-cta')) return;
     var sec=document.createElement('section'); sec.className='ac-cta'; sec.id='ac-cta';
     sec.innerHTML='<div class="wrap"><h2 class="ac-rev">Come find life<br>at the <em>river.</em></h2><p class="ac-rev" style="--d:.08s">No matter where you are on your journey, you are welcome to join us this Sunday at 10 AM.</p><div class="ctas ac-rev" style="--d:.16s"><a class="ac-btn ac-btn-gold" href="/plan-your-visit">Plan Your Visit</a><a class="ac-btn ac-btn-ghost" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch Online</a></div></div>';
@@ -472,11 +631,11 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
       body.addEventListener('transitionend',function(){ if(item.classList.contains('open')) body.style.maxHeight='none'; });
     });
   }
-  /* ---- M6: /about beliefs + values ---- */
-  function buildAbout(){
-    if(!pageIs('/about')) return;
-    var wrap=document.getElementById('sections');
-    if(!wrap || document.getElementById('ac-about')) return;
+  /* ---- beliefs + values (home section) ---- */
+  function buildBeliefsValues(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-story')||document.getElementById('ac-mission');
+    if(!anchor || document.getElementById('ac-bv')) return;
     var beliefs=[
       ["01","The Gospel","We believe that the gospel is the good news that, &ldquo;God so loved the world that He gave His one and only Son, so that whoever believes in Him will not perish but have everlasting life.&rdquo; (John 3:16) All human beings have sinned against God, and the result is that we are separated from Him and are not a part of the family of God. The good news is that God did not want to stay separate from us. The Father sent Jesus Christ to die the death that we deserved on the cross and rose again three days later so that if we place our faith in Him we can be forgiven forever, and be adopted into the family of God. We are not saved from our sins by our good works, but by simply trusting in the good work that Christ did on the cross for us as our substitutionary sacrifice. We believe that Christ died for us because God &ldquo;SO&rdquo; loves us. This good news is meant to be believed, and then to be shared so that others may experience the free gift of God's forgiveness in their life. (Ephesians 2:8&ndash;10, John 3:16, 1 John 4:10, Romans 3:23)"],
       ["02","The Trinity","We believe there is only one true God, who eternally exists as a Trinity of equally divine persons: Father, Son, and Holy Spirit. Each member of the Trinity thinks, acts, feels, speaks, and relates, because each is a person and not an impersonal force. Each member of the Trinity is equally God, sharing all the divine attributes. Because love and community flow from the Trinity to us through the Holy Spirit, we seek to live in loving community with God and others. (Genesis 1:26, Matthew 28:19, Luke 3:22, 1 Peter 1:2)"],
@@ -495,16 +654,121 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
     var plus='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg>';
     var bHtml=beliefs.map(function(b){ return '<div class="belief ac-rev"><h3 class="b-h"><button aria-expanded="false"><span class="b-title"><span class="b-num">'+b[0]+'</span><span class="b-name">'+b[1]+'</span></span><span class="chev">'+plus+'</span></button></h3><div class="b-body"><div class="b-body-pad">'+b[2]+'</div></div></div>'; }).join('');
     var vHtml=values.map(function(v){ return '<div class="vcard"><div class="v-num">'+v[0]+'</div><div><h3>'+v[1]+'</h3><p class="v-tag">'+v[2]+'</p><blockquote>'+v[3]+'</blockquote></div></div>'; }).join('');
-    var c=document.createElement('div'); c.id='ac-about'; c.className='ac-about'; c.style.paddingTop=headerOffset()+'px';
+    var c=document.createElement('div'); c.id='ac-bv'; c.className='ac-about ac-sec';
     c.innerHTML=
-      '<section class="aci"><div class="wrap"><p class="eyebrow ac-rev">About Arroyo</p><h2 class="ac-rev">We exist to <em>know</em> and <em>show</em> the love of Jesus.</h2><p class="ac-rev">Arroyo Church is a non-denominational, Bible-teaching church in Livermore, California. An arroyo is a river in the desert &mdash; and we believe God has called us to bring the life of Jesus into the Bay Area, the most unchurched region in the United States, and beyond.</p></div></section>'+
-      '<section class="acb" id="beliefs"><div class="wrap"><div class="acb-head"><div><p class="eyebrow ac-rev">Our beliefs</p><h2 class="ac-rev">What anchors <em>everything</em> we do.</h2></div><p class="ac-rev">Six convictions, rooted in Scripture, that shape who we are. Tap any one to read more.</p></div><div class="belief-list">'+bHtml+'</div></div></section>'+
-      '<section class="acv"><div class="wrap"><p class="eyebrow ac-rev">Our values</p><h2 class="ac-rev">Five things we refuse to compromise on.</h2><div class="vstack">'+vHtml+'</div></div></section>';
-    wrap.insertBefore(c, wrap.firstChild);
-    hideNativeSections(wrap);
+      '<section class="acb" id="ac-beliefs"><div class="wrap"><div class="acb-head"><div><p class="eyebrow ac-rev">Our beliefs</p><h2 class="ac-rev">What anchors <em>everything</em> we do.</h2></div><p class="ac-rev">Six convictions, rooted in Scripture, that shape who we are. Tap any one to read more.</p></div><div class="belief-list">'+bHtml+'</div></div></section>'+
+      '<section class="acv" id="ac-values"><div class="wrap"><p class="eyebrow ac-rev">Our values</p><h2 class="ac-rev">Five things we refuse to compromise on.</h2><div class="vstack">'+vHtml+'</div></div></section>';
+    anchor.parentNode.insertBefore(c, anchor.nextSibling);
     wireAccordion(c, '.belief', '.b-body');
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildMission(); buildStory(); buildTeasers(); buildCTA(); buildFooter(); buildAbout(); fixAboutNav(); }
+  /* ---- TEAM (home section) ---- */
+  function buildTeam(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-bv')||document.getElementById('ac-story');
+    if(!anchor || document.getElementById('ac-team')) return;
+    var B='https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/';
+    var staff=[
+      ['Josh Smith','Lead Pastor',B+'6a2c5fd0-7b7a-4f65-aa91-f6ab83dc18b9/R6II2038.jpg?format=900w','I met my wife, Jamie, in elementary school. We now have three daughters that I adore!','I&rsquo;m a diehard 49ers and Warriors fan.'],
+      ['Cristian Ayquipa','Associate Pastor',B+'86c9ec5e-e920-4661-8b59-412f8e5f502b/R6II2019.jpg?format=900w','I met my wife at Bible college. We have two amazing sons!','I love making coffee!'],
+      ['Chris Rogers','Worship Pastor',B+'42167adb-77e9-41a3-b891-10cf2cf087c9/R6II2021.jpg?format=900w','My wife &amp; kids love the Tri-Valley!','Music has always been my passion!'],
+      ['Emily Fountain','Interim Children&rsquo;s Ministry Director',B+'65d6fbc4-f15f-4783-bda1-9b46ca00a7b4/R6II2014.jpg?format=900w','I love being a mom!','I am the youngest of four sisters.'],
+      ['Elijah Merrell','Media Coordinator',B+'bbb854a4-37f6-475b-bf03-3436a3fe9a2b/R6II2030.jpg?format=900w','I am a pastor&rsquo;s kid.','I enjoy being creative with content and music!'],
+      ['Janna Chestnut','Women&rsquo;s Ministry Director',B+'d26f2702-88a5-4707-8a64-2d3f2bf8a9e0/201225612_10225910144448549_5580392780219787886_n.jpg?format=900w','I have five grown up children!','I have lived in the East Bay my whole life.']
+    ];
+    var elders=[
+      ['Josh Smith','Elder &middot; President',B+'01dd48be-491c-4b6b-801d-cd1c431cc6c5/IMG_0585.jpg?format=600w'],
+      ['Dakota Yates','Elder &middot; Vice President',B+'93b90642-39cb-4a5d-8d74-8b80b51be354/6.jpg?format=600w'],
+      ['Kelly Patchin','Elder &middot; Secretary',B+'cf71979c-c760-4657-b8ec-b7b491cbf4cf/7.jpg?format=600w'],
+      ['Mason Fountain','Elder &middot; Treasurer',B+'d14d2d39-716e-4b74-a068-d6177126c1b9/IMG_9F380B7F72B9-1.jpeg?format=600w']
+    ];
+    var sHtml=staff.map(function(s){ return '<div class="tcard ac-rev"><img src="'+s[2]+'" alt="'+s[0]+'" loading="lazy"><div class="t-scrim"></div><button class="t-toggle" aria-expanded="false"><span class="t-name">'+s[0]+'</span><span class="role">'+s[1]+'</span></button><div class="t-facts"><h3>'+s[0]+'</h3><div class="role">'+s[1]+'</div><p><strong>Family fact:</strong> '+s[3]+'</p><p><strong>Fun fact:</strong> '+s[4]+'</p></div></div>'; }).join('');
+    var eHtml=elders.map(function(e){ return '<div class="ecard ac-rev"><div class="e-img"><img src="'+e[2]+'" alt="'+e[0]+'" loading="lazy"></div><h3>'+e[0]+'</h3><div class="role">'+e[1]+'</div></div>'; }).join('');
+    var eld='Each member of our elder board meets the qualifications for elders found in Titus 1:5&ndash;9 and 1 Timothy 3:1&ndash;7. The elders shepherd the church body, steward its resources, and provide support and accountability for our Lead Pastor. Our elders also serve as the board of directors for Arroyo Church since every non-profit corporation is required by law to have a board of directors.';
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-team';
+    sec.innerHTML='<div class="wrap"><div class="team-head"><div><p class="eyebrow ac-rev">Our team</p><h2 class="h2 ac-rev">The people who <em>serve</em> you on Sundays.</h2></div><p class="ac-rev">Hover (or tap) a photo to get to know each person &mdash; family facts, fun facts and all.</p></div><div class="team-grid">'+sHtml+'</div><div class="elders"><p class="eyebrow ac-rev" style="color:#7d6228">Elder board</p><h2 class="h2 ac-rev" style="font-size:clamp(1.7rem,3.6vw,2.6rem)">Shepherds &amp; stewards.</h2><p class="lead ac-rev">'+eld+'</p><div class="elder-grid">'+eHtml+'</div></div></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+    sec.querySelectorAll('.tcard .t-toggle').forEach(function(btn){ btn.addEventListener('click',function(){ var card=btn.closest('.tcard'); var open=card.classList.toggle('flipped'); btn.setAttribute('aria-expanded',String(open)); }); });
+  }
+  /* ---- SERMONS (home section) ---- */
+  function buildSermons(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-team')||document.getElementById('ac-bv');
+    if(!anchor || document.getElementById('ac-sermons')) return;
+    function yt(id,title){ return '<div class="yt" data-id="'+id+'" role="button" tabindex="0" aria-label="Play: '+title+'"><img class="thumb" src="https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg" onerror="this.src=\'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg\'" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>'; }
+    var sP='<div class="sermon-grid"><div class="sermon-main">'+yt('Ed-g0Dcev3I','How You Can Experience Radical Restoration')+'<div class="series-bar"><div><div class="sb-kicker">Current series</div><h3>Walk Faithfully</h3><p>A sermon series through the life of Samuel &mdash; a new message every Sunday.</p></div><a class="btn btn-ghost" href="https://www.youtube.com/playlist?list=PLqCyakXjbp1OOesDkGS-yHXk6kpVInzvx" target="_blank" rel="noopener">Watch the Series</a></div></div><div class="yt-side">'+yt('xwzseLoIeWI','How Prayer Empowers You')+'<a class="browse-tile" href="https://www.youtube.com/@arroyochurch/playlists" target="_blank" rel="noopener"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="13" height="11" rx="2"/><path d="M19 8l3-2v12l-3-2"/></svg>Browse every series<span style="font-weight:500;font-size:.82rem;opacity:.7">Romans &middot; Psalms &middot; Philippians &amp; more</span></a></div></div>';
+    var pP='<div class="sermon-grid"><div class="sermon-main">'+yt('RGFj3CopCQ0','Pastor Asks College Students About Jesus')+'<div class="series-bar"><div><div class="sb-kicker">Arroyo Podcast</div><h3>Honest conversations, hard questions.</h3><p>The team talks through the questions people actually ask about faith.</p></div><a class="btn btn-ghost" href="https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX" target="_blank" rel="noopener">All Episodes</a></div></div><div class="yt-side">'+yt('-nED4vgUEI8','What does the Bible really say about the end times?')+yt('dn509_C_j8A','Do lukewarm Christians go to heaven?')+yt('1casv_QOmrc','Answering Hard Questions Part Two')+'</div></div>';
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-sermons';
+    sec.innerHTML='<div class="wrap"><div class="sermon-head"><div><p class="eyebrow ac-rev">Sermons</p><h2 class="h2 ac-rev">Missed a Sunday? <em>Catch up</em> anytime.</h2></div><p class="ac-rev">Stay connected with our latest sermons and podcasts &mdash; streamed every week on YouTube.</p></div><div class="sermon-tabs ac-rev" role="tablist"><button class="stab" id="stab-series" role="tab" aria-selected="true">Current Series</button><button class="stab" id="stab-podcast" role="tab" aria-selected="false">Arroyo Podcast</button></div><div class="sermon-panel active" id="spanel-series">'+sP+'</div><div class="sermon-panel" id="spanel-podcast">'+pP+'</div><div class="sermons-cta ac-rev"><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch on YouTube</a><span style="color:rgba(238,246,247,.66);font-size:.92rem">New messages every week &middot; youtube.com/@arroyochurch</span></div></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+    var tS=sec.querySelector('#stab-series'),tP=sec.querySelector('#stab-podcast'),qS=sec.querySelector('#spanel-series'),qP=sec.querySelector('#spanel-podcast');
+    function tab(ser){ tS.setAttribute('aria-selected',String(ser)); tP.setAttribute('aria-selected',String(!ser)); qS.classList.toggle('active',ser); qP.classList.toggle('active',!ser); }
+    tS.addEventListener('click',function(){tab(true);}); tP.addEventListener('click',function(){tab(false);});
+    sec.querySelectorAll('.yt').forEach(function(el){ el.addEventListener('click',function(){ var id=el.getAttribute('data-id'); if(!id||el.querySelector('iframe'))return; el.innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0" title="YouTube video" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'; }); });
+  }
+  /* ---- CONNECT (home section) ---- */
+  function buildConnect(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-sermons')||document.getElementById('ac-team');
+    if(!anchor || document.getElementById('ac-connect')) return;
+    var i1='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.9-4.6 5.5-4.6S13.9 16 14.5 19"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.6 14.1c2.7-.4 4.7 1.3 5.1 4"/></svg>';
+    var i2='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l1.9 4.4L18.5 8l-3.3 3.1.8 4.6L12 13.6l-4 2.1.8-4.6L5.5 8l4.6-.6z"/></svg>';
+    var i3='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21C12 21 4 14.5 4 9.5C4 6.5 6.5 4 9.5 4C10.9 4 12 4.8 12 4.8C12 4.8 13.1 4 14.5 4C17.5 4 20 6.5 20 9.5C20 14.5 12 21 12 21Z"/></svg>';
+    var mins='<div class="min-card ac-rev"><div class="ic">'+i1+'</div><h3>Connect Groups</h3><p>Weeknight groups across the Tri-Valley to discuss Sunday&rsquo;s message, pray together, and do life together.</p></div><div class="min-card ac-rev"><div class="ic">'+i2+'</div><h3>Children&rsquo;s Ministry</h3><p>Every Sunday, nursery through 5th grade &mdash; a safe and fun environment for your kids to learn about Jesus.</p></div><div class="min-card ac-rev"><div class="ic">'+i3+'</div><h3>Women&rsquo;s Ministry</h3><p>Gatherings and community for women in every season of life, led by our Women&rsquo;s Ministry team.</p></div>';
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-connect';
+    sec.innerHTML='<div class="wrap"><div class="connect-grid"><div class="connect-photo ac-rev"><img src="https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/f52a08fb-45fd-4b58-bfb0-064a4acad7ca/503251240_17970029975899813_3744320071993253638_n.jpg?format=1500w" alt="A connect group gathering at Arroyo Church" loading="lazy"></div><div class="connect-copy"><p class="eyebrow ac-rev">Connect groups</p><h2 class="h2 ac-rev">You were created for <em>community.</em></h2><p class="lead ac-rev">At Arroyo we offer a variety of connect groups during the week so you can continue to stay connected with others and grow in your faith. We take time to discuss how Sunday&rsquo;s message applies to our lives, pray for one another, and have a lot of fun &mdash; and sometimes eat a lot of food too.</p><a class="btn btn-river ac-rev" href="https://arroyo-church-434989.churchcenter.com/people/forms/1206123" target="_blank" rel="noopener">Join a Group</a></div></div><div class="ministries">'+mins+'</div><div class="prayer-band ac-rev"><div><h3>Got questions or need prayer?</h3><p>If you have any questions about the church or have any prayer requests, we would love to hear from you.</p></div><a class="btn btn-gold" href="mailto:josh@arroyochurch.com?subject=Question%20%2F%20Prayer%20Request">Send a Message</a></div></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+  }
+  /* ---- GIVE (home section) ---- */
+  function buildGive(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-connect')||document.getElementById('ac-sermons');
+    if(!anchor || document.getElementById('ac-give')) return;
+    var arr='<svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7.5h11M8.5 3L13 7.5 8.5 12"/></svg>';
+    var ic1='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></svg>';
+    var ic2='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5M4 19h16"/><path d="M7 14l4-4 3 3 5-6"/></svg>';
+    var ic3='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 7.5h3.2a2 2 0 110 4H9.5h3.7a2 2 0 110 4H9.5M11 5.8v1.7M11 15.5v1.7"/></svg>';
+    var g='<a class="gcard ac-rev" href="https://donate.overflow.co/arroyochurch/cash" target="_blank" rel="noopener"><div class="ic">'+ic1+'</div><h3>Cash Donation</h3><p>Give a one-time or recurring gift securely online &mdash; the simplest way to support the mission.</p><span class="g-link">Give now '+arr+'</span></a><a class="gcard ac-rev" href="https://donate.overflow.co/arroyochurch/stock/select-flow" target="_blank" rel="noopener"><div class="ic">'+ic2+'</div><h3>Stock Donation</h3><p>Donate appreciated stock directly &mdash; often the most tax-efficient way to give.</p><span class="g-link">Give stock '+arr+'</span></a><a class="gcard ac-rev" href="https://donate.overflow.co/arroyochurch/crypto" target="_blank" rel="noopener"><div class="ic">'+ic3+'</div><h3>Crypto Donation</h3><p>Give Bitcoin, Ethereum, and other digital assets securely through our giving partner.</p><span class="g-link">Give crypto '+arr+'</span></a>';
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-give';
+    sec.innerHTML='<div class="wrap"><div class="give-head"><p class="eyebrow ac-rev">Generosity</p><h2 class="h2 ac-rev">We give because <em>He</em> gave.</h2><p class="lead ac-rev">Your generosity empowers our mission to keep moving forward. We truly appreciate your donation!</p></div><div class="give-grid">'+g+'</div><p class="give-verse ac-rev">&ldquo;Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.&rdquo; &mdash; 2 Corinthians 9:7</p></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+  }
+  /* ---- VISIT (home section) ---- */
+  function buildVisit(){
+    if(!HOME()) return;
+    var anchor=document.getElementById('ac-give')||document.getElementById('ac-connect');
+    if(!anchor || document.getElementById('ac-visit')) return;
+    var mailto='mailto:josh@arroyochurch.com?subject=I%27m%20planning%20to%20visit%20this%20Sunday!&body=Hi%20Arroyo%20Church%2C%0A%0AI%27m%20planning%20to%20join%20you%20this%20Sunday%20at%2010am.%0A%0AName%3A%20%0ANumber%20of%20people%20coming%3A%20%0AKids%20joining%3F%20%0A%0ASee%20you%20soon!';
+    var faqs=[
+      ['Do you have child care during the worship service?','Yes, we provide children&rsquo;s ministry for kids from nursery age to 5th grade. We prioritize creating a safe and fun environment for your kids to learn about Jesus!'],
+      ['What is the address for the church?','945 Concannon Blvd, Livermore, CA 94550. The worship center is the round building.'],
+      ['What should I wear?','Most people in our church dress casual but feel free to come dressed however you want!'],
+      ['What does a typical Sunday morning look like?','We start each worship gathering with a few songs, followed by a sermon, and then close with a few more songs. We often offer times for those that need prayer to come forward to receive it from someone on our pastoral team.'],
+      ['How long are the worship gatherings?','Our worship gatherings are normally around 55 minutes long.'],
+      ['What type of church is Arroyo?','We are a church dedicated to knowing and showing the love of Jesus in the Bay Area and beyond. No matter where you are on your journey, you are welcome to join us!']
+    ];
+    var plus='<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg>';
+    var faqHtml=faqs.map(function(f){ return '<div class="faq-item ac-rev"><button aria-expanded="false">'+f[0]+'<span class="chev">'+plus+'</span></button><div class="f-body"><div class="f-body-pad">'+f[1]+'</div></div></div>'; }).join('');
+    var pin='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+    var clock='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>';
+    var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
+    var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p>945 Concannon Blvd, Livermore, CA 94550<br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Service time</h3><p>Sundays &middot; 10:00 AM</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Contact</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
+    var steps='<div class="step ac-rev"><div class="s-num">01</div><h3>Worship</h3><p>We start each gathering with a few songs of worship together.</p></div><div class="step ac-rev"><div class="s-num">02</div><h3>Message</h3><p>A Bible-centered sermon that bridges God&rsquo;s word to your everyday life.</p></div><div class="step ac-rev"><div class="s-num">03</div><h3>Prayer</h3><p>We close with a few more songs, and our pastoral team is available to pray with anyone who needs it.</p></div>';
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-visit';
+    sec.innerHTML='<div class="wrap visit-intro"><p class="eyebrow ac-rev">Plan your visit</p><h2 class="h2 ac-rev">This Sunday. <em>Save you a seat?</em></h2><p class="lead ac-rev">Join us for our 10:00 AM worship service this Sunday. Gatherings run about 55 minutes &mdash; come as you are, dress is casual, and your kids will love it here.</p></div><div class="ac-descent"><img src="https://tos-backtest.github.io/arroyo-church/assets/descent/seat_view.jpg" alt="The view from a seat at Arroyo Church"><div class="d-vignette"></div><div class="d-cap"><div class="big">We saved you a seat.</div><div class="small">Sundays &middot; 10:00 AM &middot; 55 minutes</div><a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a></div></div><div class="wrap"><div class="visit-meta">'+meta+'</div><div class="visit-ctas ac-rev"><a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a><a class="btn btn-ghost-dark" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a></div><div class="steps">'+steps+'</div><div class="faq"><h3 class="faq-h ac-rev">Frequently asked questions</h3>'+faqHtml+'</div></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+    wireAccordion(sec, '.faq-item', '.f-body');
+  }
+  /* ---- nav: repoint links to home anchors + smooth scroll; hide empty About folder ---- */
+  function wireNav(){
+    var map={'about':'ac-mission','team':'ac-team','beliefs':'ac-beliefs','sermons':'ac-sermons','connect':'ac-connect','give':'ac-give'};
+    function go(id){ var el=document.getElementById(id); if(el){ window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-72,behavior:'smooth'}); } }
+    function hook(el,id){ if(!id||el.getAttribute('data-ac-nav'))return; el.setAttribute('data-ac-nav','1'); if(el.tagName==='A')el.setAttribute('href','/#'+id); el.style.cursor='pointer'; el.addEventListener('click',function(e){ e.preventDefault(); if(HOME())go(id); else window.location.href='/#'+id; }); }
+    document.querySelectorAll('.header-nav-item a, .header-nav-folder-title').forEach(function(el){ hook(el,map[(el.textContent||'').trim().toLowerCase()]); });
+    document.querySelectorAll('.header-actions a, .header-actions-action a, .header .sqs-button-element--primary').forEach(function(el){ var t=(el.textContent||'').trim().toLowerCase(); if(t.indexOf('plan')>=0||t.indexOf('visit')>=0) hook(el,'ac-visit'); });
+    document.querySelectorAll('.header-nav-item').forEach(function(it){ var t=it.querySelector('.header-nav-folder-title'); if(t&&(t.textContent||'').trim().toLowerCase()==='about'){ var c=it.querySelector('.header-nav-folder-content'); if(c)c.style.display='none'; } });
+    if(location.hash&&location.hash.length>1){ var hid=location.hash.slice(1); setTimeout(function(){ go(hid); },500); }
+  }
+  function acInitSections(){ buildHero(); buildCountdown(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildSermons(); buildConnect(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
 
