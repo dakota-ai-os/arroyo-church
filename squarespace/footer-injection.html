@@ -383,6 +383,10 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 </style>
 <script>
 (function(){
+  /* single-page: redirect old standalone page URLs to the home anchors (until those pages are deleted, when the 301 URL-mappings take over) */
+  var __redir={'/about':'ac-mission','/team':'ac-team','/messages':'ac-sermons','/connect':'ac-connect','/give':'ac-give','/plan-your-visit':'ac-visit'};
+  var __rp=location.pathname.replace(/\/+$/,'').toLowerCase();
+  if(__redir[__rp]){ location.replace('/#'+__redir[__rp]); return; }
   var fine=matchMedia('(pointer:fine)').matches, reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var HOME=function(){ return document.body.classList.contains('homepage'); };
 
