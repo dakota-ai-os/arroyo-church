@@ -827,6 +827,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
     }
     function onScr(){ if(ticking)return; ticking=true; requestAnimationFrame(upd); }
     addEventListener('scroll',onScr,{passive:true}); addEventListener('resize',function(){vhc=window.innerHeight;onScr();},{passive:true}); upd();
+    setTimeout(function(){ for(var k=0;k<frames.length;k++){ var im=frames[k].querySelector('img'); if(im){ var pl=new Image(); pl.src=im.src; } } },1200);
   }
   /* ---- nav: repoint links to home anchors + smooth scroll; hide empty About folder ---- */
   function wireNav(){
