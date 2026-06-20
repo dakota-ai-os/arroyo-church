@@ -458,7 +458,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
   }
   /* ---- per-page helpers (reused by M6-M11) ---- */
   function pageIs(p){ return location.pathname.replace(/\/+$/,'')===p; }
-  function headerOffset(){ var h=document.querySelector('.header'); if(!h) return 0; var cs=getComputedStyle(h); return (cs.position==='fixed'||cs.position==='sticky')?Math.ceil(h.getBoundingClientRect().height):0; }
+  function headerOffset(){ var h=document.querySelector('.header'); if(!h) return 0; var cs=getComputedStyle(h); return (cs.position==='fixed'||cs.position==='sticky'||cs.position==='absolute')?Math.ceil(h.getBoundingClientRect().height)+8:0; }
   function hideNativeSections(wrap){ var ss=wrap.querySelectorAll(':scope > .page-section'); for(var i=0;i<ss.length;i++){ ss[i].style.display='none'; } }
   function wireAccordion(root, itemSel, bodySel){
     root.querySelectorAll(itemSel).forEach(function(item){
