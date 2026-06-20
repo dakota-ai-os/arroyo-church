@@ -405,6 +405,8 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .header .header-nav-folder-title{font-weight:600!important}
 /* 2: phones — keep the Scroll cue but SMALLER, and give the hero a touch more height (100svh) so the cue sits well clear below the address instead of overlapping it. */
 @media(max-width:767px){html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"]{min-height:100svh!important}.ac-hero .ac-scroll{display:flex!important;bottom:1.1rem;font-size:.56rem;letter-spacing:.22em;gap:.35rem}.ac-hero .ac-scroll i{height:20px}}
+/* on genuinely SHORT viewports (small phones like the SE, or any phone in landscape) the hero content + cue can't both fit even at 100svh — drop the cue there so it never overlaps the address. Normal/tall phones (iPhone Pro etc.) keep it. */
+@media(max-height:680px){.ac-hero .ac-scroll{display:none!important}}
 /* 11: mobile — the hero is pulled up -100px behind the fixed header and its content is vertically centered; on tall phones (e.g. iPhone Pro) the taller content lifts the gold eyebrow up UNDER the logo/hamburger. Top-align on phones (fitHeroTop() sizes the exact padding at runtime; this is the no-JS fallback) AND tighten the inter-element rhythm so the address line doesn't collide with the Scroll cue at the bottom. */
 @media(max-width:767px){html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"] .ac-hero{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 230px)}.ac-hero .ac-eyebrow{margin-bottom:.6rem}.ac-hero .ac-sub{margin-top:.85rem}.ac-hero .ac-ctas{margin-top:1.2rem}.ac-hero .ac-service{margin-top:1.1rem}}
 /* 4,5,8,9,10: light, readable titles on the dark sections */
