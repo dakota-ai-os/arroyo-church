@@ -198,8 +198,23 @@ html.ac-hero-on.ac-scrolled .header-title-logo img{max-height:34px!important}
     }
     tick(); setInterval(tick,1000);
   }
-  function acInitSections(){ buildHero(); buildCountdown(); }
+  /* ---- nav: the leftover empty "About" folder -> real link to /about, kill its empty dropdown ---- */
+  function fixAboutNav(){
+    var items=document.querySelectorAll('.header-nav-item');
+    for(var i=0;i<items.length;i++){
+      var it=items[i], title=it.querySelector('.header-nav-folder-title');
+      if(!title || (title.textContent||'').trim()!=='About') continue;
+      if(it.querySelectorAll('.header-nav-folder-content a, .header-nav-folder-item a').length>0) continue; /* a real (non-empty) folder: leave alone */
+      var content=it.querySelector('.header-nav-folder-content'); if(content) content.style.display='none';
+      if(!title.getAttribute('data-ac-about')){
+        title.setAttribute('data-ac-about','1'); title.style.cursor='pointer';
+        title.addEventListener('click',function(e){ e.preventDefault(); window.location.href='/about'; });
+      }
+    }
+  }
+  function acInitSections(){ buildHero(); buildCountdown(); fixAboutNav(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
+  setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
 
   /* ---- nav solid-on-scroll ---- */
   function navScroll(){ document.documentElement.classList.toggle('ac-scrolled', (window.scrollY||0)>40); }
