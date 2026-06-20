@@ -356,6 +356,20 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .ac-descent .d-cap .big{font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:clamp(1.8rem,4.6vw,3.1rem);line-height:1.12;text-shadow:0 2px 26px rgba(10,22,28,.75)}
 .ac-descent .d-cap .small{font-size:.88rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.88);margin-top:.6rem}
 .ac-descent .d-cap .btn{margin-top:1.5rem}
+/* full scroll-scrubbed descent (fly-in) */
+#ac-descent{height:600vh!important;margin:0!important}
+#ac-descent .descent-sticky{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;background:#0a161c;isolation:isolate}
+#ac-descent .d-frame{position:absolute;inset:0;opacity:0;will-change:transform,opacity}
+#ac-descent .d-frame img{width:100%;height:100%;object-fit:cover}
+#ac-descent .d-cap{opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s .45s}
+#ac-descent .d-cap.on{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s 0s}
+#ac-descent .d-pin{position:absolute;top:50%;left:50%;z-index:4;margin:-7px 0 0 -7px;opacity:0;transition:opacity .4s;pointer-events:none}
+#ac-descent .d-pin.on{opacity:1}
+#ac-descent .d-pin::before{content:"";display:block;width:14px;height:14px;border-radius:50%;background:#e3bd6a;box-shadow:0 0 0 3px rgba(10,22,28,.4)}
+#ac-descent .d-pin::after{content:"";position:absolute;inset:-13px;border-radius:50%;border:2px solid rgba(227,189,106,.85);animation:acpin 1.8s ease-out infinite}
+@keyframes acpin{from{transform:scale(.35);opacity:1}to{transform:scale(1.55);opacity:0}}
+#ac-descent .d-attrib{position:absolute;right:.7rem;bottom:.5rem;z-index:5;font-size:.62rem;color:rgba(255,255,255,.6);text-shadow:0 1px 4px rgba(0,0,0,.7)}
+@media(prefers-reduced-motion:reduce){#ac-descent{height:auto!important}#ac-descent .descent-sticky{position:relative;height:72vh}#ac-descent .d-frame{display:none}#ac-descent .d-frame.seat{display:block;opacity:1!important}#ac-descent .d-cap.final{opacity:1!important;visibility:visible!important}#ac-descent .d-pin{display:none}}
 .visit-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
 .vm{display:flex;gap:1rem;align-items:flex-start}
 .vm .ic{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.14));color:#2e8fa3}
@@ -774,10 +788,45 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
     var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
     var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p>945 Concannon Blvd, Livermore, CA 94550<br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Service time</h3><p>Sundays &middot; 10:00 AM</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Contact</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
     var steps='<div class="step ac-rev"><div class="s-num">01</div><h3>Worship</h3><p>We start each gathering with a few songs of worship together.</p></div><div class="step ac-rev"><div class="s-num">02</div><h3>Message</h3><p>A Bible-centered sermon that bridges God&rsquo;s word to your everyday life.</p></div><div class="step ac-rev"><div class="s-num">03</div><h3>Prayer</h3><p>We close with a few more songs, and our pastoral team is available to pray with anyone who needs it.</p></div>';
+    var DB='https://tos-backtest.github.io/arroyo-church/assets/descent/';
+    var dframes=['aerial_1.jpg','aerial_2.jpg','aerial_3.jpg','aerial_4.jpg','aerial_5.jpg','interior_wide.jpg','seat_view.jpg'];
+    var fHtml=dframes.map(function(f,i){return '<div class="d-frame'+(i===6?' seat':'')+'" data-f="'+i+'"><img src="'+DB+f+'" alt="" loading="lazy"></div>';}).join('');
+    var dcaps=[['Wherever you&rsquo;re coming from&hellip;','The Bay Area'],['&hellip;find your way to Livermore.','The Tri-Valley &middot; California'],['Head to the south side of town.','Concannon Blvd &amp; Holmes St'],['945 Concannon Blvd.','Plenty of parking on site'],['Look for the round building.','You can&rsquo;t miss it'],['Step inside.','Sundays &middot; 10:00 AM'],['We saved you a seat.','Sundays &middot; 10:00 AM &middot; 55 minutes']];
+    var cHtml=dcaps.map(function(c,i){return '<div class="d-cap'+(i===6?' final':'')+'" data-c="'+i+'"><div class="big">'+c[0]+'</div><div class="small">'+c[1]+'</div>'+(i===6?'<a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a>':'')+'</div>';}).join('');
+    var descent='<div class="ac-descent" id="ac-descent"><div class="descent-sticky">'+fHtml+'<div class="d-vignette"></div><div class="d-pin"></div>'+cHtml+'<div class="d-attrib">Imagery &copy; Esri &middot; Maxar &middot; Earthstar Geographics</div></div></div>';
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-visit';
-    sec.innerHTML='<div class="wrap visit-intro"><p class="eyebrow ac-rev">Plan your visit</p><h2 class="h2 ac-rev">This Sunday. <em>Save you a seat?</em></h2><p class="lead ac-rev">Join us for our 10:00 AM worship service this Sunday. Gatherings run about 55 minutes &mdash; come as you are, dress is casual, and your kids will love it here.</p></div><div class="ac-descent"><img src="https://tos-backtest.github.io/arroyo-church/assets/descent/seat_view.jpg" alt="The view from a seat at Arroyo Church"><div class="d-vignette"></div><div class="d-cap"><div class="big">We saved you a seat.</div><div class="small">Sundays &middot; 10:00 AM &middot; 55 minutes</div><a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a></div></div><div class="wrap"><div class="visit-meta">'+meta+'</div><div class="visit-ctas ac-rev"><a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a><a class="btn btn-ghost-dark" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a></div><div class="steps">'+steps+'</div><div class="faq"><h3 class="faq-h ac-rev">Frequently asked questions</h3>'+faqHtml+'</div></div>';
+    sec.innerHTML='<div class="wrap visit-intro"><p class="eyebrow ac-rev">Plan your visit</p><h2 class="h2 ac-rev">This Sunday. <em>Save you a seat?</em></h2><p class="lead ac-rev">Join us for our 10:00 AM worship service this Sunday. Gatherings run about 55 minutes &mdash; come as you are, dress is casual, and your kids will love it here.</p></div>'+descent+'<div class="wrap"><div class="visit-meta">'+meta+'</div><div class="visit-ctas ac-rev"><a class="btn btn-gold" href="'+mailto+'">Let Us Know You&rsquo;re Coming</a><a class="btn btn-ghost-dark" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a></div><div class="steps">'+steps+'</div><div class="faq"><h3 class="faq-h ac-rev">Frequently asked questions</h3>'+faqHtml+'</div></div>';
     anchor.parentNode.insertBefore(sec, anchor.nextSibling);
     wireAccordion(sec, '.faq-item', '.f-body');
+    initDescent();
+  }
+  /* ---- the fly-in: scroll-scrubbed descent from the Bay Area to a seat ---- */
+  function initDescent(){
+    var d=document.getElementById('ac-descent'); if(!d) return;
+    var frames=[].slice.call(d.querySelectorAll('.d-frame'));
+    var caps=[].slice.call(d.querySelectorAll('.d-cap'));
+    var pin=d.querySelector('.d-pin');
+    if(reduce){ var seat=d.querySelector('.d-frame.seat'); if(seat)seat.style.opacity=1; var fin=d.querySelector('.d-cap.final'); if(fin)fin.classList.add('on'); return; }
+    var DT=[{kOut:5,inFrom:0.2},{kOut:5,inFrom:0.2},{kOut:4.8,inFrom:1/4.8},{kOut:4.17,inFrom:1/4.17},{kOut:2.4,inFrom:1.10},{kOut:1.06,inFrom:1.10}];
+    var vhc=window.innerHeight, ticking=false;
+    function upd(){
+      ticking=false;
+      var dr=d.getBoundingClientRect();
+      if(dr.bottom<=0||dr.top>=vhc) return;
+      var span=dr.height-vhc;
+      var p=span>0?Math.min(1,Math.max(0,-dr.top/span)):0;
+      var N=DT.length, s=Math.min(N-1e-6,p*N), idx=Math.floor(s), t=s-idx, tr=DT[idx];
+      for(var i=0;i<frames.length;i++){ var f=frames[i];
+        if(i===idx){ f.style.opacity=1; f.style.transform='scale('+Math.pow(tr.kOut,t)+')'; }
+        else if(i===idx+1){ f.style.opacity=Math.min(1,Math.max(0,(t-0.25)/0.5)); f.style.transform='scale('+Math.pow(tr.inFrom,1-t)+')'; }
+        else { f.style.opacity=0; }
+      }
+      var capIdx=(t<0.55)?idx:idx+1;
+      for(var j=0;j<caps.length;j++){ caps[j].classList.toggle('on',(+caps[j].getAttribute('data-c'))===capIdx); }
+      if(pin) pin.classList.toggle('on', capIdx===3||capIdx===4);
+    }
+    function onScr(){ if(ticking)return; ticking=true; requestAnimationFrame(upd); }
+    addEventListener('scroll',onScr,{passive:true}); addEventListener('resize',function(){vhc=window.innerHeight;onScr();},{passive:true}); upd();
   }
   /* ---- nav: repoint links to home anchors + smooth scroll; hide empty About folder ---- */
   function wireNav(){
