@@ -406,7 +406,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 /* 2: mobile — drop the Scroll cue lower so it doesn't collide with the hero text */
 @media(max-width:640px){.ac-scroll{bottom:.7rem}.ac-scroll i{height:34px}}
 /* 11: mobile — the hero is pulled up -100px behind the fixed header and its content is vertically centered; on tall phones (e.g. iPhone Pro) the taller content lifts the gold eyebrow up UNDER the logo/hamburger. Top-align on phones so it always clears the header. */
-@media(max-width:767px){html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"] .ac-hero{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 210px)}}
+@media(max-width:767px){html.ac-hero-on [data-section-id="68533fde9bfaa374d9c67d61"] .ac-hero{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 240px)}}
 /* 4,5,8,9,10: light, readable titles on the dark sections */
 .ac-about .belief .b-name{color:#f4efe4!important}
 .ac-about .belief .chev{color:#e3bd6a!important;border-color:rgba(227,189,106,.6)!important}
@@ -883,6 +883,20 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
   setTimeout(wireMobileNav,800); setTimeout(wireMobileNav,2200);
+
+  /* ---- hero top-padding: size it to the REAL header height on phones so the gold eyebrow always clears the fixed logo/hamburger (section is pulled up -100px behind the header) ---- */
+  function fitHeroTop(){
+    var hero=document.querySelector('.ac-hero'); if(!hero) return;
+    if(window.innerWidth<=767){
+      if((window.scrollY||0)>60) return; /* measure only at the top, where the header is full height */
+      var hdr=document.querySelector('.header');
+      var hH=hdr?Math.round(hdr.getBoundingClientRect().height):109;
+      hero.style.paddingTop=(hH+128)+'px'; /* 100 cancels the section's -100 margin, +28 gap */
+    } else { hero.style.paddingTop=''; }
+  }
+  fitHeroTop(); setTimeout(fitHeroTop,400); setTimeout(fitHeroTop,1500);
+  addEventListener('resize',fitHeroTop,{passive:true});
+  addEventListener('orientationchange',function(){ setTimeout(fitHeroTop,300); });
 
   /* ---- nav solid-on-scroll ---- */
   function navScroll(){ document.documentElement.classList.toggle('ac-scrolled', (window.scrollY||0)>40); }
