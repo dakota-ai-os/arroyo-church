@@ -35,30 +35,23 @@ SERMONS_FILE = REPO / "data" / "sermons.json"
 sermons = json.loads(SERMONS_FILE.read_text(encoding="utf-8"))
 videos = sermons.get("videos") or []
 if not videos:
-    sys.exit("no latest sermon in data/sermons.json")
-v = videos[0]
+    sys.exit("no sermons in data/sermons.json")
 series = sermons.get("series") or {}
-video_id = v["id"]
-video_url = f"https://www.youtube.com/watch?v={video_id}"
 today = date.today().isoformat()
 
 DRAFTS.mkdir(parents=True, exist_ok=True)
 
-# ---- idempotency: skip if a draft already references this video id ----
-def already_done() -> bool:
+# ---- idempotency: has a draft already been written for this video id? ----
+def already_done(vid: str) -> bool:
     for f in DRAFTS.glob("*.json"):
         try:
-            if json.loads(f.read_text(encoding="utf-8")).get("videoId") == video_id:
+            if json.loads(f.read_text(encoding="utf-8")).get("videoId") == vid:
                 return True
         except Exception:
             continue
     return False
 
-if already_done():
-    print(f'Draft already exists for {video_id} ("{v.get("title")}") -- nothing to do.')
-    sys.exit(0)
-
-# ---- transcript via yt-dlp auto-captions ----
+# ---- transcript via yt-dlp captions (any English variant) ----
 def clean_vtt(vtt: str) -> str:
     seen, out = set(), []
     for raw in vtt.splitlines():
@@ -71,25 +64,53 @@ def clean_vtt(vtt: str) -> str:
         out.append(t)
     return " ".join(out)
 
-VTT = Path("/tmp/ac_sermon.en.vtt")
-transcript = ""
-try:
+def fetch_transcript(vid: str) -> str:
     for stale in Path("/tmp").glob("ac_sermon.*"):
-        stale.unlink()
-except Exception:
-    pass
-try:
-    subprocess.run(
-        ["yt-dlp", "--quiet", "--no-warnings", "--skip-download", "--write-auto-sub",
-         "--sub-lang", "en", "--sub-format", "vtt", "-o", "/tmp/ac_sermon.%(ext)s", video_url],
-        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-    )
-    transcript = clean_vtt(VTT.read_text(encoding="utf-8"))
-except Exception as e:
-    print(f"transcript fetch failed: {e}", file=sys.stderr)
+        try: stale.unlink()
+        except Exception: pass
+    try:
+        subprocess.run(
+            ["yt-dlp", "--quiet", "--no-warnings", "--skip-download",
+             "--write-auto-sub", "--write-sub", "--sub-langs", "en.*",
+             "--sub-format", "vtt", "-o", "/tmp/ac_sermon.%(ext)s",
+             f"https://www.youtube.com/watch?v={vid}"],
+            check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return ""
+    vtts = list(Path("/tmp").glob("ac_sermon*.vtt"))
+    vtts.sort(key=lambda p: (".en." not in p.name, len(p.name)))  # prefer plain "en"
+    for p in vtts:
+        try:
+            t = clean_vtt(p.read_text(encoding="utf-8"))
+            if len(t) >= 400:
+                return t
+        except Exception:
+            continue
+    return ""
 
-if len(transcript) < 400:
-    sys.exit("transcript too short/empty -- aborting so we don't write a thin post")
+# ---- pick the LATEST captioned sermon clip; skip full-service / worship livestreams
+#      (those have no usable transcript and aren't sermon-only content) ----
+SKIP_RE = re.compile(r"worship|full[ -]?service|live ?stream", re.I)
+v = None
+transcript = ""
+for cand in videos[:8]:
+    if SKIP_RE.search(cand.get("title", "")):
+        continue
+    t = fetch_transcript(cand["id"])
+    if len(t) >= 400:
+        v, transcript = cand, t
+        break
+
+if not v:
+    sys.exit("no recent captioned sermon clip found (latest is likely an un-captioned full-service video) -- nothing to do")
+
+video_id = v["id"]
+video_url = f"https://www.youtube.com/watch?v={video_id}"
+
+if already_done(video_id):
+    print(f'Draft already exists for {video_id} ("{v.get("title")}") -- nothing to do.')
+    sys.exit(0)
 
 # ---- generate with Claude (Opus 4.8, structured output) ----
 SCHEMA = {
