@@ -2,8 +2,9 @@
 """
 Weekly sermon -> blog-post generator (the CONTENT half of the blog pipeline).
 
-Reads the latest sermon from data/sermons.json, pulls its YouTube auto-caption
-transcript (yt-dlp), and asks Claude (Opus 4.8, structured output) to write a
+Reads the latest sermon from data/sermons.json, downloads its audio (yt-dlp) and
+transcribes it locally with faster-whisper (NOT YouTube captions -- livestream
+VODs often never get them), then asks Claude (Opus 4.8, structured output) to write a
 genuinely useful, SEO-aware post -- real title, original summary + application,
 scripture references, a video embed, tasteful (not stuffed) local relevance, a
 meta description, a few meaningful tags, and internal links.
@@ -15,7 +16,7 @@ so the weekly run only generates when a NEW sermon appears.
 Runs on Dakota's Mac (residential IP) -- NOT GitHub Actions -- because YouTube
 blocks yt-dlp transcript downloads from datacenter IPs.
 
-Requires: ANTHROPIC_API_KEY (env), yt-dlp on PATH, `pip install anthropic`.
+Requires: ANTHROPIC_API_KEY (env), yt-dlp on PATH, `pip install anthropic faster-whisper`.
 """
 
 import json
@@ -65,33 +66,38 @@ def clean_vtt(vtt: str) -> str:
     return " ".join(out)
 
 def fetch_transcript(vid: str) -> str:
-    for stale in Path("/tmp").glob("ac_sermon.*"):
+    """Download the sermon audio with yt-dlp and transcribe it locally with
+    faster-whisper. Independent of YouTube captions (livestream VODs often never
+    get auto-captions). yt-dlp grabs the raw audio stream (no ffmpeg needed) and
+    faster-whisper decodes it via PyAV."""
+    for stale in Path("/tmp").glob("ac_audio.*"):
         try: stale.unlink()
         except Exception: pass
     try:
         subprocess.run(
-            ["yt-dlp", "--quiet", "--no-warnings", "--skip-download",
-             "--write-auto-sub", "--write-sub", "--sub-langs", "en.*",
-             "--sub-format", "vtt", "-o", "/tmp/ac_sermon.%(ext)s",
-             f"https://www.youtube.com/watch?v={vid}"],
-            check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            ["yt-dlp", "-f", "bestaudio", "--no-playlist", "--quiet", "--no-warnings",
+             "-o", "/tmp/ac_audio.%(ext)s", f"https://www.youtube.com/watch?v={vid}"],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
-    except Exception:
+    except Exception as e:
+        print(f"audio download failed: {e}", file=sys.stderr)
         return ""
-    vtts = list(Path("/tmp").glob("ac_sermon*.vtt"))
-    vtts.sort(key=lambda p: (".en." not in p.name, len(p.name)))  # prefer plain "en"
-    for p in vtts:
-        try:
-            t = clean_vtt(p.read_text(encoding="utf-8"))
-            if len(t) >= 400:
-                return t
-        except Exception:
-            continue
-    return ""
+    audio = next(iter(sorted(Path("/tmp").glob("ac_audio.*"))), None)
+    if not audio:
+        print("no audio file produced by yt-dlp", file=sys.stderr)
+        return ""
+    try:
+        from faster_whisper import WhisperModel
+        model = WhisperModel("small", device="cpu", compute_type="int8")
+        segments, _info = model.transcribe(str(audio), language="en", vad_filter=True)
+        text = " ".join(seg.text.strip() for seg in segments)
+        return re.sub(r"\s+", " ", text).strip()
+    except Exception as e:
+        print(f"whisper transcription failed: {e}", file=sys.stderr)
+        return ""
 
-# ---- always target the LATEST sermon (videos[0]). If it isn't captioned yet,
-#      WAIT (abort) instead of falling back to an older sermon -- the daily run
-#      retries until YouTube finishes auto-captioning it. ----
+# ---- always target the LATEST sermon (videos[0]); transcribe its audio locally
+#      with whisper. If transcription fails, abort and the daily run retries. ----
 v = videos[0]
 video_id = v["id"]
 video_url = f"https://www.youtube.com/watch?v={video_id}"
@@ -102,7 +108,7 @@ if already_done(video_id):
 
 transcript = fetch_transcript(video_id)
 if len(transcript) < 400:
-    sys.exit(f'Latest sermon "{v.get("title")}" ({video_id}) not captioned yet -- waiting for YouTube; will retry next run.')
+    sys.exit(f'Could not transcribe latest sermon "{v.get("title")}" ({video_id}) yet -- will retry next run.')
 
 # ---- generate with Claude (Opus 4.8, structured output) ----
 SCHEMA = {
@@ -137,7 +143,7 @@ USER = f"""Sermon to write up:
 - YouTube video id: {video_id}
 - Watch URL: {video_url}
 
-Transcript (auto-captions; may misrender names/scripture -- correct obvious errors, keep uncertain references general):
+Transcript (auto-transcribed from audio; may misrender names/scripture and may include worship lyrics or announcements -- focus on the sermon, correct obvious errors, keep uncertain references general):
 \"\"\"
 {transcript[:60000]}
 \"\"\"
