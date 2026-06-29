@@ -1,0 +1,21 @@
+{
+  "transformational-stories": {
+    "eyebrow": "TRANSFORMATIONAL STORIES",
+    "accent": [227, 189, 106],
+    "mood": "a moody dark teal-to-near-black cinematic studio gradient, soft dramatic rim light along his edges and a subtle teal glow behind him"
+  },
+
+  "_examples_for_future_series": {
+    "_note": "Copy a block above, give it a new playlist slug, and tweak accent (RGB) + mood (the relight lighting prompt). accent drives the eyebrow, the line-2 word, and the hairline.",
+    "warm-gold-topical": {
+      "eyebrow": "ROOTED · A SERIES ON GRACE",
+      "accent": [227, 189, 106],
+      "mood": "a warm cinematic gradient from dark sand-brown into near-black ink, a soft golden god-ray from the upper corner and warm amber rim light"
+    },
+    "book-teaching": {
+      "eyebrow": "LIVING WATER · THE GOSPEL OF JOHN",
+      "accent": [95, 194, 212],
+      "mood": "a moody desaturated aerial-river-canyon scene graded deep teal and ink, soft vignette, cool rim light"
+    }
+  }
+}

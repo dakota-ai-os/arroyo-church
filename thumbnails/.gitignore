@@ -1,0 +1,5 @@
+# raw screenshots + generated/intermediate PNGs are large and regenerable
+frames/*
+out/*
+!.gitkeep
+__pycache__/
