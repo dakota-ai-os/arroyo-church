@@ -1,69 +1,51 @@
 # Arroyo sermon thumbnails
 
-Turn one screenshot of Josh + a short hook into a finished, on-brand 1280×720
-YouTube thumbnail — the same look every week, a new photo every week.
+**Automated + manual.** A weekly job preps the pastor image and drops it into Canva;
+you do the final composite in Canva (full control) and upload to YouTube.
 
 ```
-screenshot ──▶ RELIGHT (Nano Banana 2) ──▶ COMPOSE (Pillow: type + logo) ──▶ out/*.png ──▶ upload
-   frames/        Josh onto brand bg            locked per-series template
+Thu 8:37am  pastor_weekly.py  →  next screenshot → upscale + cutout + feathered → into Canva Uploads
+Sunday      you, in Canva     →  open template → drop pastor in → edit hook → export 1280×720 → YouTube
 ```
 
-## Weekly steps (~3 minutes)
+## The weekly automation
 
-1. **Grab a frame** of Josh preaching (a clear gesture/teaching moment). Drop it in
-   `frames/` — e.g. `frames/2026-06-29.png`. Pull it from last week's recording so
-   the thumbnail is built ahead of Sunday (see "Timing" below).
-2. **Decide the text.** Ask Claude (see `COPY-PROMPT.md`) for the thumbnail hook +
-   the YouTube title. They are *different* on purpose — hook on the image, full
-   searchable title in the YouTube field.
-3. **Render:**
-   ```bash
-   cd thumbnails
-   python3 make_thumb.py --src frames/2026-06-29.png --series transformational-stories \
-       --l1 FORGIVE --l2 ANYWAY --ref "MATTHEW 18:21-22" \
-       --out out/2026-06-29-forgive-anyway.png
-   ```
-   First run does the paid relight (~$0.04). To tweak only the text/layout, re-run
-   with `--scene out/scene_xxxx.jpg` to reuse the rendered scene (free, instant).
-4. **Review** `out/…png`, then upload it as the YouTube thumbnail and paste the
-   chosen title + description into the video.
+- **Scheduled task** `arroyo-pastor-thumbnail` (Claude Code → Scheduled), runs Thursdays.
+  It runs `pastor_weekly.py`, then uploads the 3 results into your Canva **Uploads**.
+- **`pastor_weekly.py`** — picks the **next** screenshot from `pastor-library/` (rotation
+  tracked in `rotation.json`), then produces and hosts three versions:
+  1. **FULL** — upscaled/enhanced, real stage background
+  2. **CUTOUT** — transparent background (rembg)
+  3. **FEATHERED** — left/right edges faded to transparent (blend-ready)
+- Runs on your Mac when Claude Code is open (or next launch). Uses `tools/media-gen`
+  (kie.ai) for the upscale and `rembg` for the cutout.
 
-## Timing — fresh photo, no Sunday scramble
+## Your Sunday step (~2 min, any computer, no install)
 
-The only per-week inputs are a **screenshot** and a **title**, both knowable before
-Sunday. Recommended: pull the frame from **last week's** recording and build the
-thumbnail Thursday. (Josh preaching is Josh preaching — nobody can tell it's last
-week.) If you'd rather use *this* week's frame, grab it after the service and run
-the one command — ~2 minutes.
+1. In Canva, duplicate **"⚙️ Thumbnail Template — Transformational Stories"**.
+2. From **Uploads**, drag the pastor (feathered or cutout) onto the right.
+3. Change the hook text (Brixton, `#f47524`), tweak scripture/eyebrows.
+4. Export 1280×720 → set as the YouTube thumbnail.
 
-## The look
+## Rotating his image week to week
 
-- **Fixed skeleton (every series):** Josh relit on the right, brand type on the
-  left, scripture ref, white Arroyo logo bottom-left, 1280×720. Bottom-right is left
-  clear for YouTube's duration / LIVE badge.
-- **Per-series skin (`series.json`):** `eyebrow` text, `accent` color (RGB — drives
-  the eyebrow, the line-2 word, the hairline), and `mood` (the relight lighting
-  prompt). Add a series by copying a block in `series.json` and giving it a new key.
-- **Fonts:** Impact (display) + Avenir Next (UI), from the system. Swappable in
-  `make_thumb.py` (`FONT`).
+`pastor-library/` holds the screenshots; each week the job uses the next one.
+**Add more** by dropping PNGs into `pastor-library/` (or hand them to Claude) — they
+join the rotation automatically.
 
-## Adding a new series
+## Text strategy
 
-1. Add a block to `series.json` (new key = playlist slug; set `eyebrow`, `accent`, `mood`).
-2. (Optional) preview the mood by rendering one sermon with `--series <new-key>`.
-That's the only "design" step — every sermon in the series then reuses it.
+See `COPY-PROMPT.md` — thumbnail = a short benefit **hook**; the YouTube title field
+is a separate, longer, searchable line.
 
-## Notes / roadmap
+## Files
 
-- `frames/` and `out/` are git-ignored (raw + regenerable images). The logos and
-  scripts are committed.
-- Relight quirk: Nano Banana sometimes returns a URL instead of a saved file; the
-  script handles that automatically (curl fallback).
-- **Cut-out library (optional, later):** for full control of the background we can
-  keep transparent PNG cut-outs of Josh (Canva's 1-click background remover, or a
-  matting lib) and composite locally instead of relighting — not needed today.
-- **Auto-copy (optional, later):** a `copy.py` could call the Anthropic API (key at
-  `~/.config/arroyo/anthropic.env`, same as the blog job) to draft the hook + title
-  automatically. For now Claude does it interactively via `COPY-PROMPT.md`.
-- **GitHub Action (optional, later):** mirror the blog/sync jobs to render on a
-  schedule once a `frames/` + title source is wired in.
+- `pastor_weekly.py` — the weekly pastor-prep script (the live pipeline)
+- `pastor-library/` — Josh screenshots (rotation source)
+- `rotation.json` — which screenshot is next
+- `COPY-PROMPT.md` — how to write the hook + YouTube title
+- `assets/` — Arroyo logos (`logo-white.png` / `logo-black.png`)
+- `make_thumb.py` — an earlier *fully*-automated PIL compositor (kept for reference;
+  the Canva-template flow above is what we use now)
+- `out/`, `frames/` — scratch (git-ignored)
+```
