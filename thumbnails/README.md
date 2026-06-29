@@ -4,7 +4,7 @@
 you do the final composite in Canva (full control) and upload to YouTube.
 
 ```
-Thu 8:37am  pastor_weekly.py  →  next screenshot → upscale + cutout + feathered → into Canva Uploads
+Thu 8:37am  pastor_weekly.py  →  next screenshot → upscale + cutout → into Canva Uploads
 Sunday      you, in Canva     →  open template → drop pastor in → edit hook → export 1280×720 → YouTube
 ```
 
@@ -13,17 +13,19 @@ Sunday      you, in Canva     →  open template → drop pastor in → edit hoo
 - **Scheduled task** `arroyo-pastor-thumbnail` (Claude Code → Scheduled), runs Thursdays.
   It runs `pastor_weekly.py`, then uploads the 3 results into your Canva **Uploads**.
 - **`pastor_weekly.py`** — picks the **next** screenshot from `pastor-library/` (rotation
-  tracked in `rotation.json`), then produces and hosts three versions:
+  tracked in `rotation.json`), then produces and hosts two versions:
   1. **FULL** — upscaled/enhanced, real stage background
   2. **CUTOUT** — transparent background (rembg)
-  3. **FEATHERED** — left/right edges faded to transparent (blend-ready)
+  The **series green background** + its **feathered-edge** version are static assets
+  already in Canva Uploads (same every week, so not regenerated here).
 - Runs on your Mac when Claude Code is open (or next launch). Uses `tools/media-gen`
   (kie.ai) for the upscale and `rembg` for the cutout.
 
 ## Your Sunday step (~2 min, any computer, no install)
 
 1. In Canva, duplicate **"⚙️ Thumbnail Template — Transformational Stories"**.
-2. From **Uploads**, drag the pastor (feathered or cutout) onto the right.
+2. From **Uploads**, drag the pastor (full or cutout) onto the right, and the
+   feathered green over the left so its edge blends into him.
 3. Change the hook text (Brixton, `#f47524`), tweak scripture/eyebrows.
 4. Export 1280×720 → set as the YouTube thumbnail.
 

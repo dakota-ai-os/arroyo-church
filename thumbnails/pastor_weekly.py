@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Weekly pastor prep for the Transformational Stories thumbnail.
 
-Picks the NEXT screenshot from pastor-library/ (rotation), then produces three
+Picks the NEXT screenshot from pastor-library/ (rotation), then produces two
 versions and hosts each, printing their URLs for the scheduled task to upload
 into Canva:
-  1. FULL      - upscaled/enhanced, with the real stage background
-  2. CUTOUT    - transparent background (rembg)
-  3. FEATHERED - left/right edges faded to transparent (blend-ready)
+  1. FULL    - upscaled/enhanced, with the real stage background
+  2. CUTOUT  - transparent background (rembg)
+
+(The series GREEN background is a static asset already in Canva, feathered once;
+it doesn't change week to week, so it's not regenerated here.)
 
 Run:  python3 thumbnails/pastor_weekly.py
 The scheduled task reads the printed *_URL lines and uploads them to Canva.
@@ -14,7 +16,6 @@ Add more screenshots any time by dropping PNGs into pastor-library/.
 """
 import sys, os, json, glob, subprocess
 sys.path.insert(0, "/Users/dakotayates/ai-os/tools/media-gen")
-import numpy as np
 from PIL import Image
 from rembg import remove
 from kie_client import KieClient
@@ -48,22 +49,11 @@ full_url = c.generate_image(PROMPT, model="nano-banana-2", aspect_ratio="16:9",
 
 full_path = os.path.join(OUT, "pastor_full.png")
 subprocess.run(["curl", "-s", "-o", full_path, full_url], check=True)
-img = Image.open(full_path).convert("RGBA")
 
 # 2) CUTOUT — transparent background
 cut_path = os.path.join(OUT, "pastor_cutout.png")
-remove(img).save(cut_path)
+remove(Image.open(full_path).convert("RGBA")).save(cut_path)
 cutout_url = c.upload_file(cut_path)
-
-# 3) FEATHERED — left/right edges fade to transparent
-W, H = img.size
-xn = np.mgrid[0:H, 0:W][1] / W
-fw = 0.13
-alpha = (np.minimum(np.clip(xn / fw, 0, 1), np.clip((1 - xn) / fw, 0, 1)) * 255).astype("uint8")
-arr = np.array(img); arr[..., 3] = alpha
-feath_path = os.path.join(OUT, "pastor_feathered.png")
-Image.fromarray(arr, "RGBA").save(feath_path)
-feathered_url = c.upload_file(feath_path)
 
 # advance rotation
 json.dump({"next": (idx + 1) % len(shots), "last_used": os.path.basename(src)},
@@ -72,4 +62,3 @@ json.dump({"next": (idx + 1) % len(shots), "last_used": os.path.basename(src)},
 print("USED_SCREENSHOT:", os.path.basename(src))
 print("FULL_URL:", full_url)
 print("CUTOUT_URL:", cutout_url)
-print("FEATHERED_URL:", feathered_url)
