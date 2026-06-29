@@ -11,6 +11,18 @@ builds every home section at runtime and injects it into the live Squarespace
 page via **Footer Code Injection**. Editing that file + re-deploying it (see
 below) is how ~all visual/site changes happen.
 
+## Load for this task
+Read the row that matches your task — open ONLY those files, skip the rest. Don't load the whole repo.
+
+| Task | Read | Skip | Skills |
+|---|---|---|---|
+| Make a visual/site change (most changes) | `squarespace/footer-injection.html` + the **► Deploying a site change** section below | `scripts/`, `data/`, `.source_pages/`, `assets/` | — |
+| Go live / apply the reskin on the live site | `squarespace/GO-LIVE-RUNBOOK.md` + `squarespace/custom-css.css` | `BUILD_PLAN.md`, `IMPLEMENTATION_GUIDE.md`, `scripts/` | — |
+| Fix the Join-a-Group form (→ Planning Center) | `squarespace/arroyo-connect-worker.js` (field map in its header) | `footer-injection.html` build code, `data/` | — |
+| Review / publish the weekly sermon blog | `blog-drafts/` (latest `.html`) + the **Weekly blog** integration note below | `scripts/generate_blog.py` internals, `footer-injection.html` | `/log-decision` |
+| Edit a standalone SEO page (/about, /team, etc.) | `.source_pages/arroyo_<page>.html` (reference) + **Do NOT touch / SEO guardrails** below | `footer-injection.html`, `scripts/` | — |
+| Make a promo image / video / jingle | — (no repo files needed) | the whole repo | `/generate-media` |
+
 ## Repo layout
 - **`squarespace/footer-injection.html`** — THE master file. Builds (home-only,
   gated by `HOME()`): hero → countdown → "what to expect" → sermons → mission →
@@ -28,7 +40,7 @@ below) is how ~all visual/site changes happen.
    `jsc` (`/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc`).
    `SyntaxError` = broken, fix it. `ReferenceError` (e.g. `matchMedia`) = fine — it parsed.
 3. `git commit` + `git push` to `main`. GitHub Pages then serves the file at
-   `https://tos-backtest.github.io/arroyo-church/squarespace/footer-injection.html`
+   `https://dakota-ai-os.github.io/arroyo-church/squarespace/footer-injection.html`
    (~30s–2min lag; cache-bust with `?cb=<timestamp>`).
 4. **Push it live in Squarespace:** Settings → Advanced → Code Injection. Replace
    the **FOOTER** field with the new file contents, then **Save**.
@@ -71,7 +83,7 @@ below) is how ~all visual/site changes happen.
 - Never commit or share secrets: the Planning Center token and the Anthropic API key.
 
 ## Working solo (for a new collaborator)
-You'll need: push access to `tos-backtest/arroyo-church`, and a Squarespace
+You'll need: push access to `dakota-ai-os/arroyo-church`, and a Squarespace
 contributor invite (Website Editor or Admin) to do the Code Injection deploy step.
 The blog automation + the integration secrets stay with the primary maintainer —
 collaborators work on the site code (the master file) and the standalone pages.

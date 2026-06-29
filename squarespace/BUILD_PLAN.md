@@ -1,8 +1,8 @@
 # Arroyo Church — Full Squarespace Build Plan
 
-**Goal:** Rebuild EVERY element of the prototype (tos-backtest.github.io/arroyo-church) inside the live Squarespace site, as faithfully as Squarespace allows. Animations best-effort. Milestone-by-milestone with a review stop after each.
+**Goal:** Rebuild EVERY element of the prototype (dakota-ai-os.github.io/arroyo-church) inside the live Squarespace site, as faithfully as Squarespace allows. Animations best-effort. Milestone-by-milestone with a review stop after each.
 
-**Reference:** the prototype = `~/arroyo-church-redesign/index.html` (also live at https://tos-backtest.github.io/arroyo-church/).
+**Reference:** the prototype = `~/arroyo-church-redesign/index.html` (also live at https://dakota-ai-os.github.io/arroyo-church/).
 
 ---
 
