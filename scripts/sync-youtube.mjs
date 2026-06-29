@@ -13,7 +13,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 
 const CHANNEL_ID = 'UCH8pQEu1LJ3INkPyzT4Pndg';                                   // @arroyochurch
-const SERIES_PLAYLIST_ID  = process.env.SERIES_PLAYLIST_ID  || 'PLqCyakXjbp1OOesDkGS-yHXk6kpVInzvx';
+const SERIES_PLAYLIST_ID  = process.env.SERIES_PLAYLIST_ID  || 'PLSIHs6mCX_TU'; // current series "Transformational Stories" (update per new series, or set YT_API_KEY to auto-detect)
 const PODCAST_PLAYLIST_ID = process.env.PODCAST_PLAYLIST_ID || 'PLqCyakXjbp1M974oafBq-gB2Nywu0liuX';
 const API_KEY = process.env.YT_API_KEY || '';
 const MAX = 6; // how many videos to carry per section

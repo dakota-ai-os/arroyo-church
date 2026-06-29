@@ -1,26 +1,14 @@
 {
   "series": {
-    "title": "Walk Faithfully",
-    "blurb": "A sermon series through the life of Samuel.",
-    "playlistUrl": "https://www.youtube.com/playlist?list=PLqCyakXjbp1OOesDkGS-yHXk6kpVInzvx"
+    "title": "Transformational Stories",
+    "blurb": "A new message every Sunday.",
+    "playlistUrl": "https://www.youtube.com/playlist?list=PLSIHs6mCX_TU"
   },
   "videos": [
     {
-      "id": "3yOTc_7cW74",
-      "title": "Getting to Your Next Chapter"
-    },
-    {
-      "id": "NPobibIv31w",
-      "title": "Running the Wrong Way"
-    },
-    {
-      "id": "Ed-g0Dcev3I",
-      "title": "How You Can Experience Radical Restoration"
-    },
-    {
-      "id": "xwzseLoIeWI",
-      "title": "How Prayer Empowers You"
+      "id": "mHu9Aa-JtsM",
+      "title": "Forgiving Despite Your Feelings | Sermon and Worship"
     }
   ],
-  "updated": "2026-06-28"
+  "updated": "2026-06-29"
 }
