@@ -15,6 +15,7 @@ The scheduled task reads the printed *_URL lines and uploads them to Canva.
 Add more screenshots any time by dropping PNGs into pastor-library/.
 """
 import sys, os, json, glob, subprocess
+from datetime import date
 sys.path.insert(0, "/Users/dakotayates/ai-os/tools/media-gen")
 from PIL import Image, ImageFilter
 from rembg import remove
@@ -67,6 +68,9 @@ cutout_url = c.upload_file(cut_path)
 json.dump({"next": (idx + 1) % len(shots), "last_used": os.path.basename(src)},
           open(STATE, "w"), indent=2)
 
+today = date.today().isoformat()
 print("USED_SCREENSHOT:", os.path.basename(src))
+print("FULL_NAME:", f"Pastor {today}")
+print("CUTOUT_NAME:", f"Pastor CUTOUT {today}")
 print("FULL_URL:", full_url)
 print("CUTOUT_URL:", cutout_url)
