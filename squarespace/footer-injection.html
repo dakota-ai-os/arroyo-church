@@ -285,6 +285,16 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .rv-more{text-align:center;margin-top:clamp(2rem,4vw,2.8rem)}
 .rv-more a{color:#e3bd6a;font-weight:700;text-decoration:none;font-size:.95rem;border-bottom:1px solid rgba(227,189,106,.4);padding-bottom:2px;transition:color .3s}
 .rv-more a:hover{color:#f0d494}
+/* EVENTS (generic /events landing — QR from invite cards) */
+#ac-events{background:#f6f1e6;color:#16242b;padding:clamp(4rem,9vh,7rem) 0}
+#ac-events .eyebrow{color:#1f6b7c;justify-content:center}
+#ac-events .ev-head{text-align:center;max-width:60ch;margin:0 auto clamp(2.2rem,5vw,3.2rem)}
+#ac-events .h2{color:#16242b}
+#ac-events .h2 em{color:#2e8fa3}
+#ac-events .lead{color:rgba(22,36,43,.72);margin:1.1rem auto 0;max-width:54ch}
+#ac-events .ev-body{display:grid;gap:1.6rem;max-width:960px;margin:0 auto}
+@media(min-width:880px){#ac-events .ev-body{grid-template-columns:1.15fr .85fr;align-items:start}}
+#ac-events .ev-meta{display:flex;flex-direction:column;gap:1.2rem;padding-top:.3rem}
 /* TEAM */
 #ac-team{background:#faf7f0;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
 #ac-team .eyebrow{color:#1f6b7c}
@@ -1374,9 +1384,27 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     sec.innerHTML='<div class="wrap"><div class="gp-head"><p class="eyebrow">Generosity</p><h2>Ways to <em>give</em>.</h2><p class="gp-lead">We give because He gave. Your generosity fuels everything God is doing through Arroyo &mdash; here in Livermore and beyond. Thank you for giving cheerfully.</p></div><div class="gp-grid">'+primary+secondary+'</div><p class="gp-monthly"><strong>Make it monthly.</strong> Recurring gifts give us a steady foundation to plan, serve, and reach more people all year long.</p></div>';
     host.insertBefore(sec, host.firstChild);
   }
+  /* ---- generic /events landing page (QR from invite cards → Plan-a-Visit form) ---- */
+  function buildEventsPage(){
+    if(!pageIs('/events')) return;
+    if(document.getElementById('ac-events')) return;
+    var host=document.querySelector('#sections')||document.querySelector('main')||document.querySelector('#page');
+    if(!host) return;
+    var W3KEY='40d3a29f-5b98-4845-bff7-c66759077fb3';
+    var pin='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+    var clock='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>';
+    var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
+    var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p><a href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">945 Concannon Blvd, Livermore, CA 94550</a><br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Sundays</h3><p>10:00 AM worship &middot; about 65 minutes</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Questions?</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
+    var form='<div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll be ready to welcome you</h3><p class="vf-sub">Whether it&rsquo;s an upcoming event or your first Sunday, drop your info below and we&rsquo;ll be looking for you &mdash; takes about 20 seconds.</p></div><form novalidate><input type="hidden" name="access_key" value="'+W3KEY+'"><input type="hidden" name="from_name" value="Arroyo Church — Events / Plan a Visit"><input type="hidden" name="subject" value="New RSVP from the Events page"><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Which event, how many coming, or anything we should know?</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Count me in</button></div></form></div>';
+    var sec=document.createElement('section'); sec.className='ac-sec ac-events'; sec.id='ac-events';
+    sec.innerHTML='<div class="wrap"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">We&rsquo;d love to <em>have you.</em></h2><p class="lead ac-rev">Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>';
+    host.appendChild(sec);
+    wireVisitForm(sec);
+  }
   function buildPageCTA(){
     var b=document.body;
     if(!b.classList.contains('collection-type-page') || b.classList.contains('homepage')) return;
+    if(pageIs('/events')) return;
     if(document.querySelector('.ac-page-cta')) return;
     var host=document.querySelector('#sections')||document.querySelector('main')||document.querySelector('#page');
     if(!host) return;
@@ -1403,9 +1431,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildGivePage(); buildPageCTA(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildGivePage(); buildEventsPage(); buildPageCTA(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   setTimeout(buildPageCTA,600); setTimeout(buildPageCTA,1800);
+  setTimeout(buildEventsPage,600); setTimeout(buildEventsPage,1800);
   setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800);
   setTimeout(buildGivePage,600); setTimeout(buildGivePage,1800);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
