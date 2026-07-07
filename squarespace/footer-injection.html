@@ -1400,6 +1400,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     sec.innerHTML='<div class="wrap"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">We&rsquo;d love to <em>have you.</em></h2><p class="lead ac-rev">Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>';
     host.appendChild(sec);
     wireVisitForm(sec);
+    /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live; desktop + mobile header heights differ) */
+    function evTop(){ var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
+    evTop(); addEventListener('resize',evTop); setTimeout(evTop,400); setTimeout(evTop,1200);
   }
   function buildPageCTA(){
     var b=document.body;
