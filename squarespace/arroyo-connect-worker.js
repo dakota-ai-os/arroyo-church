@@ -13,6 +13,7 @@
  *     nextSteps: ["<option id>", ...],     // multi-select "What's your next step?"
  *     group: "<option id>",                // only when "join a group" is selected
  *     team:  ["<option id>", ...],         // only when "start serving" is selected (forward-compat; see TEAM_OPTIONS)
+ *     intents: ["new","class",...],        // intent TOKENS for the free-text mirror (see INTENT_LABELS)
  *     message: "...",                       // free text / prayer request
  *     website, turnstileToken }             // honeypot + Turnstile
  *   Legacy: the home form may send {group} with no nextSteps — handled below.
@@ -23,11 +24,19 @@
  *   TURNSTILE_SECRET  (optional) Cloudflare Turnstile secret key. If set, the
  *                     form's Turnstile token is verified. Omit to skip for now.
  *
- * ── Confirmed field map for form 1206123 ──
+ * ── Confirmed field map for form 1206123 "Next Steps At Arroyo" ──
+ *   (Re-verified 2026-07-22 by reading the LIVE public form at
+ *    https://arroyo-church-434989.churchcenter.com/people/forms/1206123 — every option id
+ *    below is rendered by PC itself as input#checkbox_<option id>.)
  *   Phone (text)             9974695 -> value = phone string
- *   "What's your next step?"  9567926 -> value = option id (ONE value per selected option)
- *        10625856 placed faith · 10558271 Connect Class · 10558272 join a group
- *        10648022 baptized · 10558273 start serving
+ *   "What's your next step?"  9567926 -> CHECKBOXES. Emit one entry per selected option,
+ *                                        value = the option id as a SCALAR STRING. Never an array.
+ *        10625856 "I placed my faith in Jesus today"
+ *        10558271 "I want to attend the next Connect Class"
+ *        10558272 "I want to join a Connect Group"
+ *        10648022 "I want to get baptized"
+ *        10558273 "I want to start serving"
+ *        10558274 "I want to talk to a pastor"   (exists in PC; deliberately unused here)
  *   "Join a Connect Group"   9567985 -> value = option id (only with next-step "join a group")
  *        10558346 Couples Mon 7p · 10558347 Men Tue 6:30p · 10558348 Women Wed 6p
  *        10558349 Moms · 10558350 RecConnect · 10558351 Young Adults Thu 7p · 10558352 Students
@@ -50,10 +59,28 @@ const F_PHONE = "9974695", F_NEXT = "9567926", F_GROUP = "9567985", F_TEAM = "95
 const NEXT_STEP_JOIN = "10558272";  // "I want to join a Connect Group"
 const NEXT_STEP_SERVE = "10558273"; // "I want to start serving"
 // Whitelists — any option id not listed here is silently ignored (defends against tampering).
+// Verified 2026-07-22 against the live public form (arroyo-church-434989.churchcenter.com/people/forms/1206123).
+// 10558274 ("I want to talk to a pastor") exists in PC but is intentionally NOT offered by the
+// connect tag — prayer stays a free-text message by design.
 const VALID_NEXT_STEPS = new Set(["10625856","10558271","10558272","10558273","10648022"]);
 const GROUP_OPTIONS = new Set(["10558346","10558347","10558348","10558349","10558350","10558351","10558352"]);
-// Placeholder — confirm these against the live PC "Which team" field before the front end sends team[].
+// CONFIRMED 2026-07-22 against the live form (these were previously an unverified placeholder).
 const TEAM_OPTIONS = new Set(["10558402","10558403","10558404","10558405","10558406"]);
+
+// Labels for the free-text mirror (see messageOut below). Keyed by an intent TOKEN, not by
+// option id, because (a) two different buttons legitimately map to the same PC option
+// ("I'm new here" and "Attend Connect Class" both -> 10558271) and we still want to know
+// which was tapped, and (b) some intents ("prayer") have no PC option at all.
+// Whitelisted server-side so a tampered client can't inject arbitrary text into PC.
+const INTENT_LABELS = {
+  decision: "Made a decision for Jesus today",
+  new:      "First time here",
+  class:    "Wants to attend the Connect Class",
+  group:    "Wants to join a Connect Group",
+  serve:    "Wants to start serving",
+  baptism:  "Wants to get baptized",
+  prayer:   "Needs prayer",
+};
 
 function cors(origin) {
   const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://www.arroyochurch.com";
@@ -111,18 +138,36 @@ export default {
     if (!prayerOnly && !email) return json({ success: false, error: "missing" }, 422, origin);
     if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ success: false, error: "email" }, 422, origin);
 
+    // ── Free-text mirror ────────────────────────────────────────────────────────────────
+    // The Message field (9630046) is a plain string and is empirically confirmed to land, so
+    // restate the selections into it. Two reasons: (1) if PC ever silently drops the checkbox
+    // answers again, the church still SEES what the person asked for instead of it being
+    // invisible for a month; (2) it's the only channel for intents with no PC option.
+    const intents = Array.isArray(b.intents)
+      ? [...new Set(b.intents.map(String).filter((i) => Object.prototype.hasOwnProperty.call(INTENT_LABELS, i)))]
+      : [];
+    const labels = intents.map((i) => INTENT_LABELS[i]);
+    const messageOut = labels.length
+      ? "Next steps: " + labels.join(" · ") + (message ? "\n\n" + message : "")
+      : message;
+
     const values = [{ form_field_id: F_PHONE, value: phone }];
-    // Multi-select checkbox field: send all selected option ids as ONE entry with an array value
-    // (PC rejects repeated form_field_id entries for the same checkbox field).
-    if (steps.length) values.push({ form_field_id: F_NEXT, value: steps });
+    // Multi-select checkbox: emit ONE FormSubmissionValue per selected option, each with a
+    // SCALAR STRING value = the option id. NEVER send an array here.
+    // History: a prior revision sent the whole array as a single entry ({"value":["10648022"]}).
+    // PC accepted it (HTTP 201) and stored every other scalar value in the same payload — so
+    // people and messages kept arriving — but the array never resolved to a FormFieldOption and
+    // "What brought you in" came back blank. For a SINGLE selection the shape below is
+    // byte-identical to the payload confirmed working end-to-end in the original build.
+    steps.forEach((id) => values.push({ form_field_id: F_NEXT, value: id }));
     if (steps.includes(NEXT_STEP_JOIN) && b.group && GROUP_OPTIONS.has(String(b.group))) {
       values.push({ form_field_id: F_GROUP, value: String(b.group) });
     }
     if (steps.includes(NEXT_STEP_SERVE) && Array.isArray(b.team)) {
       const teams = b.team.map(String).filter((t) => TEAM_OPTIONS.has(t));
-      if (teams.length) values.push({ form_field_id: F_TEAM, value: teams });
+      teams.forEach((t) => values.push({ form_field_id: F_TEAM, value: t })); // same rule: never an array
     }
-    if (message) values.push({ form_field_id: F_MESSAGE, value: message.slice(0, 2000) });
+    if (messageOut) values.push({ form_field_id: F_MESSAGE, value: messageOut.slice(0, 2000) });
 
     const person_attributes = {
       first_name: first,
