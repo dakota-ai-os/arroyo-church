@@ -1294,7 +1294,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     function opt(step,intent,ic,label,sub,cls){ return '<button type="button" class="ct-opt'+(cls?' '+cls:'')+'" data-step="'+step+'" data-intent="'+intent+'" aria-pressed="false"><span class="ct-opt-ic">'+ic+'</span><span class="ct-opt-txt">'+label+(sub?'<small>'+sub+'</small>':'')+'</span><span class="ct-check">&#10003;</span></button>'; }
     var s1='<div class="ct-screen ct-s1 ct-anim-in" id="ac-ct-s1">'
       +'<div class="ct-band"><svg class="ct-river" viewBox="0 0 600 44" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ctRiverGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c89a3e"/><stop offset=".5" stop-color="#5fc2d4"/><stop offset="1" stop-color="#bfe7ee"/></linearGradient></defs><path class="ct-river-path" d="M0,30 C70,12 140,38 210,24 C285,9 350,38 430,22 C510,8 560,30 600,20" stroke="url(#ctRiverGrad)"/></svg>'
-        +'<p class="ct-eyebrow">You found us</p><h1 class="ct-h1">We&rsquo;re so glad you&rsquo;re <em>here.</em></h1><p class="ct-sub">Thanks for tapping in &mdash; how can we help you today?</p></div>'
+        +'<p class="ct-eyebrow">You found us</p><h1 class="ct-h1">Next <em>Steps</em></h1><p class="ct-sub">Thanks for tapping in &mdash; how can we help you today?</p></div>'
       +'<div class="ct-menu">'
         +'<p class="ct-menu-h">What brought you in? <strong>Select all that apply.</strong></p>'
         +opt('10625856','decision',icSpark,'I made a decision for Jesus today','','ct-opt-decision')
@@ -1342,12 +1342,12 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var s1=sec.querySelector('#ac-ct-s1'), s2=sec.querySelector('#ac-ct-s2');
     var cont=sec.querySelector('#ac-ct-continue'), nudge=sec.querySelector('.ct-nudge');
     var opts=[].slice.call(sec.querySelectorAll('.ct-opt'));
-    var form=s2.querySelector('form'), tsId=null, tsTries=0;
+    var form=s2.querySelector('form'), tsId=null, tsTries=0, pendingSubmit=false, tsWaitTimer=null;
     opts.forEach(function(b){ b.addEventListener('click',function(){ var on=b.getAttribute('aria-pressed')==='true'; b.setAttribute('aria-pressed',on?'false':'true'); if(nudge) nudge.textContent=''; }); });
     function selectedOpts(){ return opts.filter(function(b){return b.getAttribute('aria-pressed')==='true';}); }
     function selectedSteps(){ return selectedOpts().map(function(b){return b.getAttribute('data-step');}); }
     function selectedIntents(){ return selectedOpts().map(function(b){return b.getAttribute('data-intent');}).filter(Boolean); }
-    function renderTs(){ if(tsId!==null||tsTries++>25) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-ct-turnstile',{sitekey:KEY}); }catch(e){} } else { setTimeout(renderTs,300); } } /* cap polling at ~7.5s so a failed api.js doesn't loop forever */
+    function renderTs(){ if(tsId!==null||tsTries++>25) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-ct-turnstile',{sitekey:KEY,callback:function(tok){ if(pendingSubmit){ pendingSubmit=false; doSubmit(tok); } }}); }catch(e){} } else { setTimeout(renderTs,300); } } /* cap polling at ~7.5s so a failed api.js doesn't loop forever; the callback auto-submits if the user tapped Send before the invisible Managed-mode challenge finished */
     function setupS2(steps){
       var hasDecision=steps.indexOf('10625856')>-1, hasJoin=steps.indexOf('10558272')>-1, hasPrayer=steps.indexOf('prayer')>-1;
       var onlyPrayer=steps.length===1 && hasPrayer;
@@ -1361,7 +1361,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       groupf.hidden=!hasJoin;
       if(onlyPrayer){ msgArea.required=true; msgLab.textContent='What can we pray for? *'; }
       else { msgArea.required=false; msgLab.textContent=hasPrayer?'What can we pray for? (optional)':'Anything we should know? (optional)'; }
-      submit.innerHTML=hasDecision?'Tell my pastor &rarr;':'Send my next step &rarr;';
+      submit.innerHTML=hasDecision?'Send &rarr;':'Send &rarr;';
     }
     function toS2(){
       var steps=selectedSteps();
@@ -1374,11 +1374,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     }
     cont.addEventListener('click',toS2);
     var back=s2.querySelector('#ac-ct-back'); if(back) back.addEventListener('click',function(){ s2.hidden=true; s1.hidden=false; });
-    form.addEventListener('submit',function(e){ e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err) err.textContent='';
-      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(!token){ if(err) err.textContent='Almost there — finishing a quick security check. Tap Send again in a moment, or text us at (925) 694-0426.'; renderTs(); return; }
+    function doSubmit(token){
+      clearTimeout(tsWaitTimer);
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
       var steps=selectedSteps();
       /* de-dupe: "I'm new here" and "Attend Connect Class" deliberately share option 10558271 */
       var nextSteps=steps.filter(function(s,i){return /^[0-9]+$/.test(s)&&steps.indexOf(s)===i;});
@@ -1386,11 +1384,25 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var fd=new FormData(form);
       var data={first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:hasJoin?(fd.get('group')||''):'',nextSteps:nextSteps,intents:selectedIntents(),team:[],website:fd.get('website')||'',turnstileToken:token};
       var hasDecision=steps.indexOf('10625856')>-1;
-      var btn=form.querySelector('#ac-ct-submit'), orig=btn.innerHTML; btn.disabled=true; btn.textContent='Sending…';
+      var btn=form.querySelector('#ac-ct-submit'), orig=btn.getAttribute('data-orig')||btn.innerHTML; btn.disabled=true; btn.textContent='Sending…';
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){ if(j&&j.success){ showDone(data.first, hasDecision); } else { throw new Error('failed'); } })
-        .catch(function(){ btn.disabled=false; btn.innerHTML=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err) err.textContent="Sorry — something went wrong. Please text or call us at (925) 694-0426 and we'll take care of it."; });
+        .catch(function(){ btn.disabled=false; btn.innerHTML=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err){ err.style.color=''; err.textContent="Sorry — something went wrong. Please text or call us at (925) 694-0426 and we'll take care of it."; } });
+    }
+    form.addEventListener('submit',function(e){ e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
+      if(token){ doSubmit(token); return; }
+      /* Token not ready: the Managed-mode challenge runs invisibly and can take several seconds
+         (longer on a phone). Instead of a scary error + "tap again", show a calm verifying state
+         and let the Turnstile callback auto-submit the instant the token lands. */
+      pendingSubmit=true; renderTs();
+      var btn=form.querySelector('#ac-ct-submit'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.innerHTML); btn.disabled=true; btn.textContent='Verifying…';
+      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
+      clearTimeout(tsWaitTimer);
+      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.innerHTML=btn.getAttribute('data-orig')||'Send &rarr;'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please text or call us at (925) 694-0426 and we’ll take care of it."; } }, 20000);
     });
     function showDone(first, decision){
       var card=s2.querySelector('.ct-form');
