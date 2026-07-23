@@ -1032,18 +1032,16 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var KEY='0x4AAAAAADo6c47j8dehqH9-', WORKER='https://arroyo-connect.dakota-fac.workers.dev';
     var toggle=sec.querySelector('#ac-jg-toggle'), wrap=sec.querySelector('#ac-jg-wrap'), card=sec.querySelector('#ac-jg-form');
     if(!toggle||!wrap||!card) return;
-    var form=card.querySelector('form'), tsId=null;
-    function renderTs(){ if(tsId!==null) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-jg-turnstile',{sitekey:KEY}); }catch(e){} } else { setTimeout(renderTs,300); } }
+    var form=card.querySelector('form'), tsId=null, pendingSubmit=false, tsWaitTimer=null;
+    function renderTs(){ if(tsId!==null) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-jg-turnstile',{sitekey:KEY,callback:function(tok){ if(pendingSubmit){ pendingSubmit=false; doSubmit(tok); } }}); }catch(e){} } else { setTimeout(renderTs,300); } }
     function openForm(){ wrap.classList.add('open'); toggle.setAttribute('aria-expanded','true'); renderTs(); setTimeout(function(){ card.scrollIntoView({block:'center'}); var f=card.querySelector('input[name=first]'); if(f) f.focus(); },220); }
     function closeForm(){ wrap.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
     toggle.addEventListener('click',function(){ wrap.classList.contains('open')?closeForm():openForm(); });
     var cancel=card.querySelector('#ac-jg-cancel'); if(cancel) cancel.addEventListener('click',closeForm);
-    form.addEventListener('submit',function(e){ e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err) err.textContent='';
-      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(!token){ if(err) err.textContent='Please complete the verification just above the button.'; return; }
-      var btn=form.querySelector('button[type=submit]'), orig=btn.textContent; btn.disabled=true; btn.textContent='Sending…';
+    function doSubmit(token){
+      clearTimeout(tsWaitTimer);
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      var btn=form.querySelector('button[type=submit]'), orig=btn.getAttribute('data-orig')||btn.textContent; btn.disabled=true; btn.textContent='Sending…';
       var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; /* explicit next-step contract; worker also has a {group}-only fallback */
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
@@ -1051,7 +1049,19 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
             card.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">Thanks, <span class="vf-name"></span>!</h3><p>We got your request &mdash; one of our group leaders will reach out soon to help you get connected.</p></div>';
             card.querySelector('.vf-name').textContent=name||'friend'; var h=card.querySelector('h3'); if(h) h.focus();
           } else { throw new Error((j&&j.message)||'failed'); } })
-        .catch(function(){ btn.disabled=false; btn.textContent=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err) err.textContent="Sorry — something went wrong. Please email josh@arroyochurch.com or call (925) 694-0426 and we'll get you connected."; });
+        .catch(function(){ btn.disabled=false; btn.textContent=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err){ err.style.color=''; err.textContent="Sorry — something went wrong. Please email josh@arroyochurch.com or call (925) 694-0426 and we'll get you connected."; } });
+    }
+    form.addEventListener('submit',function(e){ e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
+      if(token){ doSubmit(token); return; }
+      /* token not ready — Managed-mode Turnstile runs invisibly and can lag; auto-submit on its callback */
+      pendingSubmit=true; renderTs();
+      var btn=form.querySelector('button[type=submit]'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.textContent); btn.disabled=true; btn.textContent='Verifying…';
+      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
+      clearTimeout(tsWaitTimer);
+      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.textContent=btn.getAttribute('data-orig')||'Request to join'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please email josh@arroyochurch.com or call (925) 694-0426 and we’ll get you connected."; } }, 20000);
     });
   }
   /* ---- CONNECT CLASS (home section, before Connect Groups) -> Worker -> Planning Center (next-step 10558271) ---- */
@@ -1085,18 +1095,16 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var KEY='0x4AAAAAADo6c47j8dehqH9-', WORKER='https://arroyo-connect.dakota-fac.workers.dev';
     var toggle=sec.querySelector('#ac-cc-toggle'), wrap=sec.querySelector('#ac-cc-wrap'), card=sec.querySelector('#ac-cc-form');
     if(!toggle||!wrap||!card) return;
-    var form=card.querySelector('form'), tsId=null, tsTries=0;
-    function renderTs(){ if(tsId!==null||tsTries++>25) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-cc-turnstile',{sitekey:KEY}); }catch(e){} } else { setTimeout(renderTs,300); } }
+    var form=card.querySelector('form'), tsId=null, tsTries=0, pendingSubmit=false, tsWaitTimer=null;
+    function renderTs(){ if(tsId!==null||tsTries++>25) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-cc-turnstile',{sitekey:KEY,callback:function(tok){ if(pendingSubmit){ pendingSubmit=false; doSubmit(tok); } }}); }catch(e){} } else { setTimeout(renderTs,300); } }
     function openForm(){ wrap.classList.add('open'); toggle.setAttribute('aria-expanded','true'); renderTs(); setTimeout(function(){ card.scrollIntoView({block:'center'}); var f=card.querySelector('input[name=first]'); if(f) f.focus(); },220); }
     function closeForm(){ wrap.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
     toggle.addEventListener('click',function(){ wrap.classList.contains('open')?closeForm():openForm(); });
     var cancel=card.querySelector('#ac-cc-cancel'); if(cancel) cancel.addEventListener('click',closeForm);
-    form.addEventListener('submit',function(e){ e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err) err.textContent='';
-      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(!token){ if(err) err.textContent='Please complete the verification just above the button.'; renderTs(); return; }
-      var btn=form.querySelector('button[type=submit]'), orig=btn.textContent; btn.disabled=true; btn.textContent='Sending…';
+    function doSubmit(token){
+      clearTimeout(tsWaitTimer);
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      var btn=form.querySelector('button[type=submit]'), orig=btn.getAttribute('data-orig')||btn.textContent; btn.disabled=true; btn.textContent='Sending…';
       var fd=new FormData(form);
       var steps=fd.getAll('nextSteps').map(String);
       if(steps.indexOf('10558271')<0) steps.unshift('10558271'); /* signing up always = Connect Class next-step */
@@ -1107,7 +1115,19 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
             card.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">You&rsquo;re in, <span class="vf-name"></span>!</h3><p>Thanks for signing up for the Connect Class. Someone from our team will reach out soon with the next date and all the details.</p></div>';
             card.querySelector('.vf-name').textContent=name||'friend'; var h=card.querySelector('h3'); if(h) h.focus();
           } else { throw new Error((j&&j.message)||'failed'); } })
-        .catch(function(){ btn.disabled=false; btn.textContent=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err) err.textContent="Sorry — something went wrong. Please email josh@arroyochurch.com or call (925) 694-0426 and we'll get you signed up."; });
+        .catch(function(){ btn.disabled=false; btn.textContent=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err){ err.style.color=''; err.textContent="Sorry — something went wrong. Please email josh@arroyochurch.com or call (925) 694-0426 and we'll get you signed up."; } });
+    }
+    form.addEventListener('submit',function(e){ e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
+      if(token){ doSubmit(token); return; }
+      /* token not ready — Managed-mode Turnstile runs invisibly and can lag; auto-submit on its callback */
+      pendingSubmit=true; renderTs();
+      var btn=form.querySelector('button[type=submit]'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.textContent); btn.disabled=true; btn.textContent='Verifying…';
+      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
+      clearTimeout(tsWaitTimer);
+      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.textContent=btn.getAttribute('data-orig')||'Save my spot'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please email josh@arroyochurch.com or call (925) 694-0426 and we’ll get you signed up."; } }, 20000);
     });
   }
   /* ---- GIVE (home section) ---- */
