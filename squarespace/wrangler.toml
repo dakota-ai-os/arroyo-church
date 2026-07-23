@@ -1,0 +1,17 @@
+# Wrangler config for the arroyo-connect Cloudflare Worker.
+# Deploy with:  cd squarespace && npx wrangler deploy
+#
+# account_id is PINNED to the account that actually owns the worker
+# (subdomain dakota-fac.workers.dev). If wrangler is authenticated to any
+# OTHER account, the deploy errors out cleanly instead of creating a
+# duplicate worker in the wrong place.
+#
+# Secrets (PC_APP_ID, PC_SECRET, TURNSTILE_SECRET) are NOT listed here on
+# purpose — they already live encrypted on the deployed worker and persist
+# across deploys. `wrangler deploy` never touches them.
+
+name = "arroyo-connect"
+main = "arroyo-connect-worker.js"
+compatibility_date = "2026-06-22"
+account_id = "fac1b9790e21bc353de110cdbd844f1c"
+workers_dev = true
