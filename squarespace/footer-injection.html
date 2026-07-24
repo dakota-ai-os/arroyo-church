@@ -1053,15 +1053,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     }
     form.addEventListener('submit',function(e){ e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
-      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(token){ doSubmit(token); return; }
-      /* token not ready — Managed-mode Turnstile runs invisibly and can lag; auto-submit on its callback */
-      pendingSubmit=true; renderTs();
-      var btn=form.querySelector('button[type=submit]'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.textContent); btn.disabled=true; btn.textContent='Verifying…';
-      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
-      clearTimeout(tsWaitTimer);
-      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.textContent=btn.getAttribute('data-orig')||'Request to join'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please email josh@arroyochurch.com or call (925) 694-0426 and we’ll get you connected."; } }, 20000);
+      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):''; /* best-effort; never blocks (see connect-tag note) */
+      doSubmit(token);
     });
   }
   /* ---- CONNECT CLASS (home section, before Connect Groups) -> Worker -> Planning Center (next-step 10558271) ---- */
@@ -1119,15 +1112,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     }
     form.addEventListener('submit',function(e){ e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
-      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(token){ doSubmit(token); return; }
-      /* token not ready — Managed-mode Turnstile runs invisibly and can lag; auto-submit on its callback */
-      pendingSubmit=true; renderTs();
-      var btn=form.querySelector('button[type=submit]'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.textContent); btn.disabled=true; btn.textContent='Verifying…';
-      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
-      clearTimeout(tsWaitTimer);
-      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.textContent=btn.getAttribute('data-orig')||'Save my spot'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please email josh@arroyochurch.com or call (925) 694-0426 and we’ll get you signed up."; } }, 20000);
+      var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):''; /* best-effort; never blocks (see connect-tag note) */
+      doSubmit(token);
     });
   }
   /* ---- GIVE (home section) ---- */
@@ -1319,8 +1305,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         +'<p class="ct-menu-h">What brought you in? <strong>Select all that apply.</strong></p>'
         +opt('10625856','decision',icSpark,'I made a decision for Jesus today','','ct-opt-decision')
         +'<div class="ct-grid">'
-          +opt('10558271','new',icNew,'I&rsquo;m new here','')
-          +opt('prayer','prayer',icPray,'I need prayer','')
+          /* "I'm new here" + "I need prayer" temporarily removed 2026-07-23 to simplify for Sunday; may restore later */
           +opt('10558271','class',icClass,'Attend Connect Class','')
           +opt('10558272','group',icGroup,'Join a group','')
           +opt('10558273','serve',icServe,'Start serving','')
@@ -1412,17 +1397,12 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     }
     form.addEventListener('submit',function(e){ e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
-      var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
+      /* Turnstile is best-effort, NEVER blocking. Its invisible challenge silently fails on some
+         phones, so attach whatever token we have (may be empty) and submit anyway. The Worker
+         verifies a token when present and otherwise falls back to the honeypot — a real visitor is
+         never stuck behind a security check that won't finish on their device. */
       var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):'';
-      if(token){ doSubmit(token); return; }
-      /* Token not ready: the Managed-mode challenge runs invisibly and can take several seconds
-         (longer on a phone). Instead of a scary error + "tap again", show a calm verifying state
-         and let the Turnstile callback auto-submit the instant the token lands. */
-      pendingSubmit=true; renderTs();
-      var btn=form.querySelector('#ac-ct-submit'); if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig',btn.innerHTML); btn.disabled=true; btn.textContent='Verifying…';
-      if(err){ err.style.color='#1f6b7c'; err.textContent='Just making sure you’re human… one moment.'; }
-      clearTimeout(tsWaitTimer);
-      tsWaitTimer=setTimeout(function(){ if(!pendingSubmit) return; pendingSubmit=false; btn.disabled=false; btn.innerHTML=btn.getAttribute('data-orig')||'Send &rarr;'; if(err){ err.style.color=''; err.textContent="That security check didn’t finish — please text or call us at (925) 694-0426 and we’ll take care of it."; } }, 20000);
+      doSubmit(token);
     });
     function showDone(first, decision){
       var card=s2.querySelector('.ct-form');

@@ -112,8 +112,12 @@ export default {
     // Honeypot: real users never fill the hidden "website" field. Pretend success, submit nothing.
     if (b.website) return json({ success: true }, 200, origin);
 
-    // Turnstile (only enforced if a secret is configured)
-    if (env.TURNSTILE_SECRET) {
+    // Turnstile — best-effort, NOT a hard gate. The invisible Managed-mode challenge can silently
+    // fail to produce a token on some mobile browsers (verified 2026-07-23: a real iPhone never got
+    // a token in 20s), and blocking a genuine visitor is worse than the occasional naive-bot
+    // submission the honeypot doesn't catch. So: if a token IS present, verify it and reject when
+    // it's invalid (that's bot-shaped); if NO token is present, fall through and rely on the honeypot.
+    if (env.TURNSTILE_SECRET && b.turnstileToken) {
       const ok = await verifyTurnstile(env.TURNSTILE_SECRET, b.turnstileToken, request.headers.get("CF-Connecting-IP"));
       if (!ok) return json({ success: false, error: "captcha" }, 403, origin);
     }
