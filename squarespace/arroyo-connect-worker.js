@@ -92,11 +92,12 @@ const INTENT_LABELS = {
 const FORMS = {
   // "Next Steps At Arroyo" — the rich intake form (next-step checkboxes, group, team, message).
   nextsteps: { id: "1206123", phone: F_PHONE, message: F_MESSAGE, requirePhone: true },
-  // "Plan Your Visit" — today its only custom field is the free-text question/prayer box.
-  // If a Phone field is added in the PC UI, put its field id in `phone` and it starts showing in
-  // the submission; until then the number still lands on the person's PROFILE and is mirrored
-  // into the message text, so it is never lost.
-  visit:     { id: "1216871", phone: null,    message: "9657927", requirePhone: false },
+  // "Plan Your Visit". Phone 10213186 is a plain single-line TEXT field, deliberately NOT PC's
+  // structured "phone_number" profile field: PC forbids assigning number/location on a
+  // FormSubmissionValue, so a structured phone field can never be populated by the API and would
+  // always render blank (this is the same reason 1206123 uses the text field 9974695). Swapped
+  // 2026-07-29 — do not "upgrade" it back to a phone_number field.
+  visit:     { id: "1216871", phone: "10213186", message: "9657927", requirePhone: false },
 };
 
 // Which on-site form a submission came from. The client sends a `source` TOKEN only; the human
