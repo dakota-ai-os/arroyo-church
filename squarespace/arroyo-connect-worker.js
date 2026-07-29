@@ -47,8 +47,7 @@
  *   Name/email/phone also written to the person profile via person_attributes.
  */
 
-const FORM_ID = "1206123";
-const PC_URL = `https://api.planningcenteronline.com/people/v2/forms/${FORM_ID}/form_submissions`;
+const PC_BASE = "https://api.planningcenteronline.com/people/v2/forms";
 
 const ALLOWED_ORIGINS = new Set([
   "https://www.arroyochurch.com",
@@ -60,9 +59,10 @@ const NEXT_STEP_JOIN = "10558272";  // "I want to join a Connect Group"
 const NEXT_STEP_SERVE = "10558273"; // "I want to start serving"
 // Whitelists — any option id not listed here is silently ignored (defends against tampering).
 // Verified 2026-07-22 against the live public form (arroyo-church-434989.churchcenter.com/people/forms/1206123).
-// 10558274 ("I want to talk to a pastor") exists in PC but is intentionally NOT offered by the
-// connect tag — prayer stays a free-text message by design.
-const VALID_NEXT_STEPS = new Set(["10625856","10558271","10558272","10558273","10648022"]);
+// 10558274 ("I want to talk to a pastor") is NOT offered by the connect tag (prayer stays a
+// free-text message there by design) but IS used by the /connect Questions-&-Prayer form, which
+// replaced a native Squarespace form that only ever emailed.
+const VALID_NEXT_STEPS = new Set(["10625856","10558271","10558272","10558273","10648022","10558274"]);
 const GROUP_OPTIONS = new Set(["10558346","10558347","10558348","10558349","10558350","10558351","10558352"]);
 // CONFIRMED 2026-07-22 against the live form (these were previously an unverified placeholder).
 const TEAM_OPTIONS = new Set(["10558402","10558403","10558404","10558405","10558406"]);
@@ -80,6 +80,38 @@ const INTENT_LABELS = {
   serve:    "Wants to start serving",
   baptism:  "Wants to get baptized",
   prayer:   "Needs prayer",
+  pastor:   "Wants to talk to a pastor",
+  question: "Has a question",
+};
+
+// ── Destination Planning Center forms ────────────────────────────────────────────────────
+// Verified 2026-07-29 by listing the account's forms through the People API. The account has
+// four forms; these are the two this site writes to. (1219524 "Arroyo Young Adults" and 1229432
+// "Connect Class" are not written to — the latter has NO custom fields, so routing the site's
+// Connect Class signup there would silently drop the extra interests + message.)
+const FORMS = {
+  // "Next Steps At Arroyo" — the rich intake form (next-step checkboxes, group, team, message).
+  nextsteps: { id: "1206123", phone: F_PHONE, message: F_MESSAGE, requirePhone: true },
+  // "Plan Your Visit" — today its only custom field is the free-text question/prayer box.
+  // If a Phone field is added in the PC UI, put its field id in `phone` and it starts showing in
+  // the submission; until then the number still lands on the person's PROFILE and is mirrored
+  // into the message text, so it is never lost.
+  visit:     { id: "1216871", phone: null,    message: "9657927", requirePhone: false },
+};
+
+// Which on-site form a submission came from. The client sends a `source` TOKEN only; the human
+// label is resolved SERVER-side (never trust client-supplied text) and written into the PC
+// message, so the church can always tell which form was filled in. `form` picks the destination.
+const SOURCES = {
+  home_visit:    { form: "visit",     label: "Plan a Visit — home page" },
+  events_rsvp:   { form: "visit",     label: "Event RSVP — events page" },
+  visit_page:    { form: "visit",     label: "Plan Your Visit page" },
+  connect_tag:   { form: "nextsteps", label: "Connect Tag — chair tap" },
+  join_group:    { form: "nextsteps", label: "Join a Group — home page" },
+  connect_class: { form: "nextsteps", label: "Connect Class signup" },
+  next_steps:    { form: "nextsteps", label: "Next Steps page" },
+  connect_group: { form: "nextsteps", label: "Connect Group page" },
+  prayer:        { form: "nextsteps", label: "Questions / Prayer — connect page" },
 };
 
 function cors(origin) {
@@ -103,6 +135,7 @@ export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
+
     if (request.method !== "POST") return json({ success: false, error: "method" }, 405, origin);
     if (!ALLOWED_ORIGINS.has(origin)) return json({ success: false, error: "origin" }, 403, origin);
 
@@ -122,8 +155,22 @@ export default {
       if (!ok) return json({ success: false, error: "captcha" }, 403, origin);
     }
 
-    const first = (b.first || "").trim();
-    const last = (b.last || "").trim();
+    // Resolve WHICH on-site form this is and therefore which PC form it writes to.
+    // Unknown/absent source => the historical default (Next Steps), so an older cached page keeps
+    // working during the window where the site and the worker aren't deployed atomically.
+    const src = Object.prototype.hasOwnProperty.call(SOURCES, String(b.source || ""))
+      ? SOURCES[String(b.source)]
+      : null;
+    const target = FORMS[src ? src.form : "nextsteps"];
+
+    let first = (b.first || "").trim();
+    let last = (b.last || "").trim();
+    // Some forms collect a single "Your name" box rather than first/last — split it.
+    if (!first && b.name) {
+      const parts = String(b.name).trim().split(/\s+/);
+      first = parts.shift() || "";
+      last = last || parts.join(" ");
+    }
     const email = (b.email || "").trim();
     const phone = (b.phone || "").trim();
     const message = (b.message || "").toString().trim();
@@ -138,7 +185,10 @@ export default {
     // Email is required EXCEPT for a prayer-only capture (no next-steps, just a message) — don't
     // gate a vulnerable ask behind an email. first + last + phone are always required.
     const prayerOnly = steps.length === 0 && !!message;
-    if (!first || !last || !phone) return json({ success: false, error: "missing" }, 422, origin);
+    if (!first) return json({ success: false, error: "missing" }, 422, origin);
+    // Phone is only mandatory on the forms that actually ask for it as required (the Next Steps
+    // family). The Plan-a-Visit / Events forms mark phone optional, so don't reject those.
+    if (target.requirePhone && (!last || !phone)) return json({ success: false, error: "missing" }, 422, origin);
     if (!prayerOnly && !email) return json({ success: false, error: "missing" }, 422, origin);
     if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ success: false, error: "email" }, 422, origin);
 
@@ -151,11 +201,19 @@ export default {
       ? [...new Set(b.intents.map(String).filter((i) => Object.prototype.hasOwnProperty.call(INTENT_LABELS, i)))]
       : [];
     const labels = intents.map((i) => INTENT_LABELS[i]);
-    const messageOut = labels.length
-      ? "Next steps: " + labels.join(" · ") + (message ? "\n\n" + message : "")
-      : message;
+    const header = [];
+    // ALWAYS record which on-site form produced this submission — several site forms share one
+    // PC form, so without this the church can't tell a visit RSVP from a next-step request.
+    if (src) header.push("Submitted via: " + src.label);
+    if (labels.length) header.push("Next steps: " + labels.join(" · "));
+    // If the destination form has no Phone field, keep the number visible in the submission body
+    // (it is always written to the person's profile too).
+    if (!target.phone && phone) header.push("Phone: " + phone);
+    const head = header.join("\n");
+    const messageOut = head ? head + (message ? "\n\n" + message : "") : message;
 
-    const values = [{ form_field_id: F_PHONE, value: phone }];
+    const values = [];
+    if (target.phone && phone) values.push({ form_field_id: target.phone, value: phone });
     // Multi-select checkbox: emit ONE FormSubmissionValue per selected option, each with a
     // SCALAR STRING value = the option id. NEVER send an array here.
     // History: a prior revision sent the whole array as a single entry ({"value":["10648022"]}).
@@ -163,15 +221,20 @@ export default {
     // people and messages kept arriving — but the array never resolved to a FormFieldOption and
     // "What brought you in" came back blank. For a SINGLE selection the shape below is
     // byte-identical to the payload confirmed working end-to-end in the original build.
-    steps.forEach((id) => values.push({ form_field_id: F_NEXT, value: id }));
-    if (steps.includes(NEXT_STEP_JOIN) && b.group && GROUP_OPTIONS.has(String(b.group))) {
-      values.push({ form_field_id: F_GROUP, value: String(b.group) });
+    // The checkbox/group/team fields belong to "Next Steps At Arroyo" only. Sending another
+    // form's field ids would be silently discarded by PC (values referencing fields on a
+    // different form are dropped), so scope them to that destination.
+    if (target.id === FORMS.nextsteps.id) {
+      steps.forEach((id) => values.push({ form_field_id: F_NEXT, value: id }));
+      if (steps.includes(NEXT_STEP_JOIN) && b.group && GROUP_OPTIONS.has(String(b.group))) {
+        values.push({ form_field_id: F_GROUP, value: String(b.group) });
+      }
+      if (steps.includes(NEXT_STEP_SERVE) && Array.isArray(b.team)) {
+        const teams = b.team.map(String).filter((t) => TEAM_OPTIONS.has(t));
+        teams.forEach((t) => values.push({ form_field_id: F_TEAM, value: t })); // same rule: never an array
+      }
     }
-    if (steps.includes(NEXT_STEP_SERVE) && Array.isArray(b.team)) {
-      const teams = b.team.map(String).filter((t) => TEAM_OPTIONS.has(t));
-      teams.forEach((t) => values.push({ form_field_id: F_TEAM, value: t })); // same rule: never an array
-    }
-    if (messageOut) values.push({ form_field_id: F_MESSAGE, value: messageOut.slice(0, 2000) });
+    if (messageOut && target.message) values.push({ form_field_id: target.message, value: messageOut.slice(0, 2000) });
 
     const person_attributes = {
       first_name: first,
@@ -194,7 +257,7 @@ export default {
 
     let pcRes;
     try {
-      pcRes = await fetch(PC_URL, {
+      pcRes = await fetch(`${PC_BASE}/${target.id}/form_submissions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

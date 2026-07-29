@@ -1042,7 +1042,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       clearTimeout(tsWaitTimer);
       var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
       var btn=form.querySelector('button[type=submit]'), orig=btn.getAttribute('data-orig')||btn.textContent; btn.disabled=true; btn.textContent='Sending…';
-      var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; /* explicit next-step contract; worker also has a {group}-only fallback */
+      var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; data.source='join_group'; data.intents=['group']; /* explicit next-step contract; worker also has a {group}-only fallback */
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){ if(j&&j.success){ var name=(data.first||'').trim();
@@ -1101,7 +1101,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var fd=new FormData(form);
       var steps=fd.getAll('nextSteps').map(String);
       if(steps.indexOf('10558271')<0) steps.unshift('10558271'); /* signing up always = Connect Class next-step */
-      var data={first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),nextSteps:steps,team:[],website:fd.get('website')||'',turnstileToken:token};
+      var data={source:'connect_class',first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),nextSteps:steps,team:[],website:fd.get('website')||'',turnstileToken:token};
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){ if(j&&j.success){ var name=(data.first||'').trim();
@@ -1135,7 +1135,6 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(!HOME()) return;
     var anchor=document.getElementById('ac-give')||document.getElementById('ac-connect');
     if(!anchor || document.getElementById('ac-visit')) return;
-    var W3KEY='40d3a29f-5b98-4845-bff7-c66759077fb3'; /* public Web3Forms access key (safe in page source); form "Plan visit" */
     var faqs=[
       ['Do you have child care during the worship service?','Yes, we provide children&rsquo;s ministry for kids from nursery age to 5th grade. We prioritize creating a safe and fun environment for your kids to learn about Jesus!'],
       ['What is the address for the church?','945 Concannon Blvd, Livermore, CA 94550. The worship center is the round building.'],
@@ -1159,14 +1158,18 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var cHtml=dcaps.map(function(c,i){return '<div class="d-cap'+(i===6?' final':'')+'" data-c="'+i+'"><div class="big">'+c[0]+'</div><div class="small">'+c[1]+'</div>'+(i===6?'<button type="button" class="btn btn-gold" data-ac-scroll>Let Us Know You&rsquo;re Coming</button>':'')+'</div>';}).join('');
     var descent='<div class="ac-descent" id="ac-descent"><div class="descent-sticky">'+fHtml+'<div class="d-vignette"></div><div class="d-pin"></div>'+cHtml+'<div class="d-attrib">Imagery &copy; Esri &middot; Maxar &middot; Earthstar Geographics</div></div></div>';
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-visit';
-    sec.innerHTML='<div class="wrap visit-intro"><p class="eyebrow ac-rev">Plan your visit</p><h2 class="h2 ac-rev">This Sunday. <em>Save you a seat?</em></h2><p class="lead ac-rev">Join us for our 10:00 AM worship service this Sunday. Gatherings run about 65 minutes &mdash; come as you are, dress is casual, and your kids will love it here.</p></div>'+descent+'<div class="wrap"><div class="visit-meta">'+meta+'</div><div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll save you a seat</h3><p class="vf-sub">Tell us a little about your visit so we can welcome you well &mdash; takes about 20 seconds.</p></div><form novalidate><input type="hidden" name="access_key" value="'+W3KEY+'"><input type="hidden" name="from_name" value="Arroyo Church — Plan Your Visit"><input type="hidden" name="subject" value="New Plan Your Visit request"><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Anything we should know? (questions, prayer)</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Save my seat</button></div></form></div><div class="steps">'+steps+'</div><div class="faq"><h3 class="faq-h ac-rev">Frequently asked questions</h3>'+faqHtml+'</div></div>';
+    sec.innerHTML='<div class="wrap visit-intro"><p class="eyebrow ac-rev">Plan your visit</p><h2 class="h2 ac-rev">This Sunday. <em>Save you a seat?</em></h2><p class="lead ac-rev">Join us for our 10:00 AM worship service this Sunday. Gatherings run about 65 minutes &mdash; come as you are, dress is casual, and your kids will love it here.</p></div>'+descent+'<div class="wrap"><div class="visit-meta">'+meta+'</div><div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll save you a seat</h3><p class="vf-sub">Tell us a little about your visit so we can welcome you well &mdash; takes about 20 seconds.</p></div><form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Anything we should know? (questions, prayer)</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Save my seat</button></div></form></div><div class="steps">'+steps+'</div><div class="faq"><h3 class="faq-h ac-rev">Frequently asked questions</h3>'+faqHtml+'</div></div>';
     anchor.parentNode.insertBefore(sec, anchor.nextSibling);
     wireAccordion(sec, '.faq-item', '.f-body');
     initDescent();
-    wireVisitForm(sec);
+    wireVisitForm(sec,'home_visit');
   }
   /* ---- plan-your-visit on-site form: AJAX -> Web3Forms emails Josh, stays on the page ---- */
-  function wireVisitForm(sec){
+  /* Plan-a-Visit / Events RSVP -> the Cloudflare Worker -> Planning Center form 1216871
+     ("Plan Your Visit"). These used to POST to Web3Forms, which only emailed the pastor; the
+     church wants every form in Planning Center. `source` tells the Worker which on-site form this
+     is, so the two share a PC form but stay distinguishable in the submission. */
+  function wireVisitForm(sec, source){
     var wrap=sec.querySelector('#ac-visit-form'); if(!wrap) return;
     var form=wrap.querySelector('form'); if(!form) return;
     form.addEventListener('submit',function(e){
@@ -1175,8 +1178,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var btn=form.querySelector('button[type=submit]'), orig=btn.textContent;
       var err=form.querySelector('.vf-err'); if(err) err.textContent='';
       btn.disabled=true; btn.textContent='Sending…';
-      var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; });
-      fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)})
+      var fd=new FormData(form);
+      var data={source:source||'home_visit',name:(fd.get('name')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),website:fd.get('botcheck')||''};
+      fetch('https://arroyo-connect.dakota-fac.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){
           if(j&&j.success){
@@ -1274,6 +1278,81 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   }
   /* ---- standalone (interior) pages: append a consistent Plan-a-Visit CTA band at the bottom (never the home page) ---- */
   /* ---- CONNECT-TAG: the NFC chair-tap "digital connect card" (interior page) ---- */
+  /* ---- native Squarespace form replacements -> Worker -> Planning Center ----------------
+     /next-steps, /connect-group and /connect each shipped a NATIVE Squarespace form block that
+     only ever emailed a notification. Squarespace form blocks cannot POST to our Worker (their
+     only destinations are email / Google Sheets / Mailchimp / Zapier), so each native block is
+     hidden and replaced IN PLACE by a branded form that posts to the Worker -> Planning Center.
+     The page, its URL and its copy are untouched, so nothing changes for SEO. */
+  function buildPCForms(){
+    var WORKER='https://arroyo-connect.dakota-fac.workers.dev';
+    var groupOpts='<option value="">Not sure yet &mdash; help me find one</option><option value="10558346">Couples &mdash; Mondays 7pm</option><option value="10558347">Men &mdash; Tuesdays 6:30pm</option><option value="10558348">Women &mdash; Wednesdays 6pm</option><option value="10558349">Moms &mdash; monthly, Sundays after church</option><option value="10558350">RecConnect &mdash; various times</option><option value="10558351">Young Adults &mdash; Fridays 7pm</option><option value="10558352">Students</option>';
+    var CFG=[
+      { col:'collection-68b73abd14d0c1662b105409', id:'ac-ns-form', src:'next_steps',
+        eyebrow:'Next steps', h:'Take your next step', sub:'Tell us where you&rsquo;re at and someone from our team will reach out this week.',
+        steps:[['10625856','decision','I began following Jesus today'],['10558272','group','I&rsquo;d like to join a Connect Group'],['10558273','serve','I&rsquo;d like to join a serve team'],['10648022','baptism','I want to get baptized']],
+        stepsLabel:'What&rsquo;s your next step? (choose any)', group:false, msgLabel:'Anything we should know? (optional)', msgReq:false,
+        btn:'Send my next step', done:'Thanks for taking a next step &mdash; someone from our team will reach out this week.' },
+      { col:'collection-68a4f7883fdf866a9a4f9227', id:'ac-cg-form', src:'connect_group',
+        eyebrow:'Connect groups', h:'Find your group', sub:'Tell us a bit about you and we&rsquo;ll connect you with a group leader.',
+        steps:[], group:true, msgLabel:'Anything we should know? (optional)', msgReq:false,
+        btn:'Request to join', done:'We got your request &mdash; one of our group leaders will reach out soon to help you get connected.' },
+      { col:'collection-68a4f28ad62f481884724557', id:'ac-qp-form', src:'prayer',
+        eyebrow:'We&rsquo;d love to hear from you', h:'Questions or prayer requests', sub:'Share whatever you&rsquo;d like &mdash; our pastoral team reads every one and will follow up.',
+        steps:[], group:false, msgLabel:'How can we help or pray for you? *', msgReq:true,
+        btn:'Send', done:'Thanks for reaching out &mdash; our pastoral team will be in touch soon.' }
+    ];
+    for(var ci=0;ci<CFG.length;ci++){ (function(c){
+      if(!document.body.classList.contains(c.col)) return;
+      if(document.getElementById(c.id)) return;
+      var native=document.querySelector('.sqs-block-form'); if(!native) return;
+      var block=native.closest('.sqs-block')||native;
+      var stepsHtml='';
+      if(c.steps.length){
+        stepsHtml='<div class="cc-opt"><span class="cc-opt-label">'+c.stepsLabel+'</span><div class="cc-steps">';
+        for(var i=0;i<c.steps.length;i++) stepsHtml+='<label><input type="checkbox" name="nextSteps" value="'+c.steps[i][0]+'" data-intent="'+c.steps[i][1]+'">'+c.steps[i][2]+'</label>';
+        stepsHtml+='</div></div>';
+      }
+      var groupHtml=c.group?'<label class="vf-field vf-full"><span>Which group interests you?</span><select name="group">'+groupOpts+'</select></label>':'';
+      var wrap=document.createElement('div');
+      wrap.className='visit-form ac-rev'; wrap.id=c.id; wrap.style.margin='0 auto'; wrap.style.maxWidth='680px';
+      wrap.innerHTML='<div class="vf-head"><p class="eyebrow">'+c.eyebrow+'</p><h3 tabindex="-1">'+c.h+'</h3><p class="vf-sub">'+c.sub+'</p></div>'
+        +'<form novalidate><input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">'
+        +'<div class="vf-grid">'
+          +'<label class="vf-field"><span>First name *</span><input type="text" name="first" required autocomplete="given-name"></label>'
+          +'<label class="vf-field"><span>Last name *</span><input type="text" name="last" required autocomplete="family-name"></label>'
+          +'<label class="vf-field"><span>Email *</span><input type="email" name="email" required inputmode="email" autocomplete="email"></label>'
+          +'<label class="vf-field"><span>Phone *</span><input type="tel" name="phone" required inputmode="tel" autocomplete="tel"></label>'
+          +groupHtml
+        +'</div>'+stepsHtml
+        +'<label class="vf-field vf-full" style="margin-top:1rem"><span>'+c.msgLabel+'</span><textarea name="message" rows="3"'+(c.msgReq?' required':'')+'></textarea></label>'
+        +'<div class="vf-err" role="alert" aria-live="polite"></div>'
+        +'<div class="vf-actions"><button type="submit" class="btn btn-gold">'+c.btn+'</button></div></form>';
+      block.style.display='none';
+      block.parentNode.insertBefore(wrap, block);
+      var form=wrap.querySelector('form');
+      form.addEventListener('submit',function(e){ e.preventDefault();
+        if(!form.checkValidity()){ form.reportValidity(); return; }
+        var err=form.querySelector('.vf-err'); if(err) err.textContent='';
+        var btn=form.querySelector('button[type=submit]'), orig=btn.textContent; btn.disabled=true; btn.textContent='Sending…';
+        var fd=new FormData(form);
+        var steps=fd.getAll('nextSteps').map(String);
+        var intents=[].slice.call(form.querySelectorAll('input[name=nextSteps]:checked')).map(function(x){return x.getAttribute('data-intent');}).filter(Boolean);
+        if(c.src==='connect_group'){ steps=['10558272']; intents=['group']; }
+        if(c.src==='prayer'){ steps=['10558274']; intents=['pastor']; }
+        var data={source:c.src,first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:c.group?(fd.get('group')||''):'',nextSteps:steps,intents:intents,team:[],website:fd.get('website')||''};
+        fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ if(j&&j.success){
+              var nm=(data.first||'').trim();
+              wrap.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">Thanks, <span class="vf-name"></span>!</h3><p>'+c.done+'</p></div>';
+              wrap.querySelector('.vf-name').textContent=nm||'friend'; /* textContent so a name can't inject markup */
+              var h=wrap.querySelector('h3'); if(h) h.focus();
+            } else { throw new Error('failed'); } })
+          .catch(function(){ btn.disabled=false; btn.textContent=orig; if(err) err.textContent="Sorry — something went wrong. Please email josh@arroyochurch.com or call (925) 694-0426 and we'll take care of it."; });
+      });
+    })(CFG[ci]); }
+  }
   function buildConnectTag(){
     if(!document.body.classList.contains('collection-68b739b28750bd7e337593bd')) return;
     if(document.getElementById('ac-ct')) return;
@@ -1387,7 +1466,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var nextSteps=steps.filter(function(s,i){return /^[0-9]+$/.test(s)&&steps.indexOf(s)===i;});
       var hasJoin=nextSteps.indexOf('10558272')>-1;
       var fd=new FormData(form);
-      var data={first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:hasJoin?(fd.get('group')||''):'',nextSteps:nextSteps,intents:selectedIntents(),team:[],website:fd.get('website')||'',turnstileToken:token};
+      var data={source:'connect_tag',first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:hasJoin?(fd.get('group')||''):'',nextSteps:nextSteps,intents:selectedIntents(),team:[],website:fd.get('website')||'',turnstileToken:token};
       var hasDecision=steps.indexOf('10625856')>-1;
       var btn=form.querySelector('#ac-ct-submit'), orig=btn.getAttribute('data-orig')||btn.innerHTML; btn.disabled=true; btn.textContent='Sending…';
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
@@ -1438,16 +1517,15 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(document.getElementById('ac-events')) return;
     var host=document.querySelector('#sections')||document.querySelector('main')||document.querySelector('#page');
     if(!host) return;
-    var W3KEY='40d3a29f-5b98-4845-bff7-c66759077fb3';
     var pin='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
     var clock='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>';
     var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
     var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p><a href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">945 Concannon Blvd, Livermore, CA 94550</a><br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Sundays</h3><p>10:00 AM worship &middot; about 65 minutes</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Questions?</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
-    var form='<div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll be ready to welcome you</h3><p class="vf-sub">Whether it&rsquo;s an upcoming event or your first Sunday, drop your info below and we&rsquo;ll be looking for you &mdash; takes about 20 seconds.</p></div><form novalidate><input type="hidden" name="access_key" value="'+W3KEY+'"><input type="hidden" name="from_name" value="Arroyo Church — Events / Plan a Visit"><input type="hidden" name="subject" value="New RSVP from the Events page"><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Which event, how many coming, or anything we should know?</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Count me in</button></div></form></div>';
+    var form='<div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll be ready to welcome you</h3><p class="vf-sub">Whether it&rsquo;s an upcoming event or your first Sunday, drop your info below and we&rsquo;ll be looking for you &mdash; takes about 20 seconds.</p></div><form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Which event, how many coming, or anything we should know?</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Count me in</button></div></form></div>';
     var sec=document.createElement('section'); sec.className='ac-sec ac-events'; sec.id='ac-events';
     sec.innerHTML='<div class="wrap"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">We&rsquo;d love to <em>have you.</em></h2><p class="lead ac-rev">Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>';
     host.appendChild(sec);
-    wireVisitForm(sec);
+    wireVisitForm(sec,'events_rsvp');
     /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live; desktop + mobile header heights differ) */
     function evTop(){ var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
     evTop(); addEventListener('resize',evTop); setTimeout(evTop,400); setTimeout(evTop,1200);
@@ -1482,11 +1560,11 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildGivePage(); buildEventsPage(); buildPageCTA(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildPageCTA(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   setTimeout(buildPageCTA,600); setTimeout(buildPageCTA,1800);
   setTimeout(buildEventsPage,600); setTimeout(buildEventsPage,1800);
-  setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800);
+  setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800); setTimeout(buildPCForms,600); setTimeout(buildPCForms,1800); setTimeout(buildPCForms,3200);
   setTimeout(buildGivePage,600); setTimeout(buildGivePage,1800);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
   setTimeout(wireMobileNav,800); setTimeout(wireMobileNav,2200);
