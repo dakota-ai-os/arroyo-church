@@ -13,6 +13,10 @@ on:
     # can be 12:45am Monday in Livermore:
     - cron: '45 7 * * 1'        # 12:45am PDT (Mar–Nov) · 11:45pm PST Sun
     - cron: '45 8 * * 1'        # 12:45am PST (Nov–Mar) ·  1:45am PDT
+    # BACKSTOP: an upload later than ~12:45am would otherwise wait for the 8am daily run.
+    # A 6am Monday pass closes most of that gap. Same DST pairing as above.
+    - cron: '0 13 * * 1'        # 6:00am PDT (Mar–Nov) · 5:00am PST
+    - cron: '0 14 * * 1'        # 6:00am PST (Nov–Mar) · 7:00am PDT
     # SAFETY NET: keep the daily run. Sermons are sometimes uploaded later in the week, and
     # the sermon->blog generator reads data/sermons.json — a Sunday-only sync would miss a
     # late upload for a whole week. The job only commits when the data actually changed, so
