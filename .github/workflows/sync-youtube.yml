@@ -2,12 +2,17 @@ name: Sync YouTube sermons + podcasts
 
 on:
   schedule:
-    # PRIMARY: Sunday right after the ~10:00–11:05am service, so the new sermon reaches
-    # arroyochurch.com AND links.arroyochurch.com (both read data/sermons.json) as soon as
-    # possible. GitHub's cron is UTC and does NOT follow daylight saving, so schedule BOTH
-    # hours that can be noon in Livermore:
-    - cron: '0 19 * * 0'        # 12:00pm PDT (Mar–Nov) · 11:00am PST
-    - cron: '0 20 * * 0'        # 12:00pm PST (Nov–Mar) ·  1:00pm PDT
+    # PRIMARY: ~12:45am Monday, timed to the moment the sermon actually becomes fetchable.
+    # The 10:00am Sunday LIVESTREAM never becomes a public video (the channel's Streams tab is
+    # empty and no 10am entry ever appears in the uploads feed) — what gets published is a
+    # separate, edited sermon-only video uploaded late Sunday night. Measured upload times:
+    #   Jul 5 11:20pm · Jul 19 11:28pm · Jul 26 11:31pm · Aug 2 11:51pm · Jun 7 12:16am Mon
+    # 12:45am Monday clears that whole window, so the new sermon reaches arroyochurch.com AND
+    # links.arroyochurch.com (both read data/sermons.json) overnight instead of ~8am Monday.
+    # GitHub's cron is UTC and does NOT follow daylight saving, so schedule BOTH hours that
+    # can be 12:45am Monday in Livermore:
+    - cron: '45 7 * * 1'        # 12:45am PDT (Mar–Nov) · 11:45pm PST Sun
+    - cron: '45 8 * * 1'        # 12:45am PST (Nov–Mar) ·  1:45am PDT
     # SAFETY NET: keep the daily run. Sermons are sometimes uploaded later in the week, and
     # the sermon->blog generator reads data/sermons.json — a Sunday-only sync would miss a
     # late upload for a whole week. The job only commits when the data actually changed, so
