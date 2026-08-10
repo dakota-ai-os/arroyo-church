@@ -135,6 +135,8 @@ Write a post that:
 - Mentions Livermore / the Tri-Valley ONCE, naturally, in a closing invitation -- never sprinkled through the body.
 - Ends with two internal-link CTAs: <a href="/messages">Watch more sermons</a> and <a href="/plan-your-visit">Plan your visit</a>.
 - bodyHtml uses semantic tags (h2, h3, p, blockquote, ul/li). No <html>/<head>/<body> wrapper, no inline color styles except the embed block above.
+- bodyHtml must be a SINGLE LINE: never emit a raw newline, tab, or any control character inside it (separate blocks with tags, not line breaks).
+- Write dashes as the HTML entity &mdash; (and &ndash; for ranges). Do NOT emit a literal em-dash character. Use plain ASCII for quotes and apostrophes.
 Tone: warm, clear, pastoral, never clickbait. Theologically careful -- if the transcript is ambiguous on a name or reference, keep it general rather than guessing."""
 
 USER = f"""Sermon to write up:
@@ -163,6 +165,29 @@ text = next((b.text for b in resp.content if b.type == "text"), None)
 if not text:
     sys.exit(f"no text block in response; stop_reason={resp.stop_reason}")
 post = json.loads(text)
+
+def repair_dashes(html: str) -> str:
+    """Repair mangled em-dashes in the model's bodyHtml.
+
+    Observed twice (2026-08-03 as 0x08, 2026-08-10 as 0x0A): where an em-dash belongs the
+    model emits a single-character JSON escape instead, producing a literal control
+    character or raw newline mid-sentence ("no delayand", "God's Plans Prevail\\nAnd That's
+    Good News"). bodyHtml is all markup, so a raw newline/control char between two
+    non-tag characters is never legitimate -- it is always a lost dash. Repair those, and
+    drop any other stray control characters.
+    """
+    # control char or newline sitting between two visible, non-tag characters => lost dash
+    html = re.sub(r"(?<=[^\s>])[\x00-\x09\x0b-\x1f\n](?=[^\s<])", "&mdash;", html)
+    # anything else that slipped through is noise, not content
+    html = re.sub(r"[\x00-\x08\x0b-\x1f]", "", html)
+    return re.sub(r"[ \t]*\n[ \t]*", " ", html).strip()
+
+if isinstance(post.get("bodyHtml"), str):
+    before = post["bodyHtml"]
+    post["bodyHtml"] = repair_dashes(before)
+    n = len(re.findall(r"[\x00-\x09\x0b-\x1f\n]", before))
+    if n:
+        print(f"repaired {n} mangled character(s) in bodyHtml (lost em-dashes)")
 
 slug = re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", (post.get("slug") or v.get("title") or "sermon").lower()))[:70]
 base = DRAFTS / f"{today}-{slug}"
