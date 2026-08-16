@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.arroyo.sermonnotes</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/dakotayates/ai-os/ventures/arroyo-church-redesign/scripts/run-sermon-notes.sh</string>
+    </array>
+    <!-- Sunday (0) at 7:00am, before the 10:00am service. Must run while logged in:
+         if no GUI session exists, macOS auto-denies the Automation request. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>0</integer>
+        <key>Hour</key><integer>7</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/Users/dakotayates/Library/Logs/arroyo-sermon-notes.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/dakotayates/Library/Logs/arroyo-sermon-notes.out.log</string>
+</dict>
+</plist>
