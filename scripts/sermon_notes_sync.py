@@ -367,6 +367,7 @@ def blocks_before_image(body_html):
     return len(re.findall(r"<div|<h1|<h2|<ol|<ul|<p\b", body_html[:m.start()]))
 
 INSTRUCT_MARK = "To save and edit this note"
+NOTE_PROMPT = "<ul><li><i>Write some notes here</i></li></ul><div><br></div>"
 
 
 def protected_blocks(body_html):
@@ -516,7 +517,7 @@ def update_note(note_id, subject, when, text):
         parts.append("<div><br></div>")   # the protected notice sits directly above
     if takeaway:
         parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
-    i = 0
+    i, seen_main = 0, False
     while i < len(blocks):
         kind, val = blocks[i]
         if kind == "sub":                      # indented, normal weight -- a real list is
@@ -533,7 +534,12 @@ def update_note(note_id, subject, when, text):
             parts.append("<ol>" + "".join(_li(g) for g in group) + "</ol>")
             parts.append("<div><br></div>")   # blank line after a list, so the next main
             continue                          # point is not flush against the sub-points
-        if kind in ("main", "subhead"):
+        if kind == "main":
+            if seen_main:            # close out the previous point before starting the next
+                parts.append(NOTE_PROMPT)
+            seen_main = True
+            parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
+        elif kind == "subhead":
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
         elif val.lstrip().startswith('"'):
             # Scripture: indent it so quotes read as distinct from Josh's teaching. Notes
@@ -550,6 +556,8 @@ def update_note(note_id, subject, when, text):
         else:
             parts.append(f"<div>{esc(val)}</div><div><br></div>")
         i += 1
+    if seen_main:                 # ...and after the final point
+        parts.append(NOTE_PROMPT)
     body_html = "".join(parts)
 
     skip = protected_blocks(prev) if prev else None
