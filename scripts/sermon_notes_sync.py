@@ -522,7 +522,8 @@ def update_note(note_id, subject, when, text):
             while i < len(blocks) and blocks[i][0] == "sub":
                 group.append(blocks[i][1]); i += 1
             parts.append("<ol>" + "".join(f"<li>{esc(g)}</li>" for g in group) + "</ol>")
-            continue
+            parts.append("<div><br></div>")   # blank line after a list, so the next main
+            continue                          # point is not flush against the sub-points
         if kind in ("main", "subhead"):
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
         else:
