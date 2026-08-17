@@ -328,86 +328,202 @@ def header_image_tag(note_id):
     return ""
 
 
+# ── UI-driven editing ────────────────────────────────────────────────────────────────────
+# Notes' AppleScript `set body` replaces EVERYTHING, which destroys the series graphic (an
+# image can only be attached through a real UI paste). So the weekly text is written by
+# selecting ONLY the text around the image and pasting over it. The image is never selected,
+# so it is never touched, moved, or re-created.
+#
+# The clipboard must carry the public.html flavour: an RTF paste silently drops font colour
+# (verified -- the purple notice came back black), while HTML preserves colour, italics,
+# headings and lists.
+
+def set_clipboard_html(html, plain=""):
+    from AppKit import NSPasteboard, NSPasteboardTypeHTML, NSPasteboardTypeString
+    pb = NSPasteboard.generalPasteboard()
+    pb.clearContents()
+    # Without an explicit charset Notes decodes the HTML as Windows-1252, so curly quotes
+    # and em-dashes arrive as mojibake ("â€œcopyâ€").
+    doc = '<meta charset="utf-8">' + html
+    pb.setString_forType_(doc, NSPasteboardTypeHTML)
+    pb.setString_forType_(plain or re.sub(r"<[^>]+>", " ", html), NSPasteboardTypeString)
+
+
+def clipboard_has_image():
+    """True if the clipboard holds image data. SAFETY GATE: after selecting a text region we
+    copy it and check -- if an image came along, the selection is wrong and we abort rather
+    than paste over the graphic."""
+    from AppKit import NSPasteboard
+    types = [str(t).lower() for t in NSPasteboard.generalPasteboard().types()]
+    return any(k in t for t in types for k in ("tiff", "png", "image"))
+
+
+def blocks_before_image(body_html):
+    """How many top-level blocks precede the <img> -- i.e. which visual line the image sits on.
+    None when the note has no image."""
+    m = re.search(r"<img\b", body_html)
+    if not m:
+        return None
+    return len(re.findall(r"<div|<h1|<h2|<ol|<ul|<p\b", body_html[:m.start()]))
+
+
+def _ui(script, timeout=120):
+    r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=timeout)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip()[:200])
+    return r.stdout.strip()
+
+
+def _focus_note(note_id):
+    # A wide window keeps the title/byline on one visual line each, so the arrow-key line
+    # count used below stays accurate.
+    _ui(
+        'tell application "Notes"\n'
+        '  activate\n'
+        '  show note id "' + note_id + '"\n'
+        'end tell\n'
+        'delay 1.5\n'
+        'tell application "System Events" to tell process "Notes"\n'
+        '  set frontmost to true\n'
+        '  delay 0.6\n'
+        '  try\n'
+        '    set size of front window to {1500, 950}\n'
+        '    set position of front window to {30, 30}\n'
+        '  end try\n'
+        'end tell\n'
+        'delay 0.8\n'
+    )
+
+
+def _keys(lines):
+    body = "\n".join("  " + l for l in lines)
+    _ui('tell application "System Events" to tell process "Notes"\n'
+        '  set frontmost to true\n'
+        '  delay 0.4\n' + body + '\nend tell\n')
+
+
+def replace_around_image(note_id, header_html, body_html, img_line):
+    """Rewrite the text ABOVE and BELOW the graphic without ever selecting the graphic.
+
+    Layout assumed (img_line is derived from the note itself, not hardcoded):
+        line 1            title      <- replaced
+        line 2            byline     <- replaced
+        line img_line     IMAGE      <- untouched
+        line img_line+1.. body text  <- replaced
+
+    The lower region is done FIRST: replacing it cannot shift the position of anything above
+    it, whereas doing the header first could change the wrap and move the image.
+    """
+    up, down = "key code 126", "key code 125"
+
+    # ---------- lower region: from the line after the image, to the end ----------
+    _keys(['keystroke "a" using {command down}', "delay 0.3", up, "delay 0.3"]
+          + [down + "\n  delay 0.15" for _ in range(img_line)]
+          + ["delay 0.3",
+             'key code 125 using {command down, shift down}',
+             "delay 0.4",
+             'keystroke "c" using {command down}', "delay 0.6"])
+    if clipboard_has_image():
+        raise RuntimeError("ABORT: the lower selection included the graphic -- nothing written")
+    set_clipboard_html(body_html)
+    _keys(['keystroke "v" using {command down}', "delay 1.2"])
+
+    # ---------- upper region: the first two lines (title + byline) ----------
+    _keys(['keystroke "a" using {command down}', "delay 0.3", up, "delay 0.3",
+           'key code 125 using {shift down}', "delay 0.2",
+           'key code 125 using {shift down}', "delay 0.4",
+           'keystroke "c" using {command down}', "delay 0.6"])
+    if clipboard_has_image():
+        raise RuntimeError("ABORT: the header selection included the graphic")
+    set_clipboard_html(header_html)
+    _keys(['keystroke "v" using {command down}', "delay 1.2"])
+
+
 def update_note(note_id, subject, when, text):
-    """Rebuild the shared note: sermon title, byline, preserved image, standing
-    instruction line, KEY TAKEAWAY, then Josh's points."""
+    """Refresh the shared note's text, leaving the series graphic untouched.
+
+    If the note has an image, only the text regions around it are replaced (via UI
+    selection + HTML paste) -- the graphic is never selected, so it is never moved,
+    re-created or lost. Dakota swaps the series banner by hand every few weeks and the
+    automation must not interfere with it.
+
+    With no image present, fall back to a plain AppleScript body write.
+    """
     esc = lambda x: html.escape(x, quote=False)
 
     title, rest = split_title_and_body(text)
     service = sunday_from_subject(subject, when)
     blocks = parse_structure(rest)
-    # the note uses straight quotes throughout; Josh's email mixes curly and straight
-    straighten = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
+    straighten = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
     takeaway = key_takeaway(title, "\n".join(v for _, v in blocks))
-    # IMAGES ARE DELIBERATELY NOT WRITTEN. Two mechanisms were tested against the live
-    # note and BOTH fail:
-    #   1. inline <img src="data:image/jpeg;base64,..."> -> Notes creates an attachment
-    #      record with NO media behind it (name "missing value", `save attachment` errors)
-    #      i.e. a broken-image placeholder.
-    #   2. <img src="cid:...@icloud.apple.com"> re-linking the existing attachment ->
-    #      attachment count drops to 0; the image is dropped entirely.
-    # AppleScript cannot attach media to a note, so any body rewrite loses the graphic.
-    # Writing nothing is strictly better than writing a broken placeholder.
-    img = "" if os.environ.get("ARROYO_NOTE_IMAGE") != "1" else header_image_tag(note_id)
-
     log(f'title="{title}"  service={service:%Y-%m-%d}  takeaway={"yes" if takeaway else "no"}')
 
     byline = f"Pastor Josh Smith | {service:%B} {ordinal(service.day)}, {service:%Y}"
     instruct = ("*To save and edit this note, click on the share button at the top, press "
-                "\u201ccopy\u201d then, create a new note and paste the text into your new note")
+                "“copy” then, create a new note and paste the text into your new note")
 
-    parts = [
-        f"<div><b><h1>{esc(title)}</h1></b></div>",
-        f"<div><b>{esc(byline)}</b><br></div>",
-    ]
-    if img:
-        parts.append(f"<div>{img}<br></div>")
-    # instruction line is ITALIC; KEY TAKEAWAY is plain (NOT bold) -- matches the house format
-    parts.append(
-        f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div><div><br></div>')
+    header_html = (f"<div><b><h1>{esc(title)}</h1></b></div>"
+                   f"<div><b>{esc(byline)}</b></div>")
+
+    parts = [f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div>',
+             "<div><br></div>"]
     if takeaway:
         parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
-    # Sub-points must be INDENTED and normal weight. Notes strips margin/padding/blockquote
-    # (verified) -- a real list is the only indentation it preserves, so consecutive
-    # sub-points are emitted as one <ol>.
     i = 0
     while i < len(blocks):
         kind, val = blocks[i]
-        if kind == "sub":
-            group = []
+        if kind == "sub":                      # indented, normal weight -- a real list is
+            group = []                          # the only indentation Notes preserves
             while i < len(blocks) and blocks[i][0] == "sub":
-                group.append(blocks[i][1])
-                i += 1
-            lis = "".join(f"<li>{esc(g)}</li>" for g in group)
-            parts.append(f"<ol>{lis}</ol>")
+                group.append(blocks[i][1]); i += 1
+            parts.append("<ol>" + "".join(f"<li>{esc(g)}</li>" for g in group) + "</ol>")
             continue
         if kind in ("main", "subhead"):
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
         else:
             parts.append(f"<div>{esc(val)}</div><div><br></div>")
         i += 1
-    body = "".join(parts)
+    body_html = "".join(parts)
 
-    tmp = Path("/tmp/arroyo-sermon-note.html")
-    tmp.write_text(body, encoding="utf-8")
-
+    # snapshot before touching anything
     BACKUPS.mkdir(parents=True, exist_ok=True)
     quoted = note_id.replace('"', '\\"')
+    prev = ""
     try:
-        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=180)
-        if prev:
-            stamp = BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html"
-            stamp.write_text(prev, encoding="utf-8")
-            log(f"backed up previous note ({len(prev)} bytes) -> {stamp}")
+        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=240)
+        (BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html").write_text(prev, encoding="utf-8")
     except Exception as e:
         log(f"WARNING: could not back up existing note ({e})")
 
-    run_osascript(f'''
-        set theHTML to (read (POSIX file "{tmp}") as «class utf8»)
-        tell application "Notes" to set body of note id "{quoted}" to theHTML
-    ''', timeout=240)
+    img_line = blocks_before_image(prev) if prev else None
+    before = attachment_count(note_id)
+
+    if img_line:
+        log(f"graphic on line {img_line + 1}; editing around it (it will not be touched)")
+        _focus_note(note_id)
+        replace_around_image(note_id, header_html, body_html, img_line)
+        after = attachment_count(note_id)
+        if after < before:
+            raise RuntimeError(f"the graphic was lost ({before} -> {after} attachments)")
+        log(f"graphic intact ({after} attachment) and verified")
+    else:
+        log("no graphic in the note -- plain body write")
+        tmp = Path("/tmp/arroyo-sermon-note.html")
+        tmp.write_text(header_html + body_html, encoding="utf-8")
+        run_osascript(
+            'set theHTML to (read (POSIX file "' + str(tmp) + '") as «class utf8»)\n'
+            'tell application "Notes" to set body of note id "' + quoted + '" to theHTML',
+            timeout=240)
     return title
+
+
+def attachment_count(note_id):
+    try:
+        return int(run_osascript(
+            f'tell application "Notes" to return count of attachments of note id "{note_id}"', timeout=180))
+    except Exception:
+        return 0
 
 
 def main():
