@@ -78,7 +78,10 @@ def fetch_latest(cfg):
     try:
         M.login(cfg["GMAIL_USER"], _clean_pw(cfg["GMAIL_APP_PASSWORD"]))
         M.select("INBOX", readonly=True)  # readonly: never marks Josh's mail as read
-        typ, data = M.search(None, f'(FROM "{cfg["SERMON_SENDER"]}" SINCE {since})')
+        # MUST filter on subject: Josh's newest email is often unrelated (worship-night
+        # graphics, etc). Grabbing "latest from Josh" would overwrite the note with that.
+        subj_key = cfg.get("SUBJECT_CONTAINS", "Sermon Notes")
+        typ, data = M.search(None, f'(FROM "{cfg["SERMON_SENDER"]}" SUBJECT "{subj_key}" SINCE {since})')
         ids = data[0].split() if typ == "OK" and data and data[0] else []
         if not ids:
             return None
@@ -126,6 +129,10 @@ def fetch_latest(cfg):
         text = re.sub(r"<[^>]+>", "", text)
         text = html.unescape(text)
 
+    # Josh re-sends corrections ("Disregard the first email...this one is the truth").
+    # Those are replies, so drop the quoted original or it gets duplicated into the note.
+    text = re.split(r"^On .+ wrote:\s*$", text, maxsplit=1, flags=re.M)[0]
+    text = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith(">"))
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
     return (subject, when, text) if text else None
 
@@ -137,40 +144,179 @@ def run_osascript(script, timeout=90):
     return r.stdout.strip()
 
 
+PREAMBLE = re.compile(
+    r"^\s*(disregard|ignore|sorry|oops|correction|use this|this one|please use|my bad)\b", re.I)
+
+
+def split_title_and_body(text):
+    """Josh's SUBJECT is 'Sermon Notes 8/16/26' -- the sermon TITLE is the first real
+    line of the body. Corrections open with chatter ("Disregard the first email...this
+    one is the truth : )"), so skip leading preamble lines before taking the title."""
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line:
+            i += 1
+            continue
+        if PREAMBLE.match(line) and len(line) < 120:
+            i += 1
+            continue
+        break
+    title = lines[i].strip() if i < len(lines) else ""
+    return title, "\n".join(lines[i + 1:]).strip()
+
+
+def sunday_from_subject(subject, fallback):
+    """'Sermon Notes 8/16/26' -> the service date. Byline uses the SERVICE date, not the
+    date Josh happened to send the email (he writes them days ahead)."""
+    m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{2,4})", subject or "")
+    if m:
+        mo, d, y = (int(x) for x in m.groups())
+        y += 2000 if y < 100 else 0
+        try:
+            return datetime(y, mo, d)
+        except ValueError:
+            pass
+    return fallback
+
+
+def ordinal(n):
+    return f"{n}{'th' if 11 <= n % 100 <= 13 else {1:'st',2:'nd',3:'rd'}.get(n % 10, 'th')}"
+
+
+def tidy_points(body):
+    """Josh's plaintext arrives as '   1.\n\n   Learn who...' (Google Docs paste). Rejoin a
+    lone list marker with the text beneath it so the note reads as clean numbered points."""
+    out, lines, i = [], body.splitlines(), 0
+    while i < len(lines):
+        cur = lines[i].strip()
+        if re.fullmatch(r"\d+\.", cur):
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j < len(lines):
+                out.append(f"{cur} {lines[j].strip()}")
+                i = j + 1
+                continue
+        out.append(cur)
+        i += 1
+    joined = re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
+    # Gmail hard-wraps at ~76 cols, so a single scripture quote arrives split across lines.
+    # Unwrap each blank-line-delimited block back into one line, matching how the note reads.
+    blocks = [" ".join(x.strip() for x in b.splitlines() if x.strip())
+              for b in re.split(r"\n\s*\n", joined)]
+    return "\n\n".join(b for b in blocks if b)
+
+
+def key_takeaway(title, body):
+    """One-sentence summary, same Anthropic key the blog pipeline uses. Best-effort:
+    if the API is unreachable the note still gets written, just without this line."""
+    env = Path.home() / ".config" / "arroyo" / "anthropic.env"
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not key and env.exists():
+        for line in env.read_text().splitlines():
+            if line.strip().startswith("ANTHROPIC_API_KEY"):
+                key = line.split("=", 1)[1].strip().strip('"').strip("'")
+    if not key:
+        log("WARNING: no Anthropic key found -- skipping KEY TAKEAWAY")
+        return ""
+    try:
+        import anthropic
+        msg = anthropic.Anthropic(api_key=key).messages.create(
+            model="claude-opus-4-8", max_tokens=300,
+            messages=[{"role": "user", "content":
+                "Write ONE sentence (35 words max) capturing the practical takeaway of this "
+                "sermon for a churchgoer. Plain declarative prose, no preamble, no quotes, "
+                "do not start with 'This sermon'.\n\n"
+                f"Title: {title}\n\n{body[:6000]}"}])
+        return " ".join(msg.content[0].text.split()).strip('"')
+    except Exception as e:
+        log(f"WARNING: KEY TAKEAWAY generation failed ({e}) -- continuing without it")
+        return ""
+
+
+def header_image_tag(note_id):
+    """Return the <img> tag for the series graphic, keeping it alive across rewrites.
+
+    Notes stores an image pasted in the UI as an INLINE base64 data URI, which the body
+    getter exposes. But an image written back BY APPLESCRIPT is not re-exposed that way --
+    the next read returns a bare placeholder. So a naive read-modify-write looks fine the
+    first Sunday and then silently deletes the graphic the second. (Verified on a scratch
+    note: attachments 1 -> 0.)
+
+    Fix: cache the graphic on disk. Refresh the cache whenever the note DOES expose a real
+    base64 image -- which is exactly what happens after someone pastes a new series graphic
+    in -- and otherwise re-inject the cached copy. The graphic changes once per sermon
+    series, so this self-heals without anyone touching the automation.
+    """
+    cache = Path.home() / ".config" / "arroyo" / "sermon-note-header.txt"
+    try:
+        body = run_osascript(f'tell application "Notes" to return body of note id "{note_id}"', timeout=240)
+        m = re.search(r"<img\b[^>]*src=\"data:image/[^\"]+\"[^>]*>", body)
+        if m:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(m.group(0), encoding="utf-8")
+            log(f"series graphic found in note ({len(m.group(0)):,} bytes) -- cache refreshed")
+            return m.group(0)
+    except Exception as e:
+        log(f"WARNING: could not read note for the graphic ({e})")
+
+    if cache.exists():
+        tag = cache.read_text(encoding="utf-8")
+        log(f"re-injecting cached series graphic ({len(tag):,} bytes)")
+        return tag
+    log("WARNING: no series graphic available -- writing the note without it")
+    return ""
+
+
 def update_note(note_id, subject, when, text):
-    """Replace the note body. Content is passed via a temp FILE, never interpolated
-    into AppleScript source -- an apostrophe or quote in Josh's notes would
-    otherwise break the script (or worse)."""
-    esc = lambda s: html.escape(s, quote=False)
-    lines = "".join(f"<div>{esc(l) if l.strip() else '<br>'}</div>" for l in text.splitlines())
-    # Notes derives a note's TITLE from the first line of its body. The shared note is
-    # retitled to that week's sermon each Sunday, so emit the sermon title first and the
-    # rename happens for free. The note is found by ID, so retitling can't break lookup.
-    title = subject.strip() or f"Sermon Notes {when:%b %-d}"
-    body = (
-        f"<div><b>{esc(title)}</b></div><div><br></div>"
-        f"{lines}"
-    )
+    """Rebuild the shared note: sermon title, byline, preserved image, standing
+    instruction line, KEY TAKEAWAY, then Josh's points."""
+    esc = lambda x: html.escape(x, quote=False)
+
+    title, points = split_title_and_body(text)
+    service = sunday_from_subject(subject, when)
+    points = tidy_points(points)
+    takeaway = key_takeaway(title, points)
+    img = header_image_tag(note_id)
+
+    log(f'title="{title}"  service={service:%Y-%m-%d}  takeaway={"yes" if takeaway else "no"}')
+
+    byline = f"Pastor Josh Smith | {service:%B} {ordinal(service.day)}, {service:%Y}"
+    instruct = ("*To save and edit this note, click on the share button at the top, press "
+                "\u201ccopy\u201d then, create a new note and paste the text into your new note")
+
+    parts = [
+        f"<div><b><h1>{esc(title)}</h1></b></div>",
+        f"<div><b>{esc(byline)}</b><br></div>",
+    ]
+    if img:
+        parts.append(f"<div>{img}</div>")
+    parts.append(f"<div>{esc(instruct)}</div><div><br></div>")
+    if takeaway:
+        parts.append(f"<div><b>KEY TAKEAWAY:</b> {esc(takeaway)}</div><div><br></div>")
+    parts += [f"<div>{esc(l) if l.strip() else '<br>'}</div>" for l in points.splitlines()]
+    body = "".join(parts)
 
     tmp = Path("/tmp/arroyo-sermon-note.html")
     tmp.write_text(body, encoding="utf-8")
 
     BACKUPS.mkdir(parents=True, exist_ok=True)
     quoted = note_id.replace('"', '\\"')
-
     try:
-        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"')
+        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=180)
         if prev:
             stamp = BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html"
             stamp.write_text(prev, encoding="utf-8")
-            log(f"backed up previous note body -> {stamp}")
+            log(f"backed up previous note ({len(prev)} bytes) -> {stamp}")
     except Exception as e:
         log(f"WARNING: could not back up existing note ({e})")
 
     run_osascript(f'''
         set theHTML to (read (POSIX file "{tmp}") as «class utf8»)
         tell application "Notes" to set body of note id "{quoted}" to theHTML
-    ''')
+    ''', timeout=240)
     return title
 
 
