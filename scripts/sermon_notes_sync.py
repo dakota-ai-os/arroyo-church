@@ -226,9 +226,15 @@ def key_takeaway(title, body):
         msg = anthropic.Anthropic(api_key=key).messages.create(
             model="claude-opus-4-8", max_tokens=300,
             messages=[{"role": "user", "content":
-                "Write ONE sentence (35 words max) capturing the practical takeaway of this "
-                "sermon for a churchgoer. Plain declarative prose, no preamble, no quotes, "
-                "do not start with 'This sermon'.\n\n"
+                "Write ONE sentence (max 40 words) summarising this sermon, in EXACTLY this "
+                "house style: a short declarative thesis, then an em-dash, then a "
+                "comma-separated list of gerund phrases.\n"
+                "Example of the required style: \"Healthy relationships take wisdom \u2014 "
+                "knowing who to trust, speaking and listening like Christ, discerning when "
+                "to confront, giving people room, and letting love cover offenses instead "
+                "of stirring up strife.\"\n"
+                "Do NOT use imperative commands ('Invest', 'Speak', 'Build'). Do NOT add "
+                "quotes, a label, or any preamble. Output only the sentence.\n\n"
                 f"Title: {title}\n\n{body[:6000]}"}])
         return " ".join(msg.content[0].text.split()).strip('"')
     except Exception as e:
@@ -278,6 +284,8 @@ def update_note(note_id, subject, when, text):
     title, points = split_title_and_body(text)
     service = sunday_from_subject(subject, when)
     points = tidy_points(points)
+    # the note uses straight quotes throughout; Josh's email mixes curly and straight
+    points = points.translate(str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"}))
     takeaway = key_takeaway(title, points)
     img = header_image_tag(note_id)
 
@@ -292,11 +300,18 @@ def update_note(note_id, subject, when, text):
         f"<div><b>{esc(byline)}</b><br></div>",
     ]
     if img:
-        parts.append(f"<div>{img}</div>")
-    parts.append(f"<div>{esc(instruct)}</div><div><br></div>")
+        parts.append(f"<div>{img}<br></div>")
+    # instruction line is ITALIC; KEY TAKEAWAY is plain (NOT bold) -- matches the house format
+    parts.append(f"<div><i>{esc(instruct)}</i></div><div><br></div>")
     if takeaway:
-        parts.append(f"<div><b>KEY TAKEAWAY:</b> {esc(takeaway)}</div><div><br></div>")
-    parts += [f"<div>{esc(l) if l.strip() else '<br>'}</div>" for l in points.splitlines()]
+        parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
+    for line in points.splitlines():
+        if not line.strip():
+            parts.append("<div><br></div>")
+        elif re.match(r"^\d+\.\s", line.strip()):
+            parts.append(f"<div><h2>{esc(line.strip())}</h2></div>")   # numbered points are headings
+        else:
+            parts.append(f"<div>{esc(line)}</div>")
     body = "".join(parts)
 
     tmp = Path("/tmp/arroyo-sermon-note.html")
