@@ -367,7 +367,7 @@ def blocks_before_image(body_html):
     return len(re.findall(r"<div|<h1|<h2|<ol|<ul|<p\b", body_html[:m.start()]))
 
 INSTRUCT_MARK = "To save and edit this note"
-NOTE_PROMPT = "<ul><li><i>Write some notes here</i></li></ul><div><br></div>"
+NOTE_PROMPT = "<div><i>Write some notes here</i></div><div><br></div>"
 
 
 def protected_blocks(body_html):
@@ -550,7 +550,7 @@ def update_note(note_id, subject, when, text):
             while i < len(blocks) and blocks[i][0] not in ("main", "subhead", "sub") \
                     and blocks[i][1].lstrip().startswith('"'):
                 quotes.append(blocks[i][1]); i += 1
-            parts.append("<ul>" + "".join(f"<li>{esc(q)}</li>" for q in quotes) + "</ul>")
+            parts.append("".join(f"<div>{esc(q)}</div>" for q in quotes) + "<div><br></div>")
             parts.append("<div><br></div>")
             continue
         else:
