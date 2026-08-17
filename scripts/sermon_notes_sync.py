@@ -512,6 +512,8 @@ def update_note(note_id, subject, when, text):
     if not keep_notice:
         parts += [f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div>',
                   "<div><br></div>"]
+    if keep_notice:
+        parts.append("<div><br></div>")   # the protected notice sits directly above
     if takeaway:
         parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
     i = 0
@@ -521,11 +523,30 @@ def update_note(note_id, subject, when, text):
             group = []                          # the only indentation Notes preserves
             while i < len(blocks) and blocks[i][0] == "sub":
                 group.append(blocks[i][1]); i += 1
-            parts.append("<ol>" + "".join(f"<li>{esc(g)}</li>" for g in group) + "</ol>")
+            def _li(g):
+                # Dakota's original bolded the label and left the quote regular:
+                #   **Understand the weight of your words:** "Death and life..."
+                lbl, sep, rest = g.partition(":")
+                if sep and len(lbl) < 60 and '"' not in lbl:
+                    return f"<li><b>{esc(lbl)}:</b>{esc(rest)}</li>"
+                return f"<li>{esc(g)}</li>"
+            parts.append("<ol>" + "".join(_li(g) for g in group) + "</ol>")
             parts.append("<div><br></div>")   # blank line after a list, so the next main
             continue                          # point is not flush against the sub-points
         if kind in ("main", "subhead"):
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
+        elif val.lstrip().startswith('"'):
+            # Scripture: indent it so quotes read as distinct from Josh's teaching. Notes
+            # only honours indentation it can model as a list (<blockquote> is silently
+            # flattened to a plain div), so use a bulleted list. Consecutive verses are
+            # grouped into ONE block so they read together, with a single blank line after.
+            quotes = []
+            while i < len(blocks) and blocks[i][0] not in ("main", "subhead", "sub") \
+                    and blocks[i][1].lstrip().startswith('"'):
+                quotes.append(blocks[i][1]); i += 1
+            parts.append("<ul>" + "".join(f"<li>{esc(q)}</li>" for q in quotes) + "</ul>")
+            parts.append("<div><br></div>")
+            continue
         else:
             parts.append(f"<div>{esc(val)}</div><div><br></div>")
         i += 1
