@@ -39,6 +39,8 @@ from datetime import datetime, timedelta, timezone
 from email.header import decode_header, make_header
 from pathlib import Path
 
+INSTRUCT_COLOR = "#AF52DE"   # Apple system purple; change here to restyle the notice
+
 CONFIG = Path.home() / ".config" / "arroyo" / "gmail.env"
 BACKUPS = Path.home() / ".config" / "arroyo" / "note-backups"
 
@@ -185,28 +187,78 @@ def ordinal(n):
     return f"{n}{'th' if 11 <= n % 100 <= 13 else {1:'st',2:'nd',3:'rd'}.get(n % 10, 'th')}"
 
 
-def tidy_points(body):
-    """Josh's plaintext arrives as '   1.\n\n   Learn who...' (Google Docs paste). Rejoin a
-    lone list marker with the text beneath it so the note reads as clean numbered points."""
-    out, lines, i = [], body.splitlines(), 0
+SCRIPTURE_REF = re.compile(r"[-\u2013]\s*(?:[1-3]\s*)?[A-Z][a-z]+\s+\d+:\d")
+
+
+def _is_subheading(text):
+    """A flush-left line that is NOT scripture -- e.g. '3 Ways to Communicate Like Christ'.
+    Scripture is flush-left too, but it opens with a quote and carries a -Book c:v citation."""
+    t = text.strip()
+    return (len(t) < 80
+            and not t[:1] in '"\u201c\u2018\''
+            and not SCRIPTURE_REF.search(t))
+
+
+def parse_structure(body):
+    """Turn Josh's Google-Docs plaintext into typed blocks.
+
+    The hard part: MAIN points and SUB points are indistinguishable by indentation --
+    both arrive as '   N.' on their own line followed by indented text. The only reliable
+    signal is the NUMBERING SEQUENCE: main points run 1,2,3,4,5 monotonically, while a
+    sub-list restarts at 1 and then main resumes where it left off. So track the expected
+    main number; anything that doesn't continue that run is a sub-point.
+    """
+    lines, items, i = body.splitlines(), [], 0
     while i < len(lines):
-        cur = lines[i].strip()
-        if re.fullmatch(r"\d+\.", cur):
+        raw = lines[i]
+        cur = raw.strip()
+        if not cur:
+            i += 1
+            continue
+        m = re.fullmatch(r"(\d+)\.", cur)
+        if m:                                   # lone list marker; text follows below
             j = i + 1
             while j < len(lines) and not lines[j].strip():
                 j += 1
-            if j < len(lines):
-                out.append(f"{cur} {lines[j].strip()}")
-                i = j + 1
+            txt = []
+            while j < len(lines) and lines[j].strip():
+                txt.append(lines[j].strip())
+                j += 1
+            items.append(("num", int(m.group(1)), " ".join(txt)))
+            i = j
+        else:                                   # prose block (Gmail hard-wraps it)
+            txt, j = [cur], i + 1
+            while j < len(lines) and lines[j].strip():
+                txt.append(lines[j].strip())
+                j += 1
+            items.append(("flush" if not raw.startswith(" ") else "ind", None, " ".join(txt)))
+            i = j
+
+    # A plain "does this continue the main run?" test is not enough: a sub-list of three
+    # items reaches 3 exactly when the next MAIN point is also 3, which swaps them. So track
+    # the sub-list's own run too -- stay in the nested list only while its numbering keeps
+    # incrementing, then fall back and re-test against the main run.
+    out, expected, sub_n, in_sub = [], 1, 0, False
+    for kind, num, text in items:
+        if kind == "num":
+            if in_sub and num == sub_n + 1:
+                out.append(("sub", text))
+                sub_n = num
                 continue
-        out.append(cur)
-        i += 1
-    joined = re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
-    # Gmail hard-wraps at ~76 cols, so a single scripture quote arrives split across lines.
-    # Unwrap each blank-line-delimited block back into one line, matching how the note reads.
-    blocks = [" ".join(x.strip() for x in b.splitlines() if x.strip())
-              for b in re.split(r"\n\s*\n", joined)]
-    return "\n\n".join(b for b in blocks if b)
+            in_sub = False
+            if num == expected:
+                out.append(("main", f"{num}. {text}"))
+                expected += 1
+            elif num == 1 and expected > 1:     # numbering restarted => nested list opens
+                in_sub, sub_n = True, 1
+                out.append(("sub", text))
+            else:
+                out.append(("sub", text))
+        elif _is_subheading(text):
+            out.append(("subhead", text))
+        else:
+            out.append(("text", text))
+    return out
 
 
 def key_takeaway(title, body):
@@ -281,12 +333,13 @@ def update_note(note_id, subject, when, text):
     instruction line, KEY TAKEAWAY, then Josh's points."""
     esc = lambda x: html.escape(x, quote=False)
 
-    title, points = split_title_and_body(text)
+    title, rest = split_title_and_body(text)
     service = sunday_from_subject(subject, when)
-    points = tidy_points(points)
+    blocks = parse_structure(rest)
     # the note uses straight quotes throughout; Josh's email mixes curly and straight
-    points = points.translate(str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"}))
-    takeaway = key_takeaway(title, points)
+    straighten = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
+    blocks = [(k, v.translate(straighten)) for k, v in blocks]
+    takeaway = key_takeaway(title, "\n".join(v for _, v in blocks))
     img = header_image_tag(note_id)
 
     log(f'title="{title}"  service={service:%Y-%m-%d}  takeaway={"yes" if takeaway else "no"}')
@@ -302,16 +355,29 @@ def update_note(note_id, subject, when, text):
     if img:
         parts.append(f"<div>{img}<br></div>")
     # instruction line is ITALIC; KEY TAKEAWAY is plain (NOT bold) -- matches the house format
-    parts.append(f"<div><i>{esc(instruct)}</i></div><div><br></div>")
+    parts.append(
+        f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div><div><br></div>')
     if takeaway:
         parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
-    for line in points.splitlines():
-        if not line.strip():
-            parts.append("<div><br></div>")
-        elif re.match(r"^\d+\.\s", line.strip()):
-            parts.append(f"<div><h2>{esc(line.strip())}</h2></div>")   # numbered points are headings
+    # Sub-points must be INDENTED and normal weight. Notes strips margin/padding/blockquote
+    # (verified) -- a real list is the only indentation it preserves, so consecutive
+    # sub-points are emitted as one <ol>.
+    i = 0
+    while i < len(blocks):
+        kind, val = blocks[i]
+        if kind == "sub":
+            group = []
+            while i < len(blocks) and blocks[i][0] == "sub":
+                group.append(blocks[i][1])
+                i += 1
+            lis = "".join(f"<li>{esc(g)}</li>" for g in group)
+            parts.append(f"<ol>{lis}</ol>")
+            continue
+        if kind in ("main", "subhead"):
+            parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
         else:
-            parts.append(f"<div>{esc(line)}</div>")
+            parts.append(f"<div>{esc(val)}</div><div><br></div>")
+        i += 1
     body = "".join(parts)
 
     tmp = Path("/tmp/arroyo-sermon-note.html")
