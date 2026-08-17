@@ -340,7 +340,16 @@ def update_note(note_id, subject, when, text):
     straighten = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
     takeaway = key_takeaway(title, "\n".join(v for _, v in blocks))
-    img = header_image_tag(note_id)
+    # IMAGES ARE DELIBERATELY NOT WRITTEN. Two mechanisms were tested against the live
+    # note and BOTH fail:
+    #   1. inline <img src="data:image/jpeg;base64,..."> -> Notes creates an attachment
+    #      record with NO media behind it (name "missing value", `save attachment` errors)
+    #      i.e. a broken-image placeholder.
+    #   2. <img src="cid:...@icloud.apple.com"> re-linking the existing attachment ->
+    #      attachment count drops to 0; the image is dropped entirely.
+    # AppleScript cannot attach media to a note, so any body rewrite loses the graphic.
+    # Writing nothing is strictly better than writing a broken placeholder.
+    img = "" if os.environ.get("ARROYO_NOTE_IMAGE") != "1" else header_image_tag(note_id)
 
     log(f'title="{title}"  service={service:%Y-%m-%d}  takeaway={"yes" if takeaway else "no"}')
 
