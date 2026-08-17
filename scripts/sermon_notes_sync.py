@@ -366,6 +366,33 @@ def blocks_before_image(body_html):
         return None
     return len(re.findall(r"<div|<h1|<h2|<ol|<ul|<p\b", body_html[:m.start()]))
 
+INSTRUCT_MARK = "To save and edit this note"
+
+
+def protected_blocks(body_html):
+    """How many leading blocks the automation must NOT touch.
+
+    The graphic and the "*To save and edit this note..." notice are both permanent -- the
+    banner changes only when Dakota swaps the series by hand, and the notice never changes at
+    all. Leaving the notice in place is what lets it stay PURPLE: Notes strips font colour on
+    every paste, so the only way to keep colour is to never overwrite the line.
+
+    Returns the number of blocks from the top through the last protected one, or None when
+    there is no graphic (first run / graphic removed).
+    """
+    blocks = re.findall(r"<(?:div|h1|h2|ol|ul)\b.*?</(?:div|h1|h2|ol|ul)>", body_html, re.S)
+    img_i = next((i for i, b in enumerate(blocks) if "<img" in b), None)
+    if img_i is None:
+        return None
+    last = img_i
+    # The notice sits under the graphic, but a UI paste can leave several empty blocks
+    # between them, so scan generously rather than assuming it is adjacent.
+    for j in range(img_i + 1, min(img_i + 12, len(blocks))):
+        if INSTRUCT_MARK in re.sub(r"<[^>]+>", "", blocks[j]):
+            last = j
+            break
+    return last + 1
+
 
 def _ui(script, timeout=120):
     r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=timeout)
@@ -402,7 +429,7 @@ def _keys(lines):
         '  delay 0.4\n' + body + '\nend tell\n')
 
 
-def replace_around_image(note_id, header_html, body_html, img_line):
+def replace_around_image(note_id, header_html, body_html, skip_lines):
     """Rewrite the text ABOVE and BELOW the graphic without ever selecting the graphic.
 
     Layout assumed (img_line is derived from the note itself, not hardcoded):
@@ -418,7 +445,7 @@ def replace_around_image(note_id, header_html, body_html, img_line):
 
     # ---------- lower region: from the line after the image, to the end ----------
     _keys(['keystroke "a" using {command down}', "delay 0.3", up, "delay 0.3"]
-          + [down + "\n  delay 0.15" for _ in range(img_line)]
+          + [down + "\n  delay 0.15" for _ in range(skip_lines)]
           + ["delay 0.3",
              'key code 125 using {command down, shift down}',
              "delay 0.4",
@@ -463,11 +490,28 @@ def update_note(note_id, subject, when, text):
     instruct = ("*To save and edit this note, click on the share button at the top, press "
                 "“copy” then, create a new note and paste the text into your new note")
 
+    # snapshot before touching anything
+    BACKUPS.mkdir(parents=True, exist_ok=True)
+    quoted = note_id.replace('"', '\\"')
+    prev = ""
+    try:
+        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=240)
+        (BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html").write_text(prev, encoding="utf-8")
+    except Exception as e:
+        log(f"WARNING: could not back up existing note ({e})")
+
+    keep_notice = bool(prev) and INSTRUCT_MARK in prev
+
     header_html = (f"<div><b><h1>{esc(title)}</h1></b></div>"
                    f"<div><b>{esc(byline)}</b></div>")
 
-    parts = [f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div>',
-             "<div><br></div>"]
+    # The notice is only emitted when the note does not already carry one. When it IS
+    # present it lives inside the protected zone and is never overwritten -- that is what
+    # preserves its purple, since Notes drops font colour on every paste.
+    parts = []
+    if not keep_notice:
+        parts += [f'<div><i><span style="color:{INSTRUCT_COLOR}">{esc(instruct)}</span></i></div>',
+                  "<div><br></div>"]
     if takeaway:
         parts.append(f"<div>KEY TAKEAWAY: {esc(takeaway)}</div><div><br></div>")
     i = 0
@@ -486,23 +530,14 @@ def update_note(note_id, subject, when, text):
         i += 1
     body_html = "".join(parts)
 
-    # snapshot before touching anything
-    BACKUPS.mkdir(parents=True, exist_ok=True)
-    quoted = note_id.replace('"', '\\"')
-    prev = ""
-    try:
-        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=240)
-        (BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html").write_text(prev, encoding="utf-8")
-    except Exception as e:
-        log(f"WARNING: could not back up existing note ({e})")
-
-    img_line = blocks_before_image(prev) if prev else None
+    skip = protected_blocks(prev) if prev else None
     before = attachment_count(note_id)
 
-    if img_line:
-        log(f"graphic on line {img_line + 1}; editing around it (it will not be touched)")
+    if skip:
+        kept = "graphic + purple notice" if keep_notice else "graphic"
+        log(f"protecting the first {skip} lines ({kept}); editing only around them")
         _focus_note(note_id)
-        replace_around_image(note_id, header_html, body_html, img_line)
+        replace_around_image(note_id, header_html, body_html, skip)
         after = attachment_count(note_id)
         if after < before:
             raise RuntimeError(f"the graphic was lost ({before} -> {after} attachments)")
