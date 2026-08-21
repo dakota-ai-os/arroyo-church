@@ -2,6 +2,10 @@
   "playlistUrl": "https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX",
   "videos": [
     {
+      "id": "XzCD5yX7Fl4",
+      "title": "How to handle difficult relationships | Arroyo Podcast"
+    },
+    {
       "id": "RGFj3CopCQ0",
       "title": "Pastor Asks College Students About Jesus (Powerful Conversations)"
     },
@@ -20,11 +24,7 @@
     {
       "id": "d-7hW6V50NE",
       "title": "Answering Hard Questions Part One"
-    },
-    {
-      "id": "LzG57MZuVPo",
-      "title": "How Christians Should Talk to Muslims (Honest Conversation)"
     }
   ],
-  "updated": "2026-08-20"
+  "updated": "2026-08-21"
 }
