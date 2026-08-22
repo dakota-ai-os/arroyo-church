@@ -146,6 +146,14 @@ def run_osascript(script, timeout=90):
     return r.stdout.strip()
 
 
+# A correction line is also recognised by WHAT IT SAYS, not just how it opens. Josh typo'd
+# "Disreagrd" on 2026-08-20 and the opener list missed it, so the preamble became the sermon
+# title. Phrase matching survives misspellings of the first word.
+PREAMBLE_HINT = re.compile(
+    r"(last|previous|first|other)\s+email|real\s+outline|correct(ed)?\s+(one|outline)|"
+    r"below\s+is\s+the|here\s+is\s+the\s+(real|right|correct)",
+    re.I,
+)
 PREAMBLE = re.compile(
     r"^\s*(disregard|ignore|sorry|oops|correction|use this|this one|please use|my bad)\b", re.I)
 
@@ -161,7 +169,7 @@ def split_title_and_body(text):
         if not line:
             i += 1
             continue
-        if PREAMBLE.match(line) and len(line) < 120:
+        if (PREAMBLE.match(line) or PREAMBLE_HINT.search(line)) and len(line) < 160:
             i += 1
             continue
         break
