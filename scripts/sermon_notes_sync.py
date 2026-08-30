@@ -35,6 +35,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from email.header import decode_header, make_header
 from pathlib import Path
@@ -502,12 +503,27 @@ def update_note(note_id, subject, when, text):
     # snapshot before touching anything
     BACKUPS.mkdir(parents=True, exist_ok=True)
     quoted = note_id.replace('"', '\\"')
-    prev = ""
+    # Wake Notes before asking it anything. On 2026-08-30 the 07:00 run hit AppleEvent
+    # timeouts on every call: launchd fires into a session where Notes has been idle for
+    # hours, and the first Apple event can outlast the timeout while it comes back.
     try:
-        prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=240)
-        (BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html").write_text(prev, encoding="utf-8")
+        run_osascript('tell application "Notes" to activate', timeout=60)
+        time.sleep(3)
     except Exception as e:
-        log(f"WARNING: could not back up existing note ({e})")
+        log(f"WARNING: could not activate Notes ({e})")
+
+    prev = ""
+    read_ok = False
+    for attempt in (1, 2, 3):
+        try:
+            prev = run_osascript(f'tell application "Notes" to return body of note id "{quoted}"', timeout=240)
+            read_ok = True
+            (BACKUPS / f"{datetime.now():%Y-%m-%d-%H%M%S}.html").write_text(prev, encoding="utf-8")
+            break
+        except Exception as e:
+            log(f"WARNING: could not read/back up the note, attempt {attempt}/3 ({e})")
+            if attempt < 3:
+                time.sleep(10)
 
     keep_notice = bool(prev) and INSTRUCT_MARK in prev
 
@@ -577,9 +593,22 @@ def update_note(note_id, subject, when, text):
         _focus_note(note_id)
         replace_around_image(note_id, header_html, body_html, skip)
         after = attachment_count(note_id)
-        if after < before:
+        if before is not None and after is not None and after < before:
             raise RuntimeError(f"the graphic was lost ({before} -> {after} attachments)")
-        log(f"graphic intact ({after} attachment) and verified")
+        if before is None or after is None:
+            log("WARNING: could not count attachments -- graphic NOT verified, check by hand")
+        else:
+            log(f"graphic intact ({after} attachment) and verified")
+    elif not read_ok:
+        # 2026-08-30: Notes was unresponsive at 07:00, so the read above timed out and prev
+        # stayed "". protected_blocks() was never consulted, skip fell to None, and control
+        # reached the plain-body branch below -- which `set body`s over EVERYTHING and
+        # destroyed the series graphic. A failed read is NOT evidence that the graphic is
+        # absent, so it must never authorise the destructive write. Fail closed: a skipped
+        # Sunday is recoverable, a deleted graphic is not (it can only be re-pasted by hand).
+        raise RuntimeError(
+            "could not read the note (Notes unresponsive) -- refusing the full-body write "
+            "that would delete the series graphic. Re-run once Notes responds.")
     else:
         log("no graphic in the note -- plain body write")
         tmp = Path("/tmp/arroyo-sermon-note.html")
@@ -592,11 +621,17 @@ def update_note(note_id, subject, when, text):
 
 
 def attachment_count(note_id):
+    """Attachment count, or None when Notes would not answer.
+
+    None (not 0) on failure: a failed query used to read as "zero attachments", which made
+    the `after < before` guard below unfireable and let the run log "graphic intact" without
+    having verified anything.
+    """
     try:
         return int(run_osascript(
             f'tell application "Notes" to return count of attachments of note id "{note_id}"', timeout=180))
     except Exception:
-        return 0
+        return None
 
 
 def main():
