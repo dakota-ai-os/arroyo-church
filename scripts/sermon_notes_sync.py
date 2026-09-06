@@ -2,9 +2,16 @@
 """
 Sermon notes email  ->  shared Apple Note.  Unattended.
 
-Josh emails the week's sermon notes to av@arroyochurch.com. This pulls the most
-recent one and replaces the body of a shared Apple Note so it's current before
+The week's preacher emails sermon material to av@arroyochurch.com. This pulls the
+most recent one and replaces the body of a shared Apple Note so it's current before
 Sunday service.
+
+TWO SENDERS, TWO FORMATS (both handled):
+  * Josh sends a Google-Docs OUTLINE  -- subject "Sermon Notes 9/13/26"
+  * A guest sends a SLIDE LIST        -- subject "Slides" (Cristian Ayquipa, 2026-09-06)
+Sender and subject are both allowlists (see allowed_senders / allowed_subjects), and
+anything matched only by a loose keyword like "slides" must also cite scripture
+(looks_like_sermon) before it is allowed to overwrite the note.
 
 WHY THIS EXISTS / WHY LAUNCHD:
 This replaces a Cowork task that worked but re-prompted for Apple Notes access
@@ -67,6 +74,52 @@ def load_config():
     return cfg
 
 
+def _csv(cfg, key, fallback):
+    """Comma-separated config value -> lowercased list. Falls back to the old single-value
+    key so an un-migrated gmail.env keeps working."""
+    raw = cfg.get(key) or fallback
+    return [p.strip().lower() for p in raw.split(",") if p.strip()]
+
+
+def allowed_senders(cfg):
+    """Who may set the note. Josh preaches most weeks, but guests preach too (Cristian
+    Ayquipa, John 15, 2026-09-06) and they send from their OWN church address -- a
+    single-sender filter silently skips those weeks and the note goes stale.
+
+    SERMON_SENDERS accepts full addresses AND bare domains ("@arroyochurch.com"), so a
+    new guest needs no config change. Sender alone is deliberately NOT enough to pass:
+    Josh also emails graphics and announcements from the same address, so the subject
+    allowlist below still has to match."""
+    return _csv(cfg, "SERMON_SENDERS", cfg["SERMON_SENDER"] + ",@arroyochurch.com")
+
+
+def allowed_subjects(cfg):
+    """Subject keywords that mark an email as THE sermon material.
+
+    "slides" is here because guests send a deck rather than an outline -- but it is a
+    generic word, so anything matched only by a loose keyword must also pass the
+    scripture gate in looks_like_sermon(). "sermon notes"/"sermon outline" are
+    unambiguous and skip that gate."""
+    return _csv(cfg, "SUBJECT_KEYWORDS",
+                cfg.get("SUBJECT_CONTAINS", "Sermon Notes") + ",sermon outline,slides,sermon")
+
+
+STRICT_SUBJECTS = ("sermon notes", "sermon outline")
+
+# Book chapter:verse -- the cheapest reliable "this is sermon material" signal.
+SCRIPTURE_ANYWHERE = re.compile(r"\b(?:[1-3]\s*)?[A-Z][a-z]{2,}\s+\d{1,3}:\d{1,3}")
+
+
+def looks_like_sermon(subject, text):
+    """Guard for the loose keywords. An unambiguous subject passes on its own; anything
+    else must actually cite scripture. Stops an announcements deck subject-lined "Slides"
+    from overwriting the note with graphics chatter."""
+    s = (subject or "").lower()
+    if any(k in s for k in STRICT_SUBJECTS):
+        return True
+    return bool(SCRIPTURE_ANYWHERE.search(text or ""))
+
+
 def _clean_pw(pw):
     """Google shows app passwords in 4-char groups; copying from the browser often
     yields NON-BREAKING spaces (U+00A0), which imaplib cannot ascii-encode. Keep
@@ -80,15 +133,44 @@ def fetch_latest(cfg):
     M = imaplib.IMAP4_SSL("imap.gmail.com")
     try:
         M.login(cfg["GMAIL_USER"], _clean_pw(cfg["GMAIL_APP_PASSWORD"]))
-        M.select("INBOX", readonly=True)  # readonly: never marks Josh's mail as read
-        # MUST filter on subject: Josh's newest email is often unrelated (worship-night
-        # graphics, etc). Grabbing "latest from Josh" would overwrite the note with that.
-        subj_key = cfg.get("SUBJECT_CONTAINS", "Sermon Notes")
-        typ, data = M.search(None, f'(FROM "{cfg["SERMON_SENDER"]}" SUBJECT "{subj_key}" SINCE {since})')
+        M.select("INBOX", readonly=True)  # readonly: never marks the sender's mail as read
+        # Filter in Python rather than with an IMAP query. The allowlists are now
+        # multi-sender AND multi-subject, and IMAP's prefix-notation OR nests horribly
+        # past two terms. The mailbox holds ~12 messages a week, so scanning headers is
+        # cheaper than getting the query wrong.
+        #
+        # MUST still filter on subject: the newest email from a preacher is often
+        # unrelated (worship-night graphics, announcement decks). "Latest from Josh"
+        # would overwrite the note with that.
+        typ, data = M.search(None, f"(SINCE {since})")
         ids = data[0].split() if typ == "OK" and data and data[0] else []
-        if not ids:
+        senders, subjects = allowed_senders(cfg), allowed_subjects(cfg)
+
+        best = None                                   # (datetime, message-id) of the winner
+        for mid in ids:
+            typ, hdr = M.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
+            if typ != "OK" or not hdr or not hdr[0]:
+                continue
+            h = email.message_from_bytes(hdr[0][1])
+            frm = str(make_header(decode_header(h.get("From", "") or ""))).lower()
+            sub = str(make_header(decode_header(h.get("Subject", "") or "")))
+            addr = email.utils.parseaddr(frm)[1]
+            if not any(addr == s or addr.endswith(s) for s in senders):
+                continue
+            if not any(k in sub.lower() for k in subjects):
+                continue
+            try:
+                when_h = email.utils.parsedate_to_datetime(h.get("Date"))
+                if when_h.tzinfo is None:
+                    when_h = when_h.replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            if best is None or when_h > best[0]:
+                best = (when_h, mid)
+
+        if best is None:
             return None
-        typ, raw = M.fetch(ids[-1], "(RFC822)")  # last id = newest
+        typ, raw = M.fetch(best[1], "(RFC822)")
         if typ != "OK":
             return None
         msg = email.message_from_bytes(raw[0][1])
@@ -176,6 +258,108 @@ def split_title_and_body(text):
         break
     title = lines[i].strip() if i < len(lines) else ""
     return title, "\n".join(lines[i + 1:]).strip()
+
+
+# ---------------------------------------------------------------- guest slide decks
+# Josh sends a Google-Docs OUTLINE: a lone "N." marker on its own line, text indented
+# beneath, main-vs-sub told apart by the numbering run (see parse_structure).
+#
+# A guest sends a SLIDE LIST instead -- "N. <slide text>" all on one line, where N is the
+# slide number, not an outline level. Cristian Ayquipa, 2026-09-06:
+#     1. Title- STAYING CONNECTED
+#     4. Point 1- PRUNING IS PART OF
+#     STAYING CONNECTED
+# Run that through parse_structure and you get eleven "main points" -- the deck's slide
+# numbers -- and no real structure. The actual outline lives in the "Title-"/"Point N-"
+# labels, so detect the shape and parse those instead.
+
+SLIDE_LINE   = re.compile(r"^\s*(\d{1,2})\.\s+(\S.*)$")
+SLIDE_TITLE  = re.compile(r"^title\s*[-–:]\s*(.+)$", re.I)
+SLIDE_POINT  = re.compile(r"^point\s*(\d+)\s*[-–:]\s*(.*)$", re.I)
+BARE_REF     = re.compile(r"^\s*(?:[1-3]\s*)?[A-Z][a-z]{2,}\s+\d{1,3}:\d{1,3}(?:\s*[-–]\s*\d{1,3})?\s*$")
+BULLET       = re.compile(r"^\s*[-•–]\s+(\S.*)$")
+
+
+def looks_like_slides(text):
+    """True when the body is a slide list rather than an outline. Requires several
+    inline-numbered lines forming a run from 1, so a stray '1. something' in prose
+    cannot flip a normal outline into slide mode."""
+    nums = [int(m.group(1)) for m in
+            (SLIDE_LINE.match(l) for l in text.splitlines()) if m]
+    return len(nums) >= 4 and nums[0] == 1 and nums == sorted(nums)
+
+
+def parse_slides(text):
+    """Slide list -> (title, blocks) in the same vocabulary parse_structure emits.
+
+    Slide numbers are dropped -- they are deck bookkeeping, not outline levels. A slide
+    carrying "Point N-" becomes a main heading (its text may wrap onto the slide's later
+    lines); everything else becomes content under the current point."""
+    # group the flat lines into slides
+    slides, cur = [], None
+    for line in text.splitlines():
+        m = SLIDE_LINE.match(line)
+        if m:
+            if cur is not None:
+                slides.append(cur)
+            cur = [m.group(2).strip()]
+        elif cur is not None and line.strip():
+            cur.append(line.strip())
+    if cur is not None:
+        slides.append(cur)
+
+    title, blocks = "", []
+    for slide in slides:
+        head = slide[0]
+
+        mt = SLIDE_TITLE.match(head)
+        if mt and not title:
+            title = " ".join([mt.group(1).strip()] + slide[1:]).strip()
+            continue
+
+        mp = SLIDE_POINT.match(head)
+        if mp:
+            # a Point slide is ONE heading; its wrapped remainder belongs to the heading
+            body = " ".join([mp.group(2).strip()] + slide[1:]).strip()
+            blocks.append(("main", f"{mp.group(1)}. {body}"))
+            continue
+
+        # ordinary content slide
+        i = 0
+        while i < len(slide):
+            ln = slide[i]
+            mb = BULLET.match(ln)
+            if mb:
+                blocks.append(("sub", mb.group(1).strip()))
+                i += 1
+                continue
+            if ln[:1] in '"“':
+                # A verse is hard-wrapped by Gmail, so rejoin until the closing quote,
+                # then pull in the reference that follows on its own line. House style
+                # keeps them as one block: "quote" -Book c:v
+                quote, i = [ln], i + 1
+                while not quote[-1].rstrip().endswith(('"', '”')) and i < len(slide):
+                    quote.append(slide[i]); i += 1
+                q = " ".join(quote)
+                if i < len(slide) and BARE_REF.match(slide[i]):
+                    q = f"{q} -{slide[i].strip()}"
+                    i += 1
+                blocks.append(("text", q))
+                continue
+            # Only a slide's FIRST line can head the ones under it, and a line ending in
+            # a full stop is a statement, not a heading -- that keeps "THE TRUE VINE" and
+            # "3 WAYS TO STAY CONNECTED" as headings while the three-line framing
+            # ("JESUS IS THE SOURCE.") stays body text.
+            if i == 0 and not ln.rstrip().endswith(".") \
+                    and _is_subheading(ln) and not BARE_REF.match(ln):
+                blocks.append(("subhead", ln))
+            else:
+                blocks.append(("text", ln))
+            i += 1
+
+    if not title:                      # no explicit "Title-" label; fall back to slide 1
+        title = slides[0][0].strip() if slides else ""
+    return title, blocks
 
 
 def sunday_from_subject(subject, fallback):
@@ -488,9 +672,13 @@ def update_note(note_id, subject, when, text):
     """
     esc = lambda x: html.escape(x, quote=False)
 
-    title, rest = split_title_and_body(text)
+    if looks_like_slides(text):
+        log("body looks like a guest slide deck -- using the slide parser")
+        title, blocks = parse_slides(text)
+    else:
+        title, rest = split_title_and_body(text)
+        blocks = parse_structure(rest)
     service = sunday_from_subject(subject, when)
-    blocks = parse_structure(rest)
     straighten = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
     takeaway = key_takeaway(title, "\n".join(v for _, v in blocks))
@@ -636,7 +824,8 @@ def attachment_count(note_id):
 
 def main():
     cfg = load_config()
-    log(f"looking for mail from {cfg['SERMON_SENDER']} (last {cfg['LOOKBACK_DAYS']} days)")
+    log(f"looking for mail from {'/'.join(allowed_senders(cfg))} "
+        f"subject~{'|'.join(allowed_subjects(cfg))} (last {cfg['LOOKBACK_DAYS']} days)")
 
     found = fetch_latest(cfg)
     if not found:
@@ -644,6 +833,10 @@ def main():
         return 0
 
     subject, when, text = found
+    if not looks_like_sermon(subject, text):
+        log(f'found "{subject}" but it cites no scripture and the subject is not an '
+            f"explicit sermon-notes one -- treating it as unrelated, note left untouched.")
+        return 0
     log(f'found "{subject}" ({when:%a %b %d %H:%M}) -- {len(text)} chars')
 
     title = update_note(cfg["NOTE_ID"], subject, when, text)
