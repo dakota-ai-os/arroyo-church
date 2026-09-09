@@ -189,10 +189,12 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
 2. Answer: phone, office hours, year founded. Send 10–15 photos.
 3. Create the Google Ads account under av@ and add billing (~10 min). Claude then builds the campaign paused.
 4. Sit with Claude through the Google for Nonprofits sign-up (EIN + terms) and find the IRS letter PDF.
-5. GA4 `G-YQ1G7DZBLE` is owned by the former agency. Decision: replace it with a new GA4 property under av@. The Analytics
-   account-creation form is filled ("Arroyo Church"); clicking Next accepts the Analytics terms, so Dakota clicks it (or says go).
-   Then: property "arroyochurch.com", web stream → new G- id → swap into Squarespace (Settings → Developer Tools →
-   External API Keys → Google Analytics) → mark the acTrack events as key events → link to Ads 974-189-2062.
+5. GA4 replaced 2026-09-09: new Analytics account "Arroyo Church" (a407495086) / property "arroyochurch.com"
+   (p553508954) / web stream 15749987659 / **measurement ID G-W3RLM6P1H0**, owned by av@arroyochurch.com. Swapped into
+   Squarespace (Settings → Developer Tools → External API Keys → Google Analytics) replacing the agency-owned G-YQ1G7DZBLE.
+   Live site confirmed serving G-W3RLM6P1H0. GA4's Events hub only lets you star an event as a key event after it has been
+   received, so: once `plan_visit_submit`, `join_group_submit`, `call_click`, `directions_click`, `watch_live_click` show up under
+   Admin → Events → Recent events, star them. Then link GA4 ↔ Ads 974-189-2062 (Admin → Product links) once the Ads wizard is done.
 
 ## 6. Copy bank
 
