@@ -104,9 +104,31 @@ Post once (sermon recap) · answer reviews within 48h · ask 3 people for a revi
 
 ## 3. Paid Google Ads — $125/mo
 
-**Account:** Google Ads customer ID **974-189-2062** was created under av@arroyochurch.com on 2026-09-09 (the "New Google
-Ads Account" button creates the shell immediately). Its signup wizard (business info → campaign → payment) is still
-unfinished; billing must be entered by Dakota. Claude builds the real campaign paused; Dakota flips it on.
+**Account:** Google Ads customer ID **974-189-2062**, created under av@arroyochurch.com on 2026-09-09. Billing entered by
+Dakota the same day (Mastercard ••••3144, "Arroyo Church" payments profile). Claude builds the campaign paused; Dakota flips it on.
+
+**Build log (2026-09-09) — draft campaign "Search - Church in Livermore", draftId 10213248828, campaignId 281499211207158.**
+Done in the wizard: objective "without guidance" → Search · goal "Form submissions from your website" set to *manual tag
+after creation*, enhanced conversions **off** · bidding Clicks, max CPC $2.50 · networks: partners + Display **off** ·
+location 10 mi radius around 945 Concannon Blvd, **Presence** only · English · EU political ads = No · AI Max **off** ·
+skipped Google's AI keyword/asset generation · **Ad group 1** = the 12 "Church in Livermore" keywords (phrase + exact) ·
+RSA with 12 headlines / 4 descriptions, paths `Livermore/Visit` (ad strength "Average" pre-launch — the only open tip is
+"include popular keywords") · 4 sitelinks (Connect Groups → /connect, View Sermons → /messages, Our Team → /team,
+About Arroyo Church → /about; Google's suggested "About Us" pointed at the broken `/new-dropdown` URL — rejected) ·
+4 callouts · call asset (925) 694-0426.
+**Blocked at the Budget step:** Google threw "Confirm it's you" (session re-auth, opens a popup to
+`ads.google.com/nav/transaction/reauth`) and the draft flipped to "Changes failed to save". Only Dakota can complete that
+sign-in. After it clears, re-verify Bidding (it carries a warning icon), then Budget $4.11/day → Review → Publish → **Pause**.
+**Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
+Church" and description 1 → "Welcoming Bible-based Christian church in Livermore. Worship, teaching and kids ministry."
+(matches the approved SBC profile copy); description 3 trimmed to "Searching for a church near Livermore, Pleasanton or
+Dublin? You're welcome as you are." (90-char cap). Sitelinks: the wizard's real-page set above replaces
+"Plan Your Visit / Watch a Sermon / Kids Ministry / Connect Groups" (Plan Your Visit is already the landing page; there is
+no kids page to link).
+**Still to do after publish (the wizard only builds one ad group):** rename "Ad group 1" → "Church in Livermore"; add ad
+groups 2 and 3 from Campaign → Ad groups → +, same RSA copy, group 3 with a $1.50 max CPC; add the campaign-level
+negative list; add the location asset once GBP is linked (Assets → Location); create the "Form submissions" conversion
+action's tag and wire its AW-id/label into `acTrack()`; link GA4 a407495086/p553508954 ↔ Ads.
 
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
