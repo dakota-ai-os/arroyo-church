@@ -92,8 +92,9 @@ existing sermon→blog automation; event posts as they come.
 - Instagram is all Reels and Facebook photo URLs are not fetchable from the page, so photos came from the website only.
 
 ### Still open
-- **Q&A:** Google's desktop UI no longer exposes a Q&A editor for this profile (not on Search, Maps, or the manager).
-  Seed the questions from the Google Maps app on a phone signed in as av@ (Maps → the listing → Questions & answers → Ask).
+- **Q&A:** moot. Google discontinued Business Profile Q&A on 2025-11-03 (phased out from 2025-12-03); Gemini "Ask Maps" now
+  answers from the profile, reviews, photos, and website. So the Q&A copy belongs on the website FAQ (/plan-your-visit already
+  has an FAQ block) and in posts. To add: the SBC line and the worship-style line.
 - **Sermon-recap post** — wire into the weekly sermon→blog automation (draft text + YouTube link → GBP post).
 - **Yelp phone** (925) 642-1516 → 694-0426: needs the Yelp for Business login.
 
@@ -103,8 +104,9 @@ Post once (sermon recap) · answer reviews within 48h · ask 3 people for a revi
 
 ## 3. Paid Google Ads — $125/mo
 
-**Account:** new Google Ads account under av@arroyochurch.com (Dakota creates it + enters billing;
-Claude builds everything paused; Dakota flips it on).
+**Account:** Google Ads customer ID **974-189-2062** was created under av@arroyochurch.com on 2026-09-09 (the "New Google
+Ads Account" button creates the shell immediately). Its signup wizard (business info → campaign → payment) is still
+unfinished; billing must be entered by Dakota. Claude builds the real campaign paused; Dakota flips it on.
 
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
@@ -149,10 +151,12 @@ conversion snippet directly.
 
 ## 4. Google Ad Grant ($10,000/mo in Search ads)
 
-**Status 2026-09-09:** Google for Nonprofits sign-up is open in Chrome as av@arroyochurch.com at the "Find your organization"
-step. Goodstack's database lists **ARROYO CHURCH · EIN 94-1347079 · Oakland, CA 94619** (the IRS file's newer address is
-945 Concannon Blvd). Ruling date is 2019, before the 2023 launch, so this EIN may belong to a predecessor entity. **Dakota
-must confirm 94-1347079 is the church's EIN** (donation receipts / bank paperwork) before it is selected and the terms accepted.
+**Status 2026-09-09 (evening):** Google for Nonprofits request **SUBMITTED** under av@arroyochurch.com (Dakota confirmed
+EIN 94-1347079 and completed the contact/terms steps). Goodstack replies to av@arroyochurch.com within 2–14 business days;
+watch for verifications@mail.goodstack.org. Context for any Goodstack question: the church operated as **East Hills Church**
+before relaunching as Arroyo Church in September 2023 (Facebook posts from 2020 carry the East Hills logo), which is why the
+EIN's ruling date is 2019 and Goodstack shows an older Oakland mailing address. Have the IRS determination letter or EIN letter
+ready under the East Hills name if asked. After approval: Activate products → Google Ad Grants.
 
 **Eligibility check:** 501(c)(3) in the IRS database ✔ · own domain on HTTPS ✔ · substantial
 original content ✔ · no AdSense on the site ✔ · not a school/hospital/government ✔. Religious
@@ -185,8 +189,10 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
 2. Answer: phone, office hours, year founded. Send 10–15 photos.
 3. Create the Google Ads account under av@ and add billing (~10 min). Claude then builds the campaign paused.
 4. Sit with Claude through the Google for Nonprofits sign-up (EIN + terms) and find the IRS letter PDF.
-5. Find who owns GA4 `G-YQ1G7DZBLE` (Squarespace → Settings → Developer Tools → External API Keys, or
-   whoever set it up) and add av@ as editor — or approve replacing it with a new GA4 under av@.
+5. GA4 `G-YQ1G7DZBLE` is owned by the former agency. Decision: replace it with a new GA4 property under av@. The Analytics
+   account-creation form is filled ("Arroyo Church"); clicking Next accepts the Analytics terms, so Dakota clicks it (or says go).
+   Then: property "arroyochurch.com", web stream → new G- id → swap into Squarespace (Settings → Developer Tools →
+   External API Keys → Google Analytics) → mark the acTrack events as key events → link to Ads 974-189-2062.
 
 ## 6. Copy bank
 
