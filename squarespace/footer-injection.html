@@ -642,6 +642,18 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* (single-page nav uses /#anchors; old pages kept live + indexed for SEO — no auto-redirect) */
   var fine=matchMedia('(pointer:fine)').matches, reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var HOME=function(){ return document.body.classList.contains('homepage'); };
+  /* ---- Conversion tracking (GA4 key events → imported into Google Ads). Fires only on real successes. ---- */
+  function acTrack(src, extra){
+    var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit'};
+    var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
+    try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('a'):null; if(!a) return; var h=a.getAttribute('href')||'';
+    if(h.indexOf('tel:')===0) acTrack('call',{event_name:'call_click'});
+    else if(h.indexOf('google.com/maps/dir')>-1) acTrack('directions',{event_name:'directions_click'});
+    else if(h.indexOf('youtube.com/@arroyochurch/live')>-1) acTrack('watch_live',{event_name:'watch_live_click'});
+  },true);
 
   /* ---- custom cursor ---- */
   if(fine&&!reduce){
@@ -1045,7 +1057,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; data.source='join_group'; data.intents=['group']; /* explicit next-step contract; worker also has a {group}-only fallback */
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
-        .then(function(j){ if(j&&j.success){ var name=(data.first||'').trim();
+        .then(function(j){ if(j&&j.success){ acTrack(data.source); var name=(data.first||'').trim();
             card.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">Thanks, <span class="vf-name"></span>!</h3><p>We got your request &mdash; one of our group leaders will reach out soon to help you get connected.</p></div>';
             card.querySelector('.vf-name').textContent=name||'friend'; var h=card.querySelector('h3'); if(h) h.focus();
           } else { throw new Error((j&&j.message)||'failed'); } })
@@ -1104,7 +1116,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var data={source:'connect_class',first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),nextSteps:steps,team:[],website:fd.get('website')||'',turnstileToken:token};
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
-        .then(function(j){ if(j&&j.success){ var name=(data.first||'').trim();
+        .then(function(j){ if(j&&j.success){ acTrack(data.source); var name=(data.first||'').trim();
             card.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">You&rsquo;re in, <span class="vf-name"></span>!</h3><p>Thanks for signing up for the Connect Class. Someone from our team will reach out soon with the next date and all the details.</p></div>';
             card.querySelector('.vf-name').textContent=name||'friend'; var h=card.querySelector('h3'); if(h) h.focus();
           } else { throw new Error((j&&j.message)||'failed'); } })
@@ -1183,7 +1195,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       fetch('https://arroyo-connect.dakota-fac.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){
-          if(j&&j.success){
+          if(j&&j.success){ acTrack(data.source);
             var name=(data.name||'').trim();
             wrap.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">Thanks, <span class="vf-name"></span>!</h3><p>We saved you a seat. Josh will reach out soon to say hi and help you plan your visit.</p><a class="btn btn-ghost-dark" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a></div>';
             wrap.querySelector('.vf-name').textContent = name || 'friend'; /* textContent, never innerHTML, so a name can't inject markup */
@@ -1343,7 +1355,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         var data={source:c.src,first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:c.group?(fd.get('group')||''):'',nextSteps:steps,intents:intents,team:[],website:fd.get('website')||''};
         fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
           .then(function(r){ return r.json(); })
-          .then(function(j){ if(j&&j.success){
+          .then(function(j){ if(j&&j.success){ acTrack(data.source);
               var nm=(data.first||'').trim();
               wrap.innerHTML='<div class="vf-done"><div class="vf-check">&#10003;</div><h3 tabindex="-1">Thanks, <span class="vf-name"></span>!</h3><p>'+c.done+'</p></div>';
               wrap.querySelector('.vf-name').textContent=nm||'friend'; /* textContent so a name can't inject markup */
@@ -1471,7 +1483,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var btn=form.querySelector('#ac-ct-submit'), orig=btn.getAttribute('data-orig')||btn.innerHTML; btn.disabled=true; btn.textContent='Sending…';
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
-        .then(function(j){ if(j&&j.success){ showDone(data.first, hasDecision); } else { throw new Error('failed'); } })
+        .then(function(j){ if(j&&j.success){ acTrack(data.source); showDone(data.first, hasDecision); } else { throw new Error('failed'); } })
         .catch(function(){ btn.disabled=false; btn.innerHTML=orig; if(window.turnstile&&tsId!==null){ try{ window.turnstile.reset(tsId); }catch(e){} } if(err){ err.style.color=''; err.textContent="Sorry — something went wrong. Please text or call us at (925) 694-0426 and we'll take care of it."; } });
     }
     form.addEventListener('submit',function(e){ e.preventDefault();
