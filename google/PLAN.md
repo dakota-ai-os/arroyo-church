@@ -49,8 +49,21 @@ Local church terms each show 100–1K searches/mo, competition **Low**. Bid data
 
 ## 2. Business Profile — changes
 
-### Done (2026-09-09)
-- Added **Worship service** hours: Sunday 10:00–11:30 AM (pending review, ~10 min).
+### Done (2026-09-09, all pending Google review unless noted)
+- Worship service hours: Sunday 10:00–11:30 AM.
+- Description replaced with Dakota's copy ("bible-based Christian church…"). Google rejects URLs in descriptions, so the
+  last line reads "Plan your visit on our website. We would love to save you a seat."
+- Opening date: September 2023.
+- Website link now carries UTM tags (`utm_source=google&utm_medium=organic&utm_campaign=gbp`).
+- Services added: Sunday Worship Service · Kids Ministry · Students & Youth · Connect Groups · Prayer · Baptism · Online Sermons & Livestream.
+- 9 photos uploaded from the website (worship gathering, lobby banner, Josh preaching, outdoor tent, 5 team headshots).
+- Posts published: (1) What to expect — Sign up → /plan-your-visit, lobby photo; (2) Connect groups — Learn more → /connect,
+  worship-gathering photo. The Monday sermon recap is left to the sermon→blog pipeline (add a GBP post step there).
+- Phone consolidated to (925) 694-0426: the site-wide Church JSON-LD (Squarespace HEADER injection) now carries it, plus
+  a real logo + hero image instead of the placeholder paths. Yelp still needs a manual edit (needs the Yelp for Business login).
+- Conversion tracking LIVE on arroyochurch.com (commit 09fb874): `acTrack()` fires GA4 events on every form success
+  (`plan_visit_submit`, `join_group_submit`, `connect_class_submit`, `prayer_request_submit`, `connect_tag_submit`) and on
+  `call_click` / `directions_click` / `watch_live_click`. Next: mark them as key events in GA4 `G-YQ1G7DZBLE` and import into Ads.
 
 ### Proposed — need Dakota's go (public-facing copy)
 **Description (replace; ~560/750 chars):**
@@ -64,19 +77,25 @@ Local church terms each show 100–1K searches/mo, competition **Low**. Bid data
 **Services (custom, under Church):** Sunday Worship Service · Kids Ministry · Students/Youth ·
 Connect Groups · Prayer · Baptism · Online Sermons & Livestream.
 
-**Q&A seed (owner asks + answers):** service time · kids · what to wear · how long · parking ·
-denomination · online option. (Copy in the artifact / section 6.)
+**Q&A seed (owner asks + answers):** service time · kids · what to wear · parking · denomination (SBC) ·
+worship style · online option. (Copy in section 6.)
 
 **Posts (weekly):** first three drafted (section 6). Ongoing: Monday sermon-recap post fed by the
 existing sermon→blog automation; event posts as they come.
 
 **Website link with UTM:** `https://www.arroyochurch.com/?utm_source=google&utm_medium=organic&utm_campaign=gbp`
 
-### Needs a fact from Dakota
-- Correct phone: 694-0426 or 642-1516? Then fix the JSON-LD on the standalone pages and Yelp.
-- Are Tue–Fri 10–4 real, staffed hours? If not, remove (wrong hours = "closed" walk-ups + bad reviews).
-- Year founded → Opening date field.
-- 10–15 real photos: exterior with signage, lobby/coffee, kids room, worship, team.
+### Facts confirmed by Dakota (2026-09-09)
+- Phone is (925) 694-0426. Tue–Fri 10–4 are real office hours. Church opened September 2023.
+- Denomination line for Q&A: "We are a Christian church part of the SBC, centered on knowing and showing the love of Jesus."
+- Worship style: blends contemporary and traditional — new songs and hymns that have been around for decades.
+- Instagram is all Reels and Facebook photo URLs are not fetchable from the page, so photos came from the website only.
+
+### Still open
+- **Q&A:** Google's desktop UI no longer exposes a Q&A editor for this profile (not on Search, Maps, or the manager).
+  Seed the questions from the Google Maps app on a phone signed in as av@ (Maps → the listing → Questions & answers → Ask).
+- **Sermon-recap post** — wire into the weekly sermon→blog automation (draft text + YouTube link → GBP post).
+- **Yelp phone** (925) 642-1516 → 694-0426: needs the Yelp for Business login.
 
 ### Weekly rhythm (15 min)
 Post once (sermon recap) · answer reviews within 48h · ask 3 people for a review (QR in bulletin,
@@ -129,6 +148,11 @@ and imported into Ads (needs the property owner to add av@ as editor). Fallback:
 conversion snippet directly.
 
 ## 4. Google Ad Grant ($10,000/mo in Search ads)
+
+**Status 2026-09-09:** Google for Nonprofits sign-up is open in Chrome as av@arroyochurch.com at the "Find your organization"
+step. Goodstack's database lists **ARROYO CHURCH · EIN 94-1347079 · Oakland, CA 94619** (the IRS file's newer address is
+945 Concannon Blvd). Ruling date is 2019, before the 2023 launch, so this EIN may belong to a predecessor entity. **Dakota
+must confirm 94-1347079 is the church's EIN** (donation receipts / bank paperwork) before it is selected and the terms accepted.
 
 **Eligibility check:** 501(c)(3) in the IRS database ✔ · own domain on HTTPS ✔ · substantial
 original content ✔ · no AdSense on the site ✔ · not a school/hospital/government ✔. Religious
