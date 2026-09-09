@@ -1,10 +1,14 @@
 {
   "series": {
-    "title": "Guidance for Today",
-    "blurb": "A new message every Sunday.",
-    "playlistUrl": "https://www.youtube.com/playlist?list=PLDBtYBbZ-aGM"
+    "title": "Latest Messages",
+    "blurb": "The newest teaching from Arroyo, including standalone messages.",
+    "playlistUrl": "https://www.youtube.com/@arroyochurch/videos"
   },
   "videos": [
+    {
+      "id": "hw8KEKFRkno",
+      "title": "I Am the True Vine: What Jesus Meant | John 15 | Arroyo Church"
+    },
     {
       "id": "dR7rQ7MhnNI",
       "title": "What the Bible Says About Money | Proverbs 22:7"

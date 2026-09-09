@@ -36,7 +36,9 @@ function parseFeed(xml) {
     const e = m[1];
     const id = (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1];
     const title = (e.match(/<title>([\s\S]*?)<\/title>/) || [])[1];
-    if (id && title) entries.push({ id, title: decode(title) });
+    const published = (e.match(/<published>([^<]+)<\/published>/) || [])[1] || '';
+    const desc = (e.match(/<media:description>([\s\S]*?)<\/media:description>/) || [])[1] || '';
+    if (id && title) entries.push({ id, title: decode(title), published, descLen: desc.length });
   }
   return { feedTitle, entries };
 }
@@ -66,6 +68,32 @@ async function resolveSeriesPlaylistId() {
   }
 }
 
+// Standalone / one-off sermons (guest speakers, weeks between series) are in NO series
+// playlist, so the playlist feed alone silently misses them. Full sermons carry the long
+// structured description (~2.7-2.9k chars); every short, clip and podcast episode on this
+// channel is under ~550. That gap is the discriminator, and it needs no API key.
+const SERMON_MIN_DESC = Number(process.env.SERMON_MIN_DESC || 1200);
+const NOT_A_SERMON = /podcast|worship night/i;
+
+async function channelSermons() {
+  try {
+    const r = await fetch('https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID);
+    if (!r.ok) return [];
+    return parseFeed(await r.text()).entries
+      .filter(e => e.descLen >= SERMON_MIN_DESC && !NOT_A_SERMON.test(e.title));
+  } catch {
+    return [];   // never let this optional pass break the sync
+  }
+}
+
+function mergeSermons(playlistEntries, channelEntries) {
+  const seen = new Map();
+  for (const e of [...playlistEntries, ...channelEntries]) if (!seen.has(e.id)) seen.set(e.id, e);
+  return [...seen.values()]
+    .sort((a, b) => new Date(b.published) - new Date(a.published))
+    .map(({ id, title }) => ({ id, title }));   // keep the published shape unchanged
+}
+
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
 
@@ -75,21 +103,30 @@ async function main() {
   const [sTitle, ...rest] = (s.feedTitle || '').split(/:\s*/);
   let blurb = rest.join(': ');
   if (blurb && !/[.!?]$/.test(blurb)) blurb += '.';
-  const sermons = {
-    series: {
-      title: sTitle || 'Current Series',
-      blurb: blurb || 'A new message every Sunday.',
-      playlistUrl: 'https://www.youtube.com/playlist?list=' + seriesId,
-    },
-    videos: s.entries.slice(0, MAX),
-    updated: today,
-  };
+  const videos = mergeSermons(s.entries, await channelSermons()).slice(0, MAX);
+
+  // If the newest message is a standalone (not in the series playlist), the series bar would
+  // mislabel it and "Watch the Series" would point at a playlist that does not contain it.
+  const standalone = videos.length && !s.entries.some(e => e.id === videos[0].id);
+  const series = standalone
+    ? {
+        title: 'Latest Messages',
+        blurb: 'The newest teaching from Arroyo, including standalone messages.',
+        playlistUrl: 'https://www.youtube.com/@arroyochurch/videos',
+      }
+    : {
+        title: sTitle || 'Current Series',
+        blurb: blurb || 'A new message every Sunday.',
+        playlistUrl: 'https://www.youtube.com/playlist?list=' + seriesId,
+      };
+
+  const sermons = { series, videos, updated: today };
 
   // ---- Podcasts ----
   const p = await feed(PODCAST_PLAYLIST_ID);
   const podcasts = {
     playlistUrl: 'https://www.youtube.com/playlist?list=' + PODCAST_PLAYLIST_ID,
-    videos: p.entries.slice(0, MAX),
+    videos: p.entries.slice(0, MAX).map(({ id, title }) => ({ id, title })),
     updated: today,
   };
 
