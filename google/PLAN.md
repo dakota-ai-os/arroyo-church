@@ -133,6 +133,7 @@ calls `gtag('config','AW-18441276047')` on Squarespace's existing gtag loader an
 and `join_group_submit` (the GA4 events still fire too). Verified on the live page (dataLayer carries the AW config).
 The action shows "Inactive" in Ads until the first real submission arrives. **GA4 ↔ Ads linked** (Analytics
 a407495086/p553508954 → Ads 974-189-2062, auto-tagging on, personalized advertising on; data appears within 24 h).
+**Location asset (2026-09-09):** the Business Profile is auto-linked in Ads (Data manager → Google Business Profile → "av@arroyochurch.com, 1 location, Used in location asset"); the campaign's location asset is set to **All locations**, so the ad can show with the map pin + address the way Blue Oaks' sponsored listing does. Google-tag diagnostics say "some pages not tagged" — stale crawl; the footer tag is site-wide and this clears on its own.
 **ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). Watch: keyword policy review (group 2), asset review, first
 conversion, and the search-terms report weekly.
 **Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
