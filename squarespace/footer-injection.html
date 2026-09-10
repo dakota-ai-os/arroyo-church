@@ -642,11 +642,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* (single-page nav uses /#anchors; old pages kept live + indexed for SEO — no auto-redirect) */
   var fine=matchMedia('(pointer:fine)').matches, reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var HOME=function(){ return document.body.classList.contains('homepage'); };
-  /* ---- Conversion tracking (GA4 key events → imported into Google Ads). Fires only on real successes. ---- */
+  /* ---- Conversion tracking (GA4 events + Google Ads conversion). Fires only on real successes. ---- */
+  /* Google Ads 974-189-2062 · Google tag AW-18441276047 · conversion action "Submit lead form" (ctId 7756266707). Rides Squarespace's gtag loader (G-W3RLM6P1H0). */
+  var AC_AW='AW-18441276047', AC_AW_LEAD=AC_AW+'/mHR9CNP5vPIcEI-VvtlE';
+  try{ if(typeof window.gtag==='function'){ window.gtag('config',AC_AW); } }catch(e){}
   function acTrack(src, extra){
     var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit'};
     var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
-    try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
+    try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); if(name==='plan_visit_submit'||name==='join_group_submit'){ window.gtag('event','conversion',{send_to:AC_AW_LEAD,value:1.0,currency:'USD'}); } } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
   }
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a'):null; if(!a) return; var h=a.getAttribute('href')||'';
