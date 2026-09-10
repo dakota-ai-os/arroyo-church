@@ -235,6 +235,28 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
    received, so: once `plan_visit_submit`, `join_group_submit`, `call_click`, `directions_click`, `watch_live_click` show up under
    Admin → Events → Recent events, star them. Then link GA4 ↔ Ads 974-189-2062 (Admin → Product links) once the Ads wizard is done.
 
+## 5b. Yelp (done 2026-09-09 evening)
+
+**Accounts:** Yelp for Business login in Chrome = **josh@easthillschurch.com** (the old domain — move this to av@ or josh@arroyochurch.com
+before easthillschurch.com lapses, or the account is unrecoverable). Managed listing id `rVgGFgmFdc1T3c0fja9N_A`, public URL now
+`yelp.com/biz/arroyo-church-livermore` (Yelp re-slugged it from east-hills-church-oakland; the old URL redirects).
+
+**Fixed on the claimed listing (was "East Hills Church, 12000 Campus Dr, Oakland", 7 reviews, 4.4★):** name → Arroyo Church ·
+address → 945 Concannon Blvd, Livermore, CA 94550 (map pin verified) · phone → (925) 694-0426 (was blank) · website →
+arroyochurch.com (was easthillschurch.com) · hours Open-24-hours-every-day → Mon closed, Tue–Fri 10–4, Sat closed, Sun 10:00–11:30 ·
+Specialties → the approved Bible-based description + the worship-style line (no URL; Yelp rejects URLs/phones in copy) ·
+History → "Established 2023" + East Hills → Arroyo lineage · Meet the Manager → Josh S., Lead Pastor bio · deleted all **19
+business-uploaded** old photos (Oakland estate, East Hills logo) · uploaded **8** current site photos with captions. All changes
+saved live (Yelp says it reviews name/address edits against the website; nothing has bounced). Logo placement is a paid Yelp add-on
+($1/day) — skipped. **Can't fix:** the ~17 user-uploaded East Hills-era photos (kids choir, fellowship hall) — owners can only
+flag them; Yelp orders photos by engagement so the new ones will mix in.
+
+**Duplicate listing:** an unclaimed "Arroyo Church" at 945 Concannon Blvd (Yelp id `73urM3xpc70b8Og0olohgg`, 1 review 5.0★, old
+642 phone) still exists. I started the claim under the same biz account and got Yelp to switch its verification number from
+642-1516 to **694-0426** (accepted instantly). **Dakota:** open `biz.yelp.com/verify/73urM3xpc70b8Og0olohgg/.../options` (or
+Yelp → the listing → Claim) and choose "Receive a text at (925) 694-0426", enter the code; then ask Yelp support (Need Help? in
+the biz dashboard) to **merge** the duplicate into `rVgGFgmFdc1T3c0fja9N_A` so the reviews combine (7 + 1).
+
 ## 6. Copy bank
 
 **Q&A seeds**
