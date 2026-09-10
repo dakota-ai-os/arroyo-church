@@ -51,6 +51,11 @@ INSTRUCT_COLOR = "#AF52DE"   # Apple system purple; change here to restyle the n
 
 CONFIG = Path.home() / ".config" / "arroyo" / "gmail.env"
 BACKUPS = Path.home() / ".config" / "arroyo" / "note-backups"
+STATE = Path.home() / ".config" / "arroyo" / "last-written.txt"
+
+# Exit code meaning "the GUI session was not usable; try again later." The runner treats
+# this as a quiet retry, NOT a failure, so a dark-wake attempt never raises an alarm.
+EX_TEMPFAIL = 75
 
 
 def log(msg):
@@ -227,6 +232,47 @@ def run_osascript(script, timeout=90):
     if r.returncode != 0:
         raise RuntimeError(r.stderr.strip() or f"osascript exited {r.returncode}")
     return r.stdout.strip()
+
+
+class SessionNotReady(RuntimeError):
+    """The Mac is awake enough to run launchd but not to script Notes."""
+
+
+def gui_session_ready():
+    """Why this exists: every failed Sunday run (8/23, 8/30, 9/6) has the same shape --
+    the IMAP fetch succeeds and then every AppleEvent to Notes times out. That is Power
+    Nap. launchd fires the job during a DARK WAKE, where the network is up but there is
+    no usable GUI session, so Notes can neither be scripted nor brought to the front and
+    osascript simply blocks until our timeout. Three symptoms, one cause.
+
+    Probing costs ~0.2s on a healthy session and turns a 2-6 minute hang into an
+    immediate, unambiguous 'not now'. Returns None when ready, else the reason."""
+    try:
+        ioreg = subprocess.run(["ioreg", "-n", "Root", "-d1", "-r"],
+                               capture_output=True, text=True, timeout=15).stdout
+        if "CGSSessionScreenIsLocked" in ioreg:
+            return "the screen is locked -- UI scripting cannot drive Notes"
+    except Exception as e:
+        log(f"WARNING: could not read lock state ({e}); continuing to the Notes probe")
+
+    try:
+        console = subprocess.run(["stat", "-f", "%Su", "/dev/console"],
+                                 capture_output=True, text=True, timeout=15).stdout.strip()
+    except Exception:
+        console = ""
+    if console in ("", "root"):
+        return f"no logged-in GUI session (/dev/console owned by {console or 'nobody'})"
+
+    # Cheap AppleEvent. A healthy session answers in well under a second; a dark wake
+    # never answers at all, which is exactly what the 120s and 240s hangs were.
+    try:
+        subprocess.run(["osascript", "-e", 'tell application "Notes" to count notes'],
+                       capture_output=True, text=True, timeout=20, check=True)
+    except subprocess.TimeoutExpired:
+        return "Notes did not answer a trivial AppleEvent within 20s (dark wake / Power Nap)"
+    except subprocess.CalledProcessError as e:
+        return f"Notes refused a trivial AppleEvent: {(e.stderr or '').strip()[:120]}"
+    return None
 
 
 # A correction line is also recognised by WHAT IT SAYS, not just how it opens. Josh typo'd
@@ -824,6 +870,15 @@ def attachment_count(note_id):
 
 def main():
     cfg = load_config()
+
+    # Probe BEFORE touching the network so a dark-wake attempt costs ~0.2s and says so
+    # plainly, instead of hanging for minutes and then failing somewhere in Notes.
+    not_ready = gui_session_ready()
+    if not_ready:
+        log(f"GUI session not usable: {not_ready}")
+        log("skipping this attempt without touching the note; a later attempt will retry.")
+        return EX_TEMPFAIL
+
     log(f"looking for mail from {'/'.join(allowed_senders(cfg))} "
         f"subject~{'|'.join(allowed_subjects(cfg))} (last {cfg['LOOKBACK_DAYS']} days)")
 
@@ -839,8 +894,19 @@ def main():
         return 0
     log(f'found "{subject}" ({when:%a %b %d %H:%M}) -- {len(text)} chars')
 
+    # Several attempts are scheduled per week so a single bad wake cannot lose the Sunday.
+    # Rewriting an already-current note is wasted work AND another pass over the series
+    # graphic, so once a service date is written the remaining attempts stand down.
+    service = sunday_from_subject(subject, when).date().isoformat()
+    already = STATE.read_text(encoding="utf-8").strip() if STATE.exists() else ""
+    if already == service:
+        log(f"note already written for {service} -- nothing to do.")
+        return 0
+
     title = update_note(cfg["NOTE_ID"], subject, when, text)
-    log(f'updated the shared Apple Note -> retitled "{title}"')
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(service, encoding="utf-8")
+    log(f'updated the shared Apple Note -> retitled "{title}" (service {service})')
     return 0
 
 

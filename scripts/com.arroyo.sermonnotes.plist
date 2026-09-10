@@ -9,14 +9,28 @@
         <string>/bin/bash</string>
         <string>/Users/dakotayates/ai-os/ventures/arroyo-church-redesign/scripts/run-sermon-notes.sh</string>
     </array>
-    <!-- Sunday (0) at 7:00am, before the 10:00am service. Must run while logged in:
-         if no GUI session exists, macOS auto-denies the Automation request. -->
+
+    <!-- SEVERAL ATTEMPTS, ON PURPOSE (2026-09-09).
+         A single Sunday 07:00 slot lost three Sundays in a row: launchd fired during a
+         Power Nap dark wake, where the network works but Notes cannot be scripted. The
+         script now detects that in ~0.2s and exits 75 without touching the note, so extra
+         attempts are cheap, and the first one that lands on a real GUI session wins. Once
+         a service date is written the rest stand down, so the note is never rewritten
+         twice (each rewrite is another pass over the protected series graphic).
+
+         Saturday 20:00 is the workhorse: Josh sends the notes Saturday early afternoon
+         (8/29 13:00 for the 8/30 service) and the Mac is normally awake and unlocked in
+         the evening. The Sunday slots are the safety net before the 10:00 service. -->
     <key>StartCalendarInterval</key>
-    <dict>
-        <key>Weekday</key><integer>0</integer>
-        <key>Hour</key><integer>7</integer>
-        <key>Minute</key><integer>0</integer>
-    </dict>
+    <array>
+        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>20</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>45</integer></dict>
+        <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+    </array>
+
+    <!-- If the Mac was asleep at a scheduled time, run as soon as it wakes rather than
+         skipping the slot entirely. -->
     <key>RunAtLoad</key>
     <false/>
     <key>StandardOutPath</key>
