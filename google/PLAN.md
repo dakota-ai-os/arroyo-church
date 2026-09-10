@@ -237,8 +237,8 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
 
 ## 5b. Yelp (done 2026-09-09 evening)
 
-**Accounts:** Yelp for Business login in Chrome = **josh@easthillschurch.com** (the old domain — move this to av@ or josh@arroyochurch.com
-before easthillschurch.com lapses, or the account is unrecoverable). Managed listing id `rVgGFgmFdc1T3c0fja9N_A`, public URL now
+**Accounts:** Yelp for Business login = **av@arroyochurch.com** (changed from josh@easthillschurch.com on 2026-09-10 and verified
+via the confirmation email; Dakota entered the password for the re-auth step). Profile name on the account is still Josh Smith, Manager. Managed listing id `rVgGFgmFdc1T3c0fja9N_A`, public URL now
 `yelp.com/biz/arroyo-church-livermore` (Yelp re-slugged it from east-hills-church-oakland; the old URL redirects).
 
 **Fixed on the claimed listing (was "East Hills Church, 12000 Campus Dr, Oakland", 7 reviews, 4.4★):** name → Arroyo Church ·
