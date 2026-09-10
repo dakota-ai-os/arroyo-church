@@ -133,7 +133,7 @@ calls `gtag('config','AW-18441276047')` on Squarespace's existing gtag loader an
 and `join_group_submit` (the GA4 events still fire too). Verified on the live page (dataLayer carries the AW config).
 The action shows "Inactive" in Ads until the first real submission arrives. **GA4 ↔ Ads linked** (Analytics
 a407495086/p553508954 → Ads 974-189-2062, auto-tagging on, personalized advertising on; data appears within 24 h).
-**To go live:** Campaigns → status dot → Enable. Then watch: keyword policy review (group 2), asset review, first
+**ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). Watch: keyword policy review (group 2), asset review, first
 conversion, and the search-terms report weekly.
 **Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
 Church" and description 1 → "Welcoming Bible-based Christian church in Livermore. Worship, teaching and kids ministry."
@@ -225,7 +225,7 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
 ## 5. What Dakota has to do (Claude can't)
 1. Approve the profile copy in section 2 (description, services, Q&A, posts).
 2. Answer: phone, office hours, year founded. Send 10–15 photos.
-3. DONE 2026-09-09: Ads account 974-189-2062 + billing (Dakota), campaign built and **paused** (Claude). **Dakota flips it on** (Campaigns → status dot → Enable) when ready; nothing spends until then.
+3. DONE 2026-09-09: Ads account 974-189-2062 + billing (Dakota), campaign built by Claude and **enabled the same evening** on Dakota's go — now spending up to $4.11/day.
 4. Sit with Claude through the Google for Nonprofits sign-up (EIN + terms) and find the IRS letter PDF.
 5. GA4 replaced 2026-09-09: new Analytics account "Arroyo Church" (a407495086) / property "arroyochurch.com"
    (p553508954) / web stream 15749987659 / **measurement ID G-W3RLM6P1H0**, owned by av@arroyochurch.com. Swapped into
