@@ -280,3 +280,22 @@ the biz dashboard) to **merge** the duplicate into `rVgGFgmFdc1T3c0fja9N_A` so t
 ## 7. Maintenance
 - Update this file when accounts are created (add account IDs), when the grant is approved, and when bidding changes.
 - Decision to log: 2026-09-09 — all Google properties consolidated under av@arroyochurch.com; paid Ads is a $125/mo top-slot test, Ad Grant is the volume lever.
+
+### 2026-09-11 — the ad landing page had no form (fixed)
+Dakota checked the live ad URL and found `/plan-your-visit` had **no Plan-a-Visit form**. Cause: the page
+hid Squarespace's native form block and pointed visitors at the home-page form instead, and that CTA
+rendered as plain text because `.btn-gold` is scoped to `.ac-sec`, which interior pages don't have. Every
+paid click was landing on a page with nothing to fill in.
+
+Fixed in `squarespace/footer-injection.html` (commits 1e8e9e3 + 781b634, both deployed):
+- `buildVisitPageForm()` inserts the REAL form inline, same markup and same `wireVisitForm` submit path as
+  the home page, source `visit_page` → Worker → **Planning Center form 1216871**, labelled "Plan Your Visit page".
+- Verified the routing without creating a junk record: a POST with `source: visit_page` and a malformed
+  email returns `error:"email"` (reached the visit form, phone optional), while a bogus source returns
+  `error:"missing"` (fell through to Next Steps). The two differ, so the token resolves correctly.
+- **Conversion gap also fixed:** `acTrack`'s event map had no `visit_page` (nor `events_rsvp`), so both fell
+  through to `form_submit`, which does NOT fire the Google Ads conversion — only `plan_visit_submit` and
+  `join_group_submit` do. A paid click that filled the form reached Planning Center but counted as zero
+  conversions, on the exact page the ads point at. Both sources now map to `plan_visit_submit`.
+- Checked live on desktop and at 390px: form renders, fields stack full width, nothing overflows, no
+  console errors, native block hidden, one copy only, bottom CTA anchors to `#ac-visit-form`.
