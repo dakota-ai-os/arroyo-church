@@ -526,8 +526,10 @@ body.collection-type-page:not(.homepage) .sqs-block-button-element--primary:hove
 .ac-page-cta .ac-cta-btns a{display:inline-flex;align-items:center;font-weight:700;font-size:.95rem;letter-spacing:.02em;padding:.9rem 1.8rem;border-radius:999px;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,background .3s,border-color .3s}
 .ac-page-cta .b-gold{background:linear-gradient(135deg,#E3BD6A,#C89A3E);color:#0A161C;box-shadow:0 8px 24px -8px rgba(200,154,62,.55)}
 .ac-page-cta .b-gold:hover{transform:translateY(-3px);box-shadow:0 14px 34px -8px rgba(200,154,62,.7)}
-.ac-pv-cta{margin:1.5rem 0}
-.ac-pv-cta p{margin:0 0 1rem;color:rgba(22,36,43,.72)}
+/* /plan-your-visit hosts the real Plan-a-Visit form inline (see buildVisitPageForm); the card
+   carries its own top margin, so the wrapper only needs to clear the block below it. */
+.ac-pv-form{margin:0 0 2.4rem}
+.ac-pv-form .visit-form{margin-top:1.6rem}
 .ac-page-cta .b-ghost{border:1.5px solid rgba(255,255,255,.45);color:#fff}
 .ac-page-cta .b-ghost:hover{transform:translateY(-3px);border-color:#7fd0e0;background:rgba(95,194,212,.12)}
 /* ════ CONNECT-TAG: NFC chair-tap "digital connect card" (interior collection 68b739b2…) ════ */
@@ -1545,6 +1547,23 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     function evTop(){ var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
     evTop(); addEventListener('resize',evTop); setTimeout(evTop,400); setTimeout(evTop,1200);
   }
+  /* ---- /plan-your-visit: the Google Ads + SEO landing page. It used to hide Squarespace's native
+     form block and point visitors at the home-page form, which cost a click and rendered as plain
+     text (.btn-gold is scoped to .ac-sec, which interior pages don't have). Now the page hosts the
+     REAL Plan-a-Visit form inline: same markup and same wireVisitForm submit path as the home page,
+     posting to the arroyo-connect Worker with source `visit_page` → Planning Center form 1216871,
+     labelled "Plan Your Visit page". The native block stays hidden — it only emails. ---- */
+  function buildVisitPageForm(){
+    if(!/\/plan-your-visit\/?$/.test(location.pathname)) return;
+    if(document.getElementById('ac-visit-form')) return;
+    var ofb=document.querySelector('.sqs-block-form'); if(!ofb) return;
+    var blk=ofb.closest('.sqs-block')||ofb; if(!blk.parentNode) return;
+    blk.style.display='none';
+    var sec=document.createElement('section'); sec.className='ac-sec ac-pv-form';
+    sec.innerHTML='<div class="visit-form" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll save you a seat</h3><p class="vf-sub">Tell us a little about your visit so we can welcome you well &mdash; takes about 20 seconds.</p></div><form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Anything we should know? (questions, prayer)</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Save my seat</button></div></form></div>';
+    blk.parentNode.insertBefore(sec,blk);
+    wireVisitForm(sec,'visit_page');
+  }
   function buildPageCTA(){
     var b=document.body;
     if(!b.classList.contains('collection-type-page') || b.classList.contains('homepage')) return;
@@ -1553,10 +1572,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var host=document.querySelector('#sections')||document.querySelector('main')||document.querySelector('#page');
     if(!host) return;
     var onVisit=/\/plan-your-visit\/?$/.test(location.pathname);
-    if(onVisit){var ofb=document.querySelector('.sqs-block-form');if(ofb && !document.querySelector('.ac-pv-cta')){var blk=ofb.closest('.sqs-block')||ofb;blk.style.display='none';var pv=document.createElement('div');pv.className='ac-pv-cta';pv.innerHTML='<p>Let us know you&rsquo;re coming &mdash; we&rsquo;ll save you a seat this Sunday.</p><a class="btn btn-gold" href="/#ac-visit-form">Plan Your Visit</a>';blk.parentNode.insertBefore(pv,blk);}}
     var sec=document.createElement('section'); sec.className='ac-page-cta';
     sec.innerHTML='<div class="wrap"><p class="eyebrow">Visit Arroyo</p><h2>We&rsquo;d love to <em>save you a seat.</em></h2><p>Join us this Sunday at 10:00&nbsp;AM &mdash; 945 Concannon Blvd, Livermore. Come as you are.</p><div class="ac-cta-btns">'
-      +(onVisit?'<a class="b-gold" href="/#ac-visit-form">Plan Your Visit</a><a class="b-ghost" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a>':'<a class="b-gold" href="/plan-your-visit">Plan Your Visit</a><a class="b-ghost" href="/#ac-sermons">Watch a Sermon</a>')
+      +(onVisit?'<a class="b-gold" href="#ac-visit-form">Plan Your Visit</a><a class="b-ghost" href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">Get Directions</a>':'<a class="b-gold" href="/plan-your-visit">Plan Your Visit</a><a class="b-ghost" href="/#ac-sermons">Watch a Sermon</a>')
       +'</div></div>';
     host.appendChild(sec);
   }
@@ -1575,9 +1593,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildPageCTA(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
-  setTimeout(buildPageCTA,600); setTimeout(buildPageCTA,1800);
+  /* Squarespace renders the native form block late on some loads; retry so the swap still lands (both are idempotent) */
+  setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },600); setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },1800);
   setTimeout(buildEventsPage,600); setTimeout(buildEventsPage,1800);
   setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800); setTimeout(buildPCForms,600); setTimeout(buildPCForms,1800); setTimeout(buildPCForms,3200);
   setTimeout(buildGivePage,600); setTimeout(buildGivePage,1800);
