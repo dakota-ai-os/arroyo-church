@@ -137,9 +137,8 @@ a407495086/p553508954 → Ads 974-189-2062, auto-tagging on, personalized advert
 **ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). **Check 2026-09-10 ~2 PM:**
 campaign Enabled / Eligible (Learning), optimization score 90.1%, all three ads Eligible, first click recorded on day 1.
 Two follow-ups: (1) Ads shows an "Accept Call and Messaging Ads Terms" banner — until Dakota clicks Fix it and accepts, the
-(925) 694-0426 call asset can't be edited and may not serve; (2) the Tri-Valley ad's strength is **Poor** because none of its
-headlines mention Pleasanton/Dublin/San Ramon — add 2–3 headlines like "Church Near Pleasanton" / "Church Near Dublin, CA" /
-"Minutes from San Ramon" to that ad group's RSA. Watch: keyword policy review (group 2), asset review, first
+(925) 694-0426 call asset can't be edited and may not serve; (2) DONE 2026-09-10: the Tri-Valley ad (adId 824112396709) got three more headlines — "Church Near Pleasanton",
+"Church Near Dublin, CA", "Minutes from San Ramon" — now 15/15 headlines; ad strength went Poor → Good in the editor. Watch: keyword policy review (group 2), asset review, first
 conversion, and the search-terms report weekly.
 **Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
 Church" and description 1 → "Welcoming Bible-based Christian church in Livermore. Worship, teaching and kids ministry."
