@@ -136,8 +136,8 @@ a407495086/p553508954 → Ads 974-189-2062, auto-tagging on, personalized advert
 **Location asset (2026-09-09):** the Business Profile is auto-linked in Ads (Data manager → Google Business Profile → "av@arroyochurch.com, 1 location, Used in location asset"); the campaign's location asset is set to **All locations**, so the ad can show with the map pin + address the way Blue Oaks' sponsored listing does. Google-tag diagnostics say "some pages not tagged" — stale crawl; the footer tag is site-wide and this clears on its own.
 **ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). **Check 2026-09-10 ~2 PM:**
 campaign Enabled / Eligible (Learning), optimization score 90.1%, all three ads Eligible, first click recorded on day 1.
-Two follow-ups: (1) Ads shows an "Accept Call and Messaging Ads Terms" banner — until Dakota clicks Fix it and accepts, the
-(925) 694-0426 call asset can't be edited and may not serve; (2) DONE 2026-09-10: the Tri-Valley ad (adId 824112396709) got three more headlines — "Church Near Pleasanton",
+Two follow-ups: (1) DONE 2026-09-10: Click-to-Call terms accepted (Admin → Account settings; Dakota authorized, Claude saved) — the
+call-terms banner is gone and the (925) 694-0426 call asset can serve; (2) DONE 2026-09-10: the Tri-Valley ad (adId 824112396709) got three more headlines — "Church Near Pleasanton",
 "Church Near Dublin, CA", "Minutes from San Ramon" — now 15/15 headlines; ad strength went Poor → Good in the editor. Watch: keyword policy review (group 2), asset review, first
 conversion, and the search-terms report weekly.
 **Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
