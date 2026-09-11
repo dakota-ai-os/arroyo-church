@@ -649,7 +649,11 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   var AC_AW='AW-18441276047', AC_AW_LEAD=AC_AW+'/mHR9CNP5vPIcEI-VvtlE';
   try{ if(typeof window.gtag==='function'){ window.gtag('config',AC_AW); } }catch(e){}
   function acTrack(src, extra){
-    var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit'};
+    /* Every Plan-a-Visit surface must map to plan_visit_submit — that's the event that fires the
+       Google Ads conversion below. visit_page (/plan-your-visit, the paid-ads landing page) and
+       events_rsvp (/events) post the same form via wireVisitForm, so they belong here too;
+       without them they fell through to 'form_submit' and the ad click went uncounted. */
+    var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',visit_page:'plan_visit_submit',events_rsvp:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit'};
     var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
     try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); if(name==='plan_visit_submit'||name==='join_group_submit'){ window.gtag('event','conversion',{send_to:AC_AW_LEAD,value:1.0,currency:'USD'}); } } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
   }
