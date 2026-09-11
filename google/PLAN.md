@@ -134,7 +134,12 @@ and `join_group_submit` (the GA4 events still fire too). Verified on the live pa
 The action shows "Inactive" in Ads until the first real submission arrives. **GA4 ↔ Ads linked** (Analytics
 a407495086/p553508954 → Ads 974-189-2062, auto-tagging on, personalized advertising on; data appears within 24 h).
 **Location asset (2026-09-09):** the Business Profile is auto-linked in Ads (Data manager → Google Business Profile → "av@arroyochurch.com, 1 location, Used in location asset"); the campaign's location asset is set to **All locations**, so the ad can show with the map pin + address the way Blue Oaks' sponsored listing does. Google-tag diagnostics say "some pages not tagged" — stale crawl; the footer tag is site-wide and this clears on its own.
-**ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). Watch: keyword policy review (group 2), asset review, first
+**ENABLED 2026-09-09 ~8:00 PM PT on Dakota's instruction** (status Eligible, bid strategy learning). **Check 2026-09-10 ~2 PM:**
+campaign Enabled / Eligible (Learning), optimization score 90.1%, all three ads Eligible, first click recorded on day 1.
+Two follow-ups: (1) Ads shows an "Accept Call and Messaging Ads Terms" banner — until Dakota clicks Fix it and accepts, the
+(925) 694-0426 call asset can't be edited and may not serve; (2) the Tri-Valley ad's strength is **Poor** because none of its
+headlines mention Pleasanton/Dublin/San Ramon — add 2–3 headlines like "Church Near Pleasanton" / "Church Near Dublin, CA" /
+"Minutes from San Ramon" to that ad group's RSA. Watch: keyword policy review (group 2), asset review, first
 conversion, and the search-terms report weekly.
 **Copy deltas vs the spec below (applied in the build):** headline "Non-Denominational Church" → "Bible-Based Christian
 Church" and description 1 → "Welcoming Bible-based Christian church in Livermore. Worship, teaching and kids ministry."
