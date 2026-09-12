@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# Content engine private corpus: sermon outlines, Josh blog posts, sermon transcripts. Never commit.
+content/source/

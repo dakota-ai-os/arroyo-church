@@ -638,6 +638,22 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
 @media(max-width:920px){.ac-cc .cc-pillars{grid-template-columns:1fr;margin-top:2.4rem}}
 @media(max-width:767px){.ac-cc{padding:3.5rem 0}}
 @media(max-width:560px){.ac-cc .cc-steps{grid-template-columns:1fr}}
+/* ════ BLOG POSTS: "take a next step" block under every post ════ */
+.ac-ns{max-width:760px;margin:clamp(2.2rem,5vw,3.4rem) auto 1.2rem;padding:0 4vw;color:#16242b}
+.ac-ns .visit-form{margin:0}
+.ac-ns .eyebrow{color:#1f6b7c}
+.ac-ns .ns-book{background:#f7f1e8;border:1px solid rgba(200,154,62,.28);border-radius:18px;padding:clamp(1.1rem,2.6vw,1.6rem);margin:0 0 1.1rem}
+.ac-ns .ns-kicker{font-size:.74rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a47a2c;margin:0 0 .35rem}
+.ac-ns .ns-title{font-family:'Fraunces',Georgia,serif;font-weight:460;font-size:clamp(1.35rem,2.6vw,1.7rem);line-height:1.15;margin:0 0 .4rem}
+.ac-ns .ns-desc{font-size:.98rem;line-height:1.6;margin:0 0 1rem;color:#34434a}
+.ac-ns .ns-fine{font-size:.78rem;color:#6a767b;margin:.75rem 0 0}
+.ac-ns .ns-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+.ac-ns .ns-link{display:block;background:#fff;border:1px solid rgba(22,36,43,.12);border-radius:14px;padding:.9rem 1rem;color:#16242b;text-decoration:none;transition:border-color .2s,transform .2s}
+.ac-ns .ns-link:hover{border-color:#c89a3e;transform:translateY(-2px)}
+.ac-ns .ns-link strong{display:block;font-size:.95rem;line-height:1.3;margin:0 0 .2rem}
+.ac-ns .ns-link span{display:block;font-size:.84rem;line-height:1.4;color:#5b676c}
+.ac-ns input{box-sizing:border-box;max-width:100%}
+@media(max-width:720px){.ac-ns .ns-links{grid-template-columns:1fr}}
 </style>
 <script>
 (function(){
@@ -653,7 +669,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
        Google Ads conversion below. visit_page (/plan-your-visit, the paid-ads landing page) and
        events_rsvp (/events) post the same form via wireVisitForm, so they belong here too;
        without them they fell through to 'form_submit' and the ad click went uncounted. */
-    var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',visit_page:'plan_visit_submit',events_rsvp:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit'};
+    var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',visit_page:'plan_visit_submit',events_rsvp:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit',ebook_blog:'ebook_signup'};
     var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
     try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); if(name==='plan_visit_submit'||name==='join_group_submit'){ window.gtag('event','conversion',{send_to:AC_AW_LEAD,value:1.0,currency:'USD'}); } } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
   }
@@ -1568,6 +1584,52 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     blk.parentNode.insertBefore(sec,blk);
     wireVisitForm(sec,'visit_page');
   }
+  /* ---- Blog posts: a "take a next step" block under every post (2026-09-12). Posts reach people far
+     beyond Livermore, and they used to end at "Watch more sermons · Plan your visit" — nothing for a
+     reader in another state or anyone not ready to walk in. Offers: the free Lifted by Love eBook
+     (first name + email → arroyo-connect Worker, source `ebook_blog` → Planning Center form 1206123,
+     labelled "Lifted by Love eBook — blog post"; the book is never withheld if the Worker call fails),
+     the Sunday livestream, a question / prayer request (/connect), and Plan a Visit for locals. ---- */
+  function buildPostNextSteps(){
+    if(!/^\/arroyoblog\/(?!tag\/|category\/)[^\/]+\/?$/.test(location.pathname)) return;
+    if(document.getElementById('ac-ns')) return;
+    var host=document.querySelector('.blog-item-content-wrapper'); if(!host||!host.parentNode) return;
+    var PDF='https://links.arroyochurch.com/lifted-by-love.pdf';
+    var sec=document.createElement('section'); sec.className='ac-sec ac-ns'; sec.id='ac-ns';
+    sec.innerHTML='<div class="visit-form">'
+      +'<div class="vf-head"><p class="eyebrow">Wherever you are with God</p><h3>Take a next step</h3><p class="vf-sub">Whether you live down the street or across the country, we&rsquo;d love to walk with you.</p></div>'
+      +'<div class="ns-book" id="ac-ns-book"><p class="ns-kicker">Free eBook from Pastor Josh</p><p class="ns-title">Lifted by Love</p>'
+      +'<p class="ns-desc">40 short devotions for the days life knocks you down. Written so anyone can read it, wherever you are on your journey.</p>'
+      +'<form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid">'
+      +'<label class="vf-field"><span>First name *</span><input type="text" name="first" required autocomplete="given-name" maxlength="60"></label>'
+      +'<label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email" maxlength="120"></label></div>'
+      +'<div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Send me the eBook</button></div>'
+      +'<p class="ns-fine">Arroyo Church may send you an occasional email. We never share your info.</p></form></div>'
+      +'<div class="ns-links">'
+      +'<a class="ns-link" href="https://www.youtube.com/@arroyochurch/live" target="_blank" rel="noopener"><strong>Watch online</strong><span>Live Sundays at 10 AM Pacific</span></a>'
+      +'<a class="ns-link" href="/connect"><strong>Ask a question or share a prayer</strong><span>We&rsquo;d love to hear from you</span></a>'
+      +'<a class="ns-link" href="/plan-your-visit"><strong>Visit in Livermore</strong><span>Sundays 10 AM &middot; 945 Concannon Blvd</span></a>'
+      +'</div></div>';
+    host.parentNode.insertBefore(sec,host.nextSibling);
+    var book=sec.querySelector('#ac-ns-book'), form=book.querySelector('form');
+    function unlock(first){
+      book.innerHTML='<p class="ns-kicker">It&rsquo;s yours</p><p class="ns-title">Thanks<span class="ns-name"></span>!</p><p class="ns-desc">Start with Day 1 today. Each devotion ends with one simple practice.</p><a class="btn btn-gold" href="'+PDF+'" target="_blank" rel="noopener">Open Lifted by Love (PDF)</a>';
+      book.querySelector('.ns-name').textContent=first?', '+first:''; /* textContent, never innerHTML, so a name can't inject markup */
+    }
+    try{ var prior=localStorage.getItem('acBookFirst'); if(prior!==null){ unlock(prior); return; } }catch(e){}
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      var fd=new FormData(form), first=(fd.get('first')||'').trim(), email=(fd.get('email')||'').trim();
+      var btn=form.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='One moment…';
+      var data={source:'ebook_blog',first:first,email:email,message:'Post: '+location.pathname,website:fd.get('botcheck')||''};
+      fetch('https://arroyo-connect.dakota-fac.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+        .then(function(r){ return r.json(); })
+        .then(function(j){ if(j&&j.success) acTrack('ebook_blog'); })
+        .catch(function(){})
+        .then(function(){ try{ localStorage.setItem('acBookFirst',first); }catch(e){} unlock(first); });
+    });
+  }
   function buildPageCTA(){
     var b=document.body;
     if(!b.classList.contains('collection-type-page') || b.classList.contains('homepage')) return;
@@ -1597,13 +1659,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   /* Squarespace renders the native form block late on some loads; retry so the swap still lands (both are idempotent) */
   setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },600); setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },1800);
   setTimeout(buildEventsPage,600); setTimeout(buildEventsPage,1800);
   setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800); setTimeout(buildPCForms,600); setTimeout(buildPCForms,1800); setTimeout(buildPCForms,3200);
   setTimeout(buildGivePage,600); setTimeout(buildGivePage,1800);
+  setTimeout(buildPostNextSteps,600); setTimeout(buildPostNextSteps,1800);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
   setTimeout(wireMobileNav,800); setTimeout(wireMobileNav,2200);
   setTimeout(wireScrollLinks,800); setTimeout(wireScrollLinks,2200);

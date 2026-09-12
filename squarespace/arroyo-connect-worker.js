@@ -52,6 +52,7 @@ const PC_BASE = "https://api.planningcenteronline.com/people/v2/forms";
 const ALLOWED_ORIGINS = new Set([
   "https://www.arroyochurch.com",
   "https://arroyochurch.com",
+  "https://links.arroyochurch.com", // link-in-bio page (repo dakota-ai-os/arroyo-link): Lifted by Love eBook form
 ]);
 
 const F_PHONE = "9974695", F_NEXT = "9567926", F_GROUP = "9567985", F_TEAM = "9568011", F_MESSAGE = "9630046";
@@ -113,6 +114,16 @@ const SOURCES = {
   next_steps:    { form: "nextsteps", label: "Next Steps page" },
   connect_group: { form: "nextsteps", label: "Connect Group page" },
   prayer:        { form: "nextsteps", label: "Questions / Prayer — connect page" },
+  // One-time backfill of submissions that predate the Planning Center migration (they had only
+  // ever been emailed). `relaxed` waives the phone requirement, because some historical records
+  // simply have no phone number. The true origin form + original date are carried in the message.
+  import_visit:  { form: "visit",     label: "Imported — historical submission", relaxed: true },
+  import_steps:  { form: "nextsteps", label: "Imported — historical submission", relaxed: true },
+  // Lifted by Love eBook sign-ups (2026-09-12). Only first name + email are collected, so `relaxed`
+  // waives phone/last name. `requireEmail` keeps email mandatory: the blog form sends the post path
+  // in `message`, which would otherwise read as a prayer-only capture and skip the email check.
+  ebook_links:   { form: "nextsteps", label: "Lifted by Love eBook — links page", relaxed: true, requireEmail: true },
+  ebook_blog:    { form: "nextsteps", label: "Lifted by Love eBook — blog post", relaxed: true, requireEmail: true },
 };
 
 function cors(origin) {
@@ -189,8 +200,8 @@ export default {
     if (!first) return json({ success: false, error: "missing" }, 422, origin);
     // Phone is only mandatory on the forms that actually ask for it as required (the Next Steps
     // family). The Plan-a-Visit / Events forms mark phone optional, so don't reject those.
-    if (target.requirePhone && (!last || !phone)) return json({ success: false, error: "missing" }, 422, origin);
-    if (!prayerOnly && !email) return json({ success: false, error: "missing" }, 422, origin);
+    if (target.requirePhone && !(src && src.relaxed) && (!last || !phone)) return json({ success: false, error: "missing" }, 422, origin);
+    if ((!prayerOnly || (src && src.requireEmail)) && !email) return json({ success: false, error: "missing" }, 422, origin);
     if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ success: false, error: "email" }, 422, origin);
 
     // ── Free-text mirror ────────────────────────────────────────────────────────────────
