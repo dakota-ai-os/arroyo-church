@@ -28,6 +28,9 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
   gated by `HOME()`): hero → countdown → "what to expect" → sermons → mission →
   story/river → beliefs → values → team → connect (+ Join-a-Group form) → give →
   plan-your-visit (+ visit form) → CTA → footer.
+  It also adds interior-page pieces, e.g. the "Take a next step" block under every
+  `/arroyoblog` post (`buildPostNextSteps`: Lifted by Love eBook form, watch live,
+  questions/prayer, plan a visit).
 - `squarespace/arroyo-connect-worker.js` — Cloudflare Worker: Join-a-Group form → Planning Center. Field map is in its header comment.
 - `scripts/generate_blog.py`, `scripts/run-blog.sh`, `scripts/com.arroyo.blog.plist` — weekly sermon→blog generator (runs on the maintainer's Mac via launchd).
 - `scripts/sync-youtube.mjs` + `.github/workflows/sync-youtube.yml` — daily Action writing `data/sermons.json` / `data/podcasts.json`.
@@ -49,6 +52,9 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
      the editor whose content contains `buildHero`/`ac-hero`. After saving, confirm
      the HEADER still contains `"@type": "Church"`.
    - Squarespace trims ~1 trailing char on save — harmless.
+   - Claude's in-browser save (`cm.setValue` + the Save button) was blocked by Claude Code's
+     auto mode on 2026-09-12. If that happens, a human pastes the footer — copy it from
+     `https://raw.githubusercontent.com/dakota-ai-os/arroyo-church/main/squarespace/footer-injection.html`.
 5. Verify on www.arroyochurch.com (hard refresh; CDN lags ~20–40s).
 
 ## Gotchas (these will bite you)
@@ -63,11 +69,15 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
   transitions on mobile (big stacked padding looks like dead space).
 
 ## Integrations (secrets are NOT in this repo)
-- **Plan a Visit form** → Web3Forms (public site key lives in the file; emails the pastor). No backend.
-- **Join a Group form** → Cloudflare Worker `arroyo-connect`
-  (`https://arroyo-connect.dakota-fac.workers.dev`) which holds the Planning Center
-  token as an encrypted secret and POSTs to People form 1206123. Worker code +
-  field map: `squarespace/arroyo-connect-worker.js`. Anti-spam = Cloudflare Turnstile.
+- **Every site form** (Plan a Visit, Join a Group, Connect Class, connect tag, questions/prayer,
+  events RSVP, and the Lifted by Love eBook on blog posts + links.arroyochurch.com) → Cloudflare
+  Worker `arroyo-connect` (`https://arroyo-connect.dakota-fac.workers.dev`), which holds the
+  Planning Center token as an encrypted secret. A `source` token picks the PC form (1206123 Next
+  Steps or 1216871 Plan Your Visit) and labels the submission. Worker code + field map:
+  `squarespace/arroyo-connect-worker.js`; deploy with `npx wrangler deploy` from `squarespace/`
+  (logged in as dakota@arroyochurch.com). Anti-spam = honeypot + best-effort Turnstile.
+- **Google Search Console** → property `https://www.arroyochurch.com/` under av@arroyochurch.com,
+  verified through Google Analytics (removing the site's gtag breaks verification).
 - **Countdown "Watch Live" button** → `youtube.com/@arroyochurch/live` (auto-resolves to the current stream during the Sun 10:00–11:30am window).
 - **Weekly blog** → runs on the maintainer's Mac only (launchd `com.arroyo.blog`,
   daily 9:15am): downloads the latest sermon's audio, transcribes it locally with
@@ -78,7 +88,8 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 ## Do NOT touch / SEO guardrails
 - The **HEADER** code injection (Church schema).
 - The standalone pages (/about, /team, /messages, /connect, /give,
-  /plan-your-visit) and the **/arroyoblog** blog (~170 indexed URLs) — they're kept
+  /plan-your-visit) and the **/arroyoblog** blog (35 posts + ~190 tag pages as of
+  2026-09-12; Google indexes the posts but skips most tag pages) — they're kept
   live + indexed for SEO. Don't delete, redirect, or strip their content.
 - Never commit or share secrets: the Planning Center token and the Anthropic API key.
 
