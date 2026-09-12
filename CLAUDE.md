@@ -89,7 +89,7 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 - The **HEADER** code injection (Church schema).
 - The standalone pages (/about, /team, /messages, /connect, /give,
   /plan-your-visit) and the **/arroyoblog** blog (35 posts + ~190 tag pages as of
-  2026-09-12; Google indexes the posts but skips most tag pages) — they're kept
+  2026-09-12; ~30 thin tag pages show in Search Console as crawled but not indexed) — they're kept
   live + indexed for SEO. Don't delete, redirect, or strip their content.
 - Never commit or share secrets: the Planning Center token and the Anthropic API key.
 
