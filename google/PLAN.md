@@ -59,8 +59,8 @@ Local church terms each show 100–1K searches/mo, competition **Low**. Bid data
 - 9 photos uploaded from the website (worship gathering, lobby banner, Josh preaching, outdoor tent, 5 team headshots).
 - Posts published: (1) What to expect — Sign up → /plan-your-visit, lobby photo; (2) Connect groups — Learn more → /connect,
   worship-gathering photo. The Monday sermon recap is left to the sermon→blog pipeline (add a GBP post step there).
-  2026-09-13: the service runs about 55 minutes, not 65 (Dakota). The copy bank below is corrected; if the live
-  "What to expect" post says 65, edit it in the profile.
+  2026-09-13: the service runs about 55 minutes, not 65 (Dakota). The copy bank below is corrected, and the live
+  "What to expect" post was edited to 55 the same day (shows Pending while Google reviews the edit).
 - Phone consolidated to (925) 694-0426: the site-wide Church JSON-LD (Squarespace HEADER injection) now carries it, plus
   a real logo + hero image instead of the placeholder paths. Yelp still needs a manual edit (needs the Yelp for Business login).
 - Conversion tracking LIVE on arroyochurch.com (commit 09fb874): `acTrack()` fires GA4 events on every form success
