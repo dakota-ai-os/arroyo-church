@@ -115,13 +115,27 @@ STRICT_SUBJECTS = ("sermon notes", "sermon outline")
 SCRIPTURE_ANYWHERE = re.compile(r"\b(?:[1-3]\s*)?[A-Z][a-z]{2,}\s+\d{1,3}:\d{1,3}")
 
 
+def is_substantive(text):
+    """True when a body actually carries sermon content: it cites scripture, is a guest
+    slide deck, or has at least two numbered main points."""
+    text = text or ""
+    if SCRIPTURE_ANYWHERE.search(text) or looks_like_slides(text):
+        return True
+    _, rest = split_title_and_body(text)
+    return sum(1 for kind, _ in parse_structure(rest) if kind == "main") >= 2
+
+
 def looks_like_sermon(subject, text):
-    """Guard for the loose keywords. An unambiguous subject passes on its own; anything
-    else must actually cite scripture. Stops an announcements deck subject-lined "Slides"
-    from overwriting the note with graphics chatter."""
+    """Guard applied to every candidate email, after its quoted history is stripped.
+
+    2026-09-12: an explicit subject used to pass ON ITS OWN. Josh replied inside the
+    outline's thread ("Re: Sermon Notes for 9/13/26" -- "Yes EJ has them all...") and that
+    84-char reply, being newer and subject-matched, replaced the real outline in the shared
+    note. A subject is no longer evidence of content: strict subjects must be substantive,
+    and loose keywords ("slides", "sermon") must still cite scripture."""
     s = (subject or "").lower()
     if any(k in s for k in STRICT_SUBJECTS):
-        return True
+        return is_substantive(text)
     return bool(SCRIPTURE_ANYWHERE.search(text or ""))
 
 
@@ -132,66 +146,17 @@ def _clean_pw(pw):
     return re.sub(r"[^A-Za-z0-9]", "", pw)
 
 
-def fetch_latest(cfg):
-    """Newest email from SERMON_SENDER within LOOKBACK_DAYS. Returns (subject, date, text) or None."""
-    since = (datetime.now(timezone.utc) - timedelta(days=int(cfg["LOOKBACK_DAYS"]))).strftime("%d-%b-%Y")
-    M = imaplib.IMAP4_SSL("imap.gmail.com")
-    try:
-        M.login(cfg["GMAIL_USER"], _clean_pw(cfg["GMAIL_APP_PASSWORD"]))
-        M.select("INBOX", readonly=True)  # readonly: never marks the sender's mail as read
-        # Filter in Python rather than with an IMAP query. The allowlists are now
-        # multi-sender AND multi-subject, and IMAP's prefix-notation OR nests horribly
-        # past two terms. The mailbox holds ~12 messages a week, so scanning headers is
-        # cheaper than getting the query wrong.
-        #
-        # MUST still filter on subject: the newest email from a preacher is often
-        # unrelated (worship-night graphics, announcement decks). "Latest from Josh"
-        # would overwrite the note with that.
-        typ, data = M.search(None, f"(SINCE {since})")
-        ids = data[0].split() if typ == "OK" and data and data[0] else []
-        senders, subjects = allowed_senders(cfg), allowed_subjects(cfg)
+def strip_reply(text):
+    """Drop quoted history so only what the sender newly wrote remains. Josh sends
+    corrections as replies ("Disregard the first email..."), so the quoted original must
+    go or it would be duplicated into the note."""
+    text = re.split(r"^On .+ wrote:\s*$", text or "", maxsplit=1, flags=re.M)[0]
+    text = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith(">"))
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
 
-        best = None                                   # (datetime, message-id) of the winner
-        for mid in ids:
-            typ, hdr = M.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
-            if typ != "OK" or not hdr or not hdr[0]:
-                continue
-            h = email.message_from_bytes(hdr[0][1])
-            frm = str(make_header(decode_header(h.get("From", "") or ""))).lower()
-            sub = str(make_header(decode_header(h.get("Subject", "") or "")))
-            addr = email.utils.parseaddr(frm)[1]
-            if not any(addr == s or addr.endswith(s) for s in senders):
-                continue
-            if not any(k in sub.lower() for k in subjects):
-                continue
-            try:
-                when_h = email.utils.parsedate_to_datetime(h.get("Date"))
-                if when_h.tzinfo is None:
-                    when_h = when_h.replace(tzinfo=timezone.utc)
-            except Exception:
-                continue
-            if best is None or when_h > best[0]:
-                best = (when_h, mid)
 
-        if best is None:
-            return None
-        typ, raw = M.fetch(best[1], "(RFC822)")
-        if typ != "OK":
-            return None
-        msg = email.message_from_bytes(raw[0][1])
-    finally:
-        try:
-            M.close()
-        except Exception:
-            pass
-        M.logout()
-
-    subject = str(make_header(decode_header(msg.get("Subject", "") or "")))
-    try:
-        when = email.utils.parsedate_to_datetime(msg.get("Date"))
-    except Exception:
-        when = datetime.now(timezone.utc)
-
+def message_text(msg):
+    """Plain-text body of an email (falling back to its HTML), quoted history removed."""
     text, html_body = "", ""
     if msg.is_multipart():
         for part in msg.walk():
@@ -218,13 +183,83 @@ def fetch_latest(cfg):
         text = re.sub(r"<br\s*/?>|</p>", "\n", html_body, flags=re.I)
         text = re.sub(r"<[^>]+>", "", text)
         text = html.unescape(text)
+    return strip_reply(text)
 
-    # Josh re-sends corrections ("Disregard the first email...this one is the truth").
-    # Those are replies, so drop the quoted original or it gets duplicated into the note.
-    text = re.split(r"^On .+ wrote:\s*$", text, maxsplit=1, flags=re.M)[0]
-    text = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith(">"))
-    text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    return (subject, when, text) if text else None
+
+def choose_candidate(candidates):
+    """Pick the email to publish from (datetime, subject, text) tuples, or None.
+
+    Newest wins, because corrections arrive later -- but only among emails that carry an
+    outline. A thread reply that merely chats is skipped, so the real outline it replied
+    to still reaches the note."""
+    for when, subject, text in sorted(candidates, key=lambda c: c[0], reverse=True):
+        if text and looks_like_sermon(subject, text):
+            return subject, when, text
+        log(f'skipping "{subject}" ({when:%a %b %d %H:%M}) -- {len(text or "")} chars with no '
+            f"sermon content once quoted text is stripped")
+    return None
+
+
+def fetch_latest(cfg):
+    """Newest email within LOOKBACK_DAYS that is from an allowed sender, has an allowed
+    subject AND actually carries an outline. Returns (subject, date, text) or None."""
+    since = (datetime.now(timezone.utc) - timedelta(days=int(cfg["LOOKBACK_DAYS"]))).strftime("%d-%b-%Y")
+    M = imaplib.IMAP4_SSL("imap.gmail.com")
+    try:
+        M.login(cfg["GMAIL_USER"], _clean_pw(cfg["GMAIL_APP_PASSWORD"]))
+        M.select("INBOX", readonly=True)  # readonly: never marks the sender's mail as read
+        # Filter in Python rather than with an IMAP query. The allowlists are now
+        # multi-sender AND multi-subject, and IMAP's prefix-notation OR nests horribly
+        # past two terms. The mailbox holds ~12 messages a week, so scanning headers is
+        # cheaper than getting the query wrong.
+        #
+        # MUST still filter on subject: the newest email from a preacher is often
+        # unrelated (worship-night graphics, announcement decks). "Latest from Josh"
+        # would overwrite the note with that.
+        typ, data = M.search(None, f"(SINCE {since})")
+        ids = data[0].split() if typ == "OK" and data and data[0] else []
+        senders, subjects = allowed_senders(cfg), allowed_subjects(cfg)
+
+        candidates = []                               # (datetime, message-id)
+        for mid in ids:
+            typ, hdr = M.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
+            if typ != "OK" or not hdr or not hdr[0]:
+                continue
+            h = email.message_from_bytes(hdr[0][1])
+            frm = str(make_header(decode_header(h.get("From", "") or ""))).lower()
+            sub = str(make_header(decode_header(h.get("Subject", "") or "")))
+            addr = email.utils.parseaddr(frm)[1]
+            if not any(addr == s or addr.endswith(s) for s in senders):
+                continue
+            if not any(k in sub.lower() for k in subjects):
+                continue
+            try:
+                when_h = email.utils.parsedate_to_datetime(h.get("Date"))
+                if when_h.tzinfo is None:
+                    when_h = when_h.replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            candidates.append((when_h, mid))
+
+        # Read EVERY subject-matched email, not just the newest: the newest is often a reply
+        # in the outline's own thread, and only the bodies can tell an outline from chatter.
+        # A week holds a handful of these at most.
+        parsed = []
+        for when_h, mid in candidates:
+            typ, raw = M.fetch(mid, "(BODY.PEEK[])")
+            if typ != "OK" or not raw or not raw[0]:
+                continue
+            msg = email.message_from_bytes(raw[0][1])
+            subject = str(make_header(decode_header(msg.get("Subject", "") or "")))
+            parsed.append((when_h, subject, message_text(msg)))
+    finally:
+        try:
+            M.close()
+        except Exception:
+            pass
+        M.logout()
+
+    return choose_candidate(parsed)
 
 
 def run_osascript(script, timeout=90):
@@ -500,6 +535,31 @@ def parse_structure(body):
     return out
 
 
+TAKEAWAY_META = re.compile(
+    r"\b(I need|I can(?:no|['’])t|I['’]?m unable|I am unable|unable to|could you|"
+    r"please (?:share|provide)|provide (?:the|more)|sermon (?:text|content)|as an AI|"
+    r"here(?: is|['’]s) (?:a|the|one))\b", re.I)
+
+
+def takeaway_problem(s):
+    """Why the model's KEY TAKEAWAY must not be published, or None when it is fine.
+
+    2026-09-12: handed an 84-char reply instead of an outline, the model asked for the
+    sermon content -- and that request was printed in the shared note as the KEY TAKEAWAY.
+    Anything that is not one house-style sentence is dropped; the note is written without it."""
+    if not s:
+        return "empty"
+    if "?" in s:
+        return "contains a question"
+    if TAKEAWAY_META.search(s):
+        return "reads as a reply to us, not a summary"
+    if "—" not in s and " – " not in s:
+        return "missing the em-dash the house style requires"
+    if len(s.split()) > 60:
+        return f"{len(s.split())} words (limit 60)"
+    return None
+
+
 def key_takeaway(title, body):
     """One-sentence summary, same Anthropic key the blog pipeline uses. Best-effort:
     if the API is unreachable the note still gets written, just without this line."""
@@ -527,7 +587,12 @@ def key_takeaway(title, body):
                 "Do NOT use imperative commands ('Invest', 'Speak', 'Build'). Do NOT add "
                 "quotes, a label, or any preamble. Output only the sentence.\n\n"
                 f"Title: {title}\n\n{body[:6000]}"}])
-        return " ".join(msg.content[0].text.split()).strip('"')
+        out = " ".join(msg.content[0].text.split()).strip('"')
+        problem = takeaway_problem(out)
+        if problem:
+            log(f"WARNING: KEY TAKEAWAY rejected ({problem}) -- continuing without it: {out[:120]!r}")
+            return ""
+        return out
     except Exception as e:
         log(f"WARNING: KEY TAKEAWAY generation failed ({e}) -- continuing without it")
         return ""
@@ -899,8 +964,8 @@ def main():
     # graphic, so once a service date is written the remaining attempts stand down.
     service = sunday_from_subject(subject, when).date().isoformat()
     already = STATE.read_text(encoding="utf-8").strip() if STATE.exists() else ""
-    if already == service:
-        log(f"note already written for {service} -- nothing to do.")
+    if already == service and "--force" not in sys.argv[1:]:
+        log(f"note already written for {service} -- nothing to do (pass --force to rewrite it).")
         return 0
 
     title = update_note(cfg["NOTE_ID"], subject, when, text)
