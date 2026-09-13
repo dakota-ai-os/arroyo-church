@@ -98,7 +98,18 @@ def fetch_transcript(vid: str) -> str:
 
 # ---- always target the LATEST sermon (videos[0]); transcribe its audio locally
 #      with whisper. If transcription fails, abort and the daily run retries. ----
-v = videos[0]
+# Manual override, for weeks the site data has not caught up to yet -- e.g. the first
+# message of a new series whose playlist does not exist, so sync-youtube has not listed
+# the video -- and for re-running with a transcript already on disk:
+#   BLOG_VIDEO_ID=... BLOG_VIDEO_TITLE="..." BLOG_SERIES_TITLE="..." BLOG_SERIES_BLURB="..."
+#   BLOG_TRANSCRIPT_FILE=/path/to/transcript.txt
+# With none of these set, behaviour is unchanged: the latest sermon in data/sermons.json.
+if os.environ.get("BLOG_VIDEO_ID"):
+    v = {"id": os.environ["BLOG_VIDEO_ID"], "title": os.environ.get("BLOG_VIDEO_TITLE", "")}
+else:
+    v = videos[0]
+if os.environ.get("BLOG_SERIES_TITLE"):
+    series = {"title": os.environ["BLOG_SERIES_TITLE"], "blurb": os.environ.get("BLOG_SERIES_BLURB", "")}
 video_id = v["id"]
 video_url = f"https://www.youtube.com/watch?v={video_id}"
 
@@ -106,7 +117,8 @@ if already_done(video_id):
     print(f'Draft already exists for {video_id} ("{v.get("title")}") -- nothing to do.')
     sys.exit(0)
 
-transcript = fetch_transcript(video_id)
+_tfile = os.environ.get("BLOG_TRANSCRIPT_FILE")
+transcript = Path(_tfile).read_text(encoding="utf-8") if _tfile else fetch_transcript(video_id)
 if len(transcript) < 400:
     sys.exit(f'Could not transcribe latest sermon "{v.get("title")}" ({video_id}) yet -- will retry next run.')
 
