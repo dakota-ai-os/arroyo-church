@@ -59,6 +59,8 @@ Local church terms each show 100–1K searches/mo, competition **Low**. Bid data
 - 9 photos uploaded from the website (worship gathering, lobby banner, Josh preaching, outdoor tent, 5 team headshots).
 - Posts published: (1) What to expect — Sign up → /plan-your-visit, lobby photo; (2) Connect groups — Learn more → /connect,
   worship-gathering photo. The Monday sermon recap is left to the sermon→blog pipeline (add a GBP post step there).
+  2026-09-13: the service runs about 55 minutes, not 65 (Dakota). The copy bank below is corrected; if the live
+  "What to expect" post says 65, edit it in the profile.
 - Phone consolidated to (925) 694-0426: the site-wide Church JSON-LD (Squarespace HEADER injection) now carries it, plus
   a real logo + hero image instead of the placeholder paths. Yelp still needs a manual edit (needs the Yelp for Business login).
 - Conversion tracking LIVE on arroyochurch.com (commit 09fb874): `acTrack()` fires GA4 events on every form success
@@ -264,17 +266,17 @@ the biz dashboard) to **merge** the duplicate into `rVgGFgmFdc1T3c0fja9N_A` so t
 ## 6. Copy bank
 
 **Q&A seeds**
-- What time is the Sunday service? — Sundays at 10:00 AM. Doors open at 9:30. It runs about 65 minutes.
+- What time is the Sunday service? — Sundays at 10:00 AM. Doors open at 9:30. It runs about 55 minutes.
 - Is there something for kids? — Yes. Kids ministry meets during the Sunday service. Check in at the kids desk when you arrive.
 - What should I wear? — Whatever you're comfortable in. Most people are casual.
 - Where do I park? — Free parking on site at 945 Concannon Blvd. The worship center is the round building.
 - What denomination is Arroyo Church? — Non-denominational Christian church, centered on knowing and showing the love of Jesus.
 - Can I watch online? — Yes. Sundays at 10 AM at youtube.com/@arroyochurch/live; past messages are on the channel.
-- How long is the service? — About 65 minutes.
+- How long is the service? — About 55 minutes.
 
 **First three posts**
 1. Sermon recap (Monday): "This Sunday, Pastor Josh [title]. Missed it? Watch the full message: [YouTube link]. Join us next Sunday at 10 AM — 945 Concannon Blvd." Button: Learn more → sermon URL.
-2. What to expect: "New to Arroyo? Sundays at 10 AM, about 65 minutes, kids ministry during service, free parking. Come as you are. Plan your visit and we'll save you a seat." Button: Sign up → /plan-your-visit.
+2. What to expect: "New to Arroyo? Sundays at 10 AM, about 55 minutes, kids ministry during service, free parking. Come as you are. Plan your visit and we'll save you a seat." Button: Sign up → /plan-your-visit.
 3. Connect groups: "You were created for community. Connect groups meet all week — men, women, couples, moms, young adults, students. Find yours." Button: Learn more → /connect.
 
 ## 7. Maintenance
