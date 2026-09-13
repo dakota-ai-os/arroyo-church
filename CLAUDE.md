@@ -73,7 +73,7 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
   events RSVP, and the Lifted by Love eBook on blog posts + links.arroyochurch.com) → Cloudflare
   Worker `arroyo-connect` (`https://arroyo-connect.dakota-fac.workers.dev`), which holds the
   Planning Center token as an encrypted secret. A `source` token picks the PC form (1206123 Next
-  Steps or 1216871 Plan Your Visit) and labels the submission. Worker code + field map:
+  Steps, 1216871 Plan Your Visit, or 1320123 Lifted by Love eBook) and labels the submission. Worker code + field map:
   `squarespace/arroyo-connect-worker.js`; deploy with `npx wrangler deploy` from `squarespace/`
   (logged in as dakota@arroyochurch.com). Anti-spam = honeypot + best-effort Turnstile.
 - **Google Search Console** → property `https://www.arroyochurch.com/` under av@arroyochurch.com,

@@ -1587,7 +1587,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* ---- Blog posts: a "take a next step" block under every post (2026-09-12). Posts reach people far
      beyond Livermore, and they used to end at "Watch more sermons · Plan your visit" — nothing for a
      reader in another state or anyone not ready to walk in. Offers: the free Lifted by Love eBook
-     (first name + email → arroyo-connect Worker, source `ebook_blog` → Planning Center form 1206123,
+     (first + last name + email → arroyo-connect Worker, source `ebook_blog` → Planning Center form 1320123 "Lifted by Love eBook",
      labelled "Lifted by Love eBook — blog post"; the book is never withheld if the Worker call fails),
      the Sunday livestream, a question / prayer request (/connect), and Plan a Visit for locals. ---- */
   function buildPostNextSteps(){
@@ -1602,7 +1602,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'<p class="ns-desc">40 short devotions for the days life knocks you down. Written so anyone can read it, wherever you are on your journey.</p>'
       +'<form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid">'
       +'<label class="vf-field"><span>First name *</span><input type="text" name="first" required autocomplete="given-name" maxlength="60"></label>'
-      +'<label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email" maxlength="120"></label></div>'
+      +'<label class="vf-field"><span>Last name *</span><input type="text" name="last" required autocomplete="family-name" maxlength="60"></label>'
+      +'<label class="vf-field vf-full"><span>Email *</span><input type="email" name="email" required autocomplete="email" maxlength="120"></label></div>'
       +'<div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Send me the eBook</button></div>'
       +'<p class="ns-fine">Arroyo Church may send you an occasional email. We never share your info.</p></form></div>'
       +'<div class="ns-links">'
@@ -1620,9 +1621,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     form.addEventListener('submit',function(e){
       e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
-      var fd=new FormData(form), first=(fd.get('first')||'').trim(), email=(fd.get('email')||'').trim();
+      var fd=new FormData(form), first=(fd.get('first')||'').trim(), last=(fd.get('last')||'').trim(), email=(fd.get('email')||'').trim();
       var btn=form.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='One moment…';
-      var data={source:'ebook_blog',first:first,email:email,message:'Post: '+location.pathname,website:fd.get('botcheck')||''};
+      var data={source:'ebook_blog',first:first,last:last,email:email,message:'Post: '+location.pathname,website:fd.get('botcheck')||''};
       fetch('https://arroyo-connect.dakota-fac.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){ if(j&&j.success) acTrack('ebook_blog'); })

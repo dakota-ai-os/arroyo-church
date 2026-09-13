@@ -87,7 +87,7 @@ const INTENT_LABELS = {
 
 // ── Destination Planning Center forms ────────────────────────────────────────────────────
 // Verified 2026-07-29 by listing the account's forms through the People API. The account has
-// four forms; these are the two this site writes to. (1219524 "Arroyo Young Adults" and 1229432
+// four forms; these are the two this site writes to. A fifth, the eBook form below, was added 2026-09-13. (1219524 "Arroyo Young Adults" and 1229432
 // "Connect Class" are not written to — the latter has NO custom fields, so routing the site's
 // Connect Class signup there would silently drop the extra interests + message.)
 const FORMS = {
@@ -99,6 +99,10 @@ const FORMS = {
   // always render blank (this is the same reason 1206123 uses the text field 9974695). Swapped
   // 2026-07-29 — do not "upgrade" it back to a phone_number field.
   visit:     { id: "1216871", phone: "10213186", message: "9657927", requirePhone: false },
+  // "Lifted by Love eBook" (created 2026-09-13 just for the eBook sign-ups). PC's built-in first name,
+  // last name and email, plus one plain Paragraph field that receives the "Submitted via" note (and
+  // the blog post path). No phone field, so a phone is never required.
+  ebook:     { id: "1320123", phone: null, message: "10551131", requirePhone: false },
 };
 
 // Which on-site form a submission came from. The client sends a `source` TOKEN only; the human
@@ -119,11 +123,13 @@ const SOURCES = {
   // simply have no phone number. The true origin form + original date are carried in the message.
   import_visit:  { form: "visit",     label: "Imported — historical submission", relaxed: true },
   import_steps:  { form: "nextsteps", label: "Imported — historical submission", relaxed: true },
-  // Lifted by Love eBook sign-ups (2026-09-12). Only first name + email are collected, so `relaxed`
-  // waives phone/last name. `requireEmail` keeps email mandatory: the blog form sends the post path
-  // in `message`, which would otherwise read as a prayer-only capture and skip the email check.
-  ebook_links:   { form: "nextsteps", label: "Lifted by Love eBook — links page", relaxed: true, requireEmail: true },
-  ebook_blog:    { form: "nextsteps", label: "Lifted by Love eBook — blog post", relaxed: true, requireEmail: true },
+  // Lifted by Love eBook sign-ups. Since 2026-09-13 they go to their own PC form (FORMS.ebook), because
+  // 1206123 requires a phone. PC also needs a last name on every person, so `requireLast` rejects a
+  // missing one here instead of letting PC fail silently (both eBook forms now ask for it).
+  // `requireEmail` keeps email mandatory: the blog form sends the post path in `message`, which would
+  // otherwise read as a prayer-only capture and skip the email check.
+  ebook_links:   { form: "ebook", label: "Lifted by Love eBook — links page", requireLast: true, requireEmail: true },
+  ebook_blog:    { form: "ebook", label: "Lifted by Love eBook — blog post", requireLast: true, requireEmail: true },
 };
 
 function cors(origin) {
@@ -198,6 +204,7 @@ export default {
     // gate a vulnerable ask behind an email. first + last + phone are always required.
     const prayerOnly = steps.length === 0 && !!message;
     if (!first) return json({ success: false, error: "missing" }, 422, origin);
+    if (src && src.requireLast && !last) return json({ success: false, error: "missing" }, 422, origin);
     // Phone is only mandatory on the forms that actually ask for it as required (the Next Steps
     // family). The Plan-a-Visit / Events forms mark phone optional, so don't reject those.
     if (target.requirePhone && !(src && src.relaxed) && (!last || !phone)) return json({ success: false, error: "missing" }, 422, origin);
@@ -251,8 +258,9 @@ export default {
     const person_attributes = {
       first_name: first,
       last_name: last,
-      phone_numbers_attributes: [{ location: "Mobile", number: phone }],
     };
+    // Only send a phone when there is one (the eBook sign-ups never collect it).
+    if (phone) person_attributes.phone_numbers_attributes = [{ location: "Mobile", number: phone }];
     // Prayer-only submissions create a person with NO email. Verify PC accepts this in the
     // go/no-go test (a no-email submission); if PC 422s, require email here even for prayer-only.
     if (email) person_attributes.emails_attributes = [{ location: "Home", address: email }];
