@@ -1,10 +1,14 @@
 {
   "series": {
-    "title": "Latest Messages",
-    "blurb": "The newest teaching from Arroyo, including standalone messages.",
-    "playlistUrl": "https://www.youtube.com/@arroyochurch/videos"
+    "title": "Grace for You",
+    "blurb": "A new message every Sunday.",
+    "playlistUrl": "https://www.youtube.com/playlist?list=PLBlTJb-1c0CQ"
   },
   "videos": [
+    {
+      "id": "qrQDZ_0wRLY",
+      "title": "What Is the Grace of God? | Ephesians 1 Sermon | Arroyo Church"
+    },
     {
       "id": "hw8KEKFRkno",
       "title": "I Am the True Vine: What Jesus Meant | John 15 | Arroyo Church"
@@ -16,15 +20,7 @@
     {
       "id": "gTOkRXmnrCA",
       "title": "How to Lead Your Family Spiritually | Proverbs 22:6"
-    },
-    {
-      "id": "dEfZGOuStus",
-      "title": "Guidance for Your Relationships"
-    },
-    {
-      "id": "U1oTLAGnRJM",
-      "title": "How to Get Guidance from God"
     }
   ],
-  "updated": "2026-09-13"
+  "updated": "2026-09-14"
 }
