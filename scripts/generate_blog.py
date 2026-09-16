@@ -213,7 +213,7 @@ base = DRAFTS / f"{today}-{slug}"
     f"""<!-- PASTE-READY DRAFT -- review, then in Squarespace create a blog post and:
      - Title: {post['title']}
      - SEO Description (Post Settings -> SEO): {post['metaDescription']}
-     - URL slug: {slug}
+     - Post URL (Settings -> Content -> Post URL; set it on every new post, and never Duplicate an old post): {slug}
      - Tags: {', '.join(post['tags'])}
      - Body: paste everything below this comment. -->
 {post['bodyHtml']}

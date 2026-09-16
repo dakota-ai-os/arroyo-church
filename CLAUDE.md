@@ -88,9 +88,14 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 ## Do NOT touch / SEO guardrails
 - The **HEADER** code injection (Church schema).
 - The standalone pages (/about, /team, /messages, /connect, /give,
-  /plan-your-visit) and the **/arroyoblog** blog (35 posts + ~190 tag pages as of
-  2026-09-12; ~30 thin tag pages show in Search Console as crawled but not indexed) — they're kept
+  /plan-your-visit) and the **/arroyoblog** blog (34 published posts + ~190 tag pages as of
+  2026-09-16; ~30 thin tag pages show in Search Console as crawled but not indexed) — they're kept
   live + indexed for SEO. Don't delete, redirect, or strip their content.
+  - **Exception (approved 2026-09-16):** a junk Post URL may be fixed. Add the 301 in Settings →
+    Developer Tools → URL Mappings *first* (Squarespace ignores a mapping while a real page still
+    owns the old path), using an absolute `https://www.arroyochurch.com/arroyoblog/<slug>` target (a
+    relative target adds an http hop), then change the Post URL and check the old URL returns 301.
+    A duplicate copy goes to **Draft** with a parking slug (never deleted) and 301s to the post it copies.
 - Never commit or share secrets: the Planning Center token and the Anthropic API key.
 
 ## Working solo (for a new collaborator)
