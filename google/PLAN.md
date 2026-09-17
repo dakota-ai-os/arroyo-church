@@ -241,13 +241,15 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
    received, so: once `plan_visit_submit`, `join_group_submit`, `call_click`, `directions_click`, `watch_live_click` show up under
    Admin → Events → Recent events, star them. Then link GA4 ↔ Ads 974-189-2062 (Admin → Product links) once the Ads wizard is done.
 
-## 5b. Yelp (done 2026-09-09 evening)
+## 5b. Yelp (2026-09-09; split into two pages 2026-09-17)
 
 **Accounts:** Yelp for Business login = **av@arroyochurch.com** (changed from josh@easthillschurch.com on 2026-09-10 and verified
-via the confirmation email; Dakota entered the password for the re-auth step). Account profile renamed to **Arroyo Church Team** (shows as "Arroyo Church T., Manager" in review replies) on 2026-09-10; password unchanged per Dakota. The public "Meet the Manager" section still shows Josh S., Lead Pastor — that's separate and intended. Managed listing id `rVgGFgmFdc1T3c0fja9N_A`, public URL now
-`yelp.com/biz/arroyo-church-livermore` (Yelp re-slugged it from east-hills-church-oakland; the old URL redirects).
+via the confirmation email; Dakota entered the password for the re-auth step). Account profile renamed to **Arroyo Church Team** (shows as "Arroyo Church T., Manager" in review replies) on 2026-09-10; password unchanged per Dakota. The public "Meet the Manager" section still shows Josh S., Lead Pastor — that's separate and intended. Managed listings: **Arroyo Church** `73urM3xpc70b8Og0olohgg`
+(`yelp.com/biz/arroyo-church-dublin`) and the old **East Hills Church** page `rVgGFgmFdc1T3c0fja9N_A`
+(`yelp.com/biz/east-hills-church-oakland-2`, marked Moved 2026-09-17, moderators pending). See the split below.
 
-**Fixed on the claimed listing (was "East Hills Church, 12000 Campus Dr, Oakland", 7 reviews, 4.4★):** name → Arroyo Church ·
+**Fixed on the claimed listing on 2026-09-09 (was "East Hills Church, 12000 Campus Dr, Oakland", 7 reviews, 4.4★; reversed on
+2026-09-17, see below):** name → Arroyo Church ·
 address → 945 Concannon Blvd, Livermore, CA 94550 (map pin verified) · phone → (925) 694-0426 (was blank) · website →
 arroyochurch.com (was easthillschurch.com) · hours Open-24-hours-every-day → Mon closed, Tue–Fri 10–4, Sat closed, Sun 10:00–11:30 ·
 Specialties → the approved Bible-based description + the worship-style line (no URL; Yelp rejects URLs/phones in copy) ·
@@ -271,14 +273,35 @@ captions on the old page were mismatched (e.g., Emily's headshot captioned as Jo
 "Regal Theater" — it's stored in `addressLine3`, which neither the owner dashboard nor the public suggest-edit form can edit;
 submitted as an owner note via yelp.com Suggest an edit.
 
-**Still to do on the old page `rVgGFgmFdc1T3c0fja9N_A` (blocked 2026-09-17):** (1) Dakota deletes the 8 Arroyo photos
-(first 8 tiles in biz_photos — the ones without the customer badge; Claude can't permanently delete); (2) restore name → East
-Hills Church, address → 12000 Campus Dr, Oakland, CA 94619, website → https://www.easthillschurch.com (it 301s to arroyochurch.com),
-phone stays (925) 694-0426 because Yelp requires one; Specialties/Manager → the original East Hills text (saved in the session
-scratchpad restore record); (3) then yelp.com → Suggest an edit → Business Closed or Moved → point to Arroyo Church, 945 Concannon
-Blvd, citing the easthillschurch.com redirect and the Jan 2023 CA name amendment. Claude Code's auto-mode safety check blocked
-Claude from saving (2)–(3), so these need Dakota to approve or do them. Order matters: (1) and (2) before (3), because a
-moved/closed page loses owner access.
+**Done on the old page `rVgGFgmFdc1T3c0fja9N_A` (2026-09-17):** Dakota deleted the 8 Arroyo photos, then Claude restored the
+page with his OK: name → East Hills Church · address → 12000 Campus Dr, Oakland, CA 94619 · website → https://www.easthillschurch.com
+(it 301s to arroyochurch.com) · Specialties and Meet the Manager → the original East Hills text · History → "Established 1987",
+East Hills Community Church (formerly Melrose Baptist) → relaunched as Arroyo Church in Livermore in 2023. The phone stays
+(925) 694-0426 because Yelp requires one. The hours still show Arroyo's office hours, because the original "Open 24 hours" wasn't
+real. The page keeps its 7 reviews and 19 member photos.
+
+**Moved request filed (2026-09-17):** yelp.com → Suggest an edit → Is this your business: Yes → Business Closed or Moved → Moved to
+New Location → search "Arroyo Church" near Livermore, CA → Select the 945 Concannon page (`73urM3xpc70b8Og0olohgg`) · contact
+av@arroyochurch.com · note (270 chars): the Oakland location closed, the church was renamed Arroyo Church (CA name amendment filed
+Jan 2023) and meets at 945 Concannon Blvd, easthillschurch.com redirects to arroyochurch.com, and the selected page is the current
+listing. Yelp accepted it for moderation, and the old page now shows "Yelpers report this location has closed" while it's reviewed.
+**Watch for:** Yelp's email to av@. If the moderators merge the pages instead of closing the old one, the fallback is to report the
+1-star review as a conflict of interest. Also still pending: "Regal Theater" on the Livermore page's address.
+
+## 5c. Apple Business / Apple Maps (in progress)
+
+Apple Maps' place card for Arroyo pulls reviews and photos from Yelp and showed the old (925) 642-1516 number. The fix is to verify
+the church in Apple Business, then set the phone, hours and photos there.
+
+- **Org verification:** the EIN was rejected ("business ID isn't recognized"), so we switched to domain validation plus the
+  Venture Church Network group-exemption letter as the supporting document.
+- **Domain:** arroyochurch.com is listed under Apple Business → Settings → Domains, unverified. Apple's window ends about
+  **2026-09-30**. Verify → the dialog shows a TXT record for host `@`. Add it in Squarespace Domains → arroyochurch.com → DNS
+  settings, then press Verify in Apple Business.
+- **Blocker (2026-09-17):** the DNS lives in the Squarespace account that owns the domain (Josh Smith's). Dakota's own Squarespace
+  login gets "Access Denied" on the DNS page. Someone has to sign in to the owner account, or the owner can invite Dakota to
+  manage the domain.
+- **After verification:** phone → (925) 694-0426, hours, cover photo and current photos. Apple takes days to weeks to publish.
 
 ## 6. Copy bank
 
