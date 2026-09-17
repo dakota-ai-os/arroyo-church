@@ -274,7 +274,7 @@ captions on the old page were mismatched (e.g., Emily's headshot captioned as Jo
 submitted as an owner note via yelp.com Suggest an edit.
 
 **Done on the old page `rVgGFgmFdc1T3c0fja9N_A` (2026-09-17):** Dakota deleted the 8 Arroyo photos, then Claude restored the
-page with his OK: name → East Hills Church · address → 12000 Campus Dr, Oakland, CA 94619 · website → https://www.easthillschurch.com
+page with Dakota's OK: name → East Hills Church · address → 12000 Campus Dr, Oakland, CA 94619 · website → https://www.easthillschurch.com
 (it 301s to arroyochurch.com) · Specialties and Meet the Manager → the original East Hills text · History → "Established 1987",
 East Hills Community Church (formerly Melrose Baptist) → relaunched as Arroyo Church in Livermore in 2023. The phone stays
 (925) 694-0426 because Yelp requires one. The hours still show Arroyo's office hours, because the original "Open 24 hours" wasn't
