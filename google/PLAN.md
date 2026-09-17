@@ -300,8 +300,9 @@ the church in Apple Business, then set the phone, hours and photos there.
   record in place. The DNS lives in the domain owner's Squarespace account (Josh Smith's) — Dakota's own login gets "Access Denied"
   on the DNS page, and Squarespace makes the owner account re-confirm with Google before it will save a record. If this comes up
   again: **a domain-manager invite went to Dakota Yates / dakota@arroyochurch.com on 2026-09-17** (Domains → Permissions → Invite
-  domain manager, sent from the owner account). Once Dakota accepts it while signed in as dakota@arroyochurch.com, that login can
-  edit DNS without Josh. Note Squarespace re-asks the owner to confirm with Google before every protected action here.
+  domain manager, sent from the owner account) and **accepted the same day** — dakota@arroyochurch.com now opens
+  `account.squarespace.com/domains/managed/arroyochurch.com/dns/dns-settings` directly and can edit DNS without Josh. The domain
+  doesn't show in that account's Domains list, so use the URL above. Note Squarespace re-asks the owner to confirm with Google before every protected action here.
 - **Org verification sent 2026-09-17:** method 1 Domain Validation (arroyochurch.com), method 2 "Other" = the Venture Church
   Network group-exemption letter (`~/Desktop/IRS Letter Signed - 2025.pdf`) with a 467-character description covering the group
   exemption and the Jan 2023 name change. Apple shows the org as **In Review** (up to 5 business days) and emails the result to
