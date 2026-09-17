@@ -295,12 +295,15 @@ the church in Apple Business, then set the phone, hours and photos there.
 
 - **Org verification:** the EIN was rejected ("business ID isn't recognized"), so we switched to domain validation plus the
   Venture Church Network group-exemption letter as the supporting document.
-- **Domain:** arroyochurch.com is listed under Apple Business → Settings → Domains, unverified. Apple's window ends about
-  **2026-09-30**. Verify → the dialog shows a TXT record for host `@`. Add it in Squarespace Domains → arroyochurch.com → DNS
-  settings, then press Verify in Apple Business.
-- **Blocker (2026-09-17):** the DNS lives in the Squarespace account that owns the domain (Josh Smith's). Dakota's own Squarespace
-  login gets "Access Denied" on the DNS page. Someone has to sign in to the owner account, or the owner can invite Dakota to
-  manage the domain.
+- **Domain verified 2026-09-17:** TXT record `apple-domain-verification=QBsg0osKnfMBx5sz` at host `@`, added under Squarespace
+  Domains → arroyochurch.com → DNS → Custom records, then Apple Business → Settings → Domains → Verify → Check Records. Leave the
+  record in place. The DNS lives in the domain owner's Squarespace account (Josh Smith's) — Dakota's own login gets "Access Denied"
+  on the DNS page, and Squarespace makes the owner account re-confirm with Google before it will save a record. If this comes up
+  again, the owner can invite Dakota as a domain manager (Domains → Permissions → Invite domain manager), which grants DNS access.
+- **Org verification sent 2026-09-17:** method 1 Domain Validation (arroyochurch.com), method 2 "Other" = the Venture Church
+  Network group-exemption letter (`~/Desktop/IRS Letter Signed - 2025.pdf`) with a 467-character description covering the group
+  exemption and the Jan 2023 name change. Apple shows the org as **In Review** (up to 5 business days) and emails the result to
+  av@arroyochurch.com. Apple Organization ID 406431513582.
 - **After verification:** phone → (925) 694-0426, hours, cover photo and current photos. Apple takes days to weeks to publish.
 
 ## 6. Copy bank
