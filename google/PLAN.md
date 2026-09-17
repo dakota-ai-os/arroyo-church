@@ -257,11 +257,28 @@ saved live (Yelp says it reviews name/address edits against the website; nothing
 ($1/day) — skipped. **Can't fix:** the ~17 user-uploaded East Hills-era photos (kids choir, fellowship hall) — owners can only
 flag them; Yelp orders photos by engagement so the new ones will mix in.
 
-**Duplicate listing:** an unclaimed "Arroyo Church" at 945 Concannon Blvd (Yelp id `73urM3xpc70b8Og0olohgg`, 1 review 5.0★, old
-642 phone) still exists. I started the claim under the same biz account and got Yelp to switch its verification number from
-642-1516 to **694-0426** (accepted instantly). **Dakota:** open `biz.yelp.com/verify/73urM3xpc70b8Og0olohgg/.../options` (or
-Yelp → the listing → Claim) and choose "Receive a text at (925) 694-0426", enter the code; then ask Yelp support (Need Help? in
-the biz dashboard) to **merge** the duplicate into `rVgGFgmFdc1T3c0fja9N_A` so the reviews combine (7 + 1).
+**Duplicate listing → now the Livermore page (2026-09-17).** Strategy changed 2026-09-12: do NOT ask Yelp to merge. Renaming the
+Oakland page put its 1-star review and ~17 member photos on Arroyo, and Apple Maps shows Yelp's photos/reviews. Instead: the
+former duplicate `73urM3xpc70b8Og0olohgg` (yelp.com/biz/arroyo-church-dublin; its pin sat at Regal Hacienda Crossings, Dublin,
+where the church once met) becomes Arroyo's clean page, and the old page goes back to East Hills Church, Oakland, marked Moved.
+
+**Done on `73urM3xpc70b8Og0olohgg` (2026-09-17):** claimed under av@ (no text code needed) · phone (925) 642-1516 → 694-0426 ·
+hours Mon closed, Tue–Fri 10–4, Sat closed, Sun 10–11:30 · Specialties + History + Meet the Manager (Josh S.) copied from the old
+page · amenity Open to All · 8 site photos uploaded with ACCURATE captions (verified on the public page): Chris Rogers (Worship
+Pastor), Emily Fountain (Children's Ministry Director), Josh Smith (Lead Pastor) headshot + preaching, Elijah Merrell (Media
+Coordinator), Kelly Patchin (Elder), lobby "Community at Arroyo Church", tent "Arroyo Church at a community event". The earlier
+captions on the old page were mismatched (e.g., Emily's headshot captioned as Josh preaching). **Pending moderators:** remove
+"Regal Theater" — it's stored in `addressLine3`, which neither the owner dashboard nor the public suggest-edit form can edit;
+submitted as an owner note via yelp.com Suggest an edit.
+
+**Still to do on the old page `rVgGFgmFdc1T3c0fja9N_A` (blocked 2026-09-17):** (1) Dakota deletes the 8 Arroyo photos
+(first 8 tiles in biz_photos — the ones without the customer badge; Claude can't permanently delete); (2) restore name → East
+Hills Church, address → 12000 Campus Dr, Oakland, CA 94619, website → https://www.easthillschurch.com (it 301s to arroyochurch.com),
+phone stays (925) 694-0426 because Yelp requires one; Specialties/Manager → the original East Hills text (saved in the session
+scratchpad restore record); (3) then yelp.com → Suggest an edit → Business Closed or Moved → point to Arroyo Church, 945 Concannon
+Blvd, citing the easthillschurch.com redirect and the Jan 2023 CA name amendment. Claude Code's auto-mode safety check blocked
+Claude from saving (2)–(3), so these need Dakota to approve or do them. Order matters: (1) and (2) before (3), because a
+moved/closed page loses owner access.
 
 ## 6. Copy bank
 
