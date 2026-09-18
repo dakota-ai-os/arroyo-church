@@ -245,8 +245,10 @@ arroyochurch.com mail is on Workspace this can zero the bill) and the YouTube No
 
 **Accounts:** Yelp for Business login = **av@arroyochurch.com** (changed from josh@easthillschurch.com on 2026-09-10 and verified
 via the confirmation email; Dakota entered the password for the re-auth step). Account profile renamed to **Arroyo Church Team** (shows as "Arroyo Church T., Manager" in review replies) on 2026-09-10; password unchanged per Dakota. The public "Meet the Manager" section still shows Josh S., Lead Pastor — that's separate and intended. Managed listings: **Arroyo Church** `73urM3xpc70b8Og0olohgg`
-(`yelp.com/biz/arroyo-church-dublin`) and the old **East Hills Church** page `rVgGFgmFdc1T3c0fja9N_A`
-(`yelp.com/biz/east-hills-church-oakland-2`, marked Moved 2026-09-17, moderators pending). See the split below.
+(**`yelp.com/biz/arroyo-church-livermore-2`** since 2026-09-18; `arroyo-church-dublin` redirects to it) and the old **East Hills
+Church** page `rVgGFgmFdc1T3c0fja9N_A` (`yelp.com/biz/east-hills-church-oakland-2`, shown as CLOSED since 2026-09-18). ⚠️ The
+unsuffixed `yelp.com/biz/arroyo-church-livermore` belongs to the OLD page and now lands on the closed East Hills page — never
+share it. See the split below.
 
 **Fixed on the claimed listing on 2026-09-09 (was "East Hills Church, 12000 Campus Dr, Oakland", 7 reviews, 4.4★; reversed on
 2026-09-17, see below):** name → Arroyo Church ·
@@ -286,7 +288,12 @@ av@arroyochurch.com · note (270 chars): the Oakland location closed, the church
 Jan 2023) and meets at 945 Concannon Blvd, easthillschurch.com redirects to arroyochurch.com, and the selected page is the current
 listing. Yelp accepted it for moderation, and the old page now shows "Yelpers report this location has closed" while it's reviewed.
 **Watch for:** Yelp's email to av@. If the moderators merge the pages instead of closing the old one, the fallback is to report the
-1-star review as a conflict of interest. Also still pending: "Regal Theater" on the Livermore page's address.
+1-star review as a conflict of interest.
+
+**Status 2026-09-18:** moderators removed "Regal Theater" — the Livermore page now reads 945 Concannon Blvd, Livermore, CA 94550
+(phone 694-0426, 5.0 from 1 review, 8 photos) and Yelp re-slugged it to `arroyo-church-livermore-2`. The old page's title now
+says CLOSED, its hours are hidden, and it still shows "Yelpers report this location has closed" with no "moved to" link, so Yelp
+is treating it as closed rather than linking the two pages — fine for our purpose, and nothing was merged.
 
 ## 5c. Apple Business / Apple Maps (in progress)
 
@@ -308,6 +315,9 @@ the church in Apple Business, then set the phone, hours and photos there.
   exemption and the Jan 2023 name change. Apple shows the org as **In Review** (up to 5 business days) and emails the result to
   av@arroyochurch.com. Apple Organization ID 406431513582.
 - **After verification:** phone → (925) 694-0426, hours, cover photo and current photos. Apple takes days to weeks to publish.
+- **Check 2026-09-18:** no decision email yet (only "verification is in review", Sep 17). The Apple Maps card (place id
+  `IBF83C24354FA29B3`) is unchanged: phone (925) 642-1516, Yelp 4.4 (7) with the 1-star, and its Yelp rating links to
+  `yelp.com/biz/rVgGFgmFdc1T3c0fja9N_A` — Apple is still matched to the old, now-closed page until it re-reads Yelp.
 
 ## 6. Copy bank
 
