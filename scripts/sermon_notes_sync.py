@@ -771,6 +771,19 @@ def replace_around_image(note_id, header_html, body_html, skip_lines):
     _keys(['keystroke "v" using {command down}', "delay 1.2"])
 
 
+def strip_markdown_emphasis(text):
+    """Drop the asterisks Josh uses for bold, so they don't reach the shared note.
+
+    2026-09-20: he wrote the outline as "*Walk in His Will *" / "*#1 Walk in unity *",
+    and the note published the asterisks literally -- in its title, every point heading,
+    and mid-sentence in '*"Abba,* Father."'. Apple Notes has no markdown, so an asterisk
+    from the email is never anything but a stray character. The purple instruction line
+    keeps its leading "*" because the script writes that line itself; it never comes
+    through here."""
+    text = (text or "").replace("*", "")
+    return "\n".join(re.sub(r"[ \t]{2,}", " ", l).rstrip() for l in text.splitlines())
+
+
 def update_note(note_id, subject, when, text):
     """Refresh the shared note's text, leaving the series graphic untouched.
 
@@ -782,6 +795,7 @@ def update_note(note_id, subject, when, text):
     With no image present, fall back to a plain AppleScript body write.
     """
     esc = lambda x: html.escape(x, quote=False)
+    text = strip_markdown_emphasis(text)
 
     if looks_like_slides(text):
         log("body looks like a guest slide deck -- using the slide parser")
