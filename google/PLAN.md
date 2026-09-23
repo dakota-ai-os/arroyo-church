@@ -315,6 +315,12 @@ the church in Apple Business, then set the phone, hours and photos there.
   exemption and the Jan 2023 name change. Apple shows the org as **In Review** (up to 5 business days) and emails the result to
   av@arroyochurch.com. Apple Organization ID 406431513582.
 - **After verification:** phone → (925) 694-0426, hours, cover photo and current photos. Apple takes days to weeks to publish.
+- **Blocked 2026-09-22 (case 102971677900):** deployment_support@apple.com wrote that the enrolling Apple Account's name must be
+  a real person's name, not the church's. Fix at account.apple.com → Personal Information → Name (first + last) on
+  av@arroyochurch.com, then reply to Sheldon on that case to restart the review. The organization name in Apple Business stays
+  "Arroyo Church"; this is only the person's account name.
+- **Check 2026-09-23:** Apple Maps has DROPPED the Yelp ratings block — no 4.4 (7), no 1-star review on the card. Two
+  Yelp-sourced photo tiles remain and the phone still reads (925) 642-1516, which the claimed place card will fix.
 - **Check 2026-09-18:** no decision email yet (only "verification is in review", Sep 17). The Apple Maps card (place id
   `IBF83C24354FA29B3`) is unchanged: phone (925) 642-1516, Yelp 4.4 (7) with the 1-star, and its Yelp rating links to
   `yelp.com/biz/rVgGFgmFdc1T3c0fja9N_A` — Apple is still matched to the old, now-closed page until it re-reads Yelp.
