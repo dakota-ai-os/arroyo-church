@@ -2,6 +2,10 @@
   "playlistUrl": "https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX",
   "videos": [
     {
+      "id": "O5IkbXCEn9g",
+      "title": "Arroyo Podcast | How to deal with loss"
+    },
+    {
       "id": "XzCD5yX7Fl4",
       "title": "How to handle difficult relationships | Arroyo Podcast"
     },
@@ -20,11 +24,7 @@
     {
       "id": "1casv_QOmrc",
       "title": "Answering Hard Questions Part Two"
-    },
-    {
-      "id": "d-7hW6V50NE",
-      "title": "Answering Hard Questions Part One"
     }
   ],
-  "updated": "2026-09-26"
+  "updated": "2026-09-27"
 }
