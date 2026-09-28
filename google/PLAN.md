@@ -27,7 +27,7 @@ The church is in the IRS database → Goodstack (Google's verifier) can match it
 - Verified. 5.0 ★ · 50 reviews · every review answered (good). Profile strength "Looks good".
 - Categories: Church (primary) · Christian church · Non-denominational church. Keep.
 - Description: 291 of 750 chars, says "a new church", no Tri-Valley / service-time / ministry keywords.
-- Hours: Sun 10:00–11:30 · Mon closed · Tue–Fri 10–4 · Sat closed. Special hours: none.
+- Hours: Sun **9:30**–11:30 (doors open 9:30, confirmed by Dakota 2026-09-28; was 10:00) · Mon closed · Tue–Fri 10–4 · Sat closed. Special hours: none.
 - **Worship service hours added 2026-09-09 (Sunday 10:00–11:30 AM) — pending Google review.**
 - Opening date: not set. Services: none. Posts: **never posted**. Q&A: none. Chat: off.
 - Attributes: wheelchair entrance/parking/restroom + restroom (added by Google). "From the business": none.
@@ -89,6 +89,8 @@ existing sermon→blog automation; event posts as they come.
 
 ### Facts confirmed by Dakota (2026-09-09)
 - Phone is (925) 694-0426. Tue–Fri 10–4 are real office hours. Church opened September 2023.
+- (2026-09-28) Sunday doors open 9:30 AM; service 10:00 AM. The building is wheelchair accessible. Dakota granted full
+  permission to publish the site/hero-video photos on Apple Maps (Apple's upload attests rights from everyone pictured).
 - Denomination line for Q&A: "We are a Christian church part of the SBC, centered on knowing and showing the love of Jesus."
 - Worship style: blends contemporary and traditional — new songs and hymns that have been around for decades.
 - Instagram is all Reels and Facebook photo URLs are not fetchable from the page, so photos came from the website only.
@@ -331,6 +333,13 @@ the church in Apple Business, then set the phone, hours and photos there.
   (Parking Lot / Nonprofit / Good for Kids ready; free parking + wheelchair access unconfirmed). Photo set, checked for kids/QR
   codes/trademarks/Apple minimums (cover ≥1600×1040, gallery ≥720×960, logo ≥1024²): session scratchpad `apple-photos/final-v2/`.
   Apple Business sessions expire quickly; Dakota has to sign back in (Claude never types Apple credentials).
+- **Finished 2026-09-28 (after Dakota's OK):** cover photo (Sunday crowd outside the round building, 1904×1071, also set at brand
+  level) and 9 gallery photos (worship from the back, band, Josh teaching, Connect Center, after-service group, welcome tent,
+  building front, sanctuary, drone) — all "In Review, up to 3 days". The three 1280×720 building shots were refused ("smaller than
+  720 x 960px") and re-sent as 1707×960 resizes. Good to Know: Wheelchair Accessible, Good for Kids, Nonprofit, Free
+  Self-Parking, Parking Lot. Hours changed to **Sun 9:30–11:30 AM** on Apple, GBP (pending Google review ≤10 min; GBP's separate
+  "Worship service" hours stay Sun 10:00–11:30) and the Yelp Livermore page (saved). Still waiting on Apple: location
+  verification → then set phone to +1 925-694-0426 and consider Actions.
 - **Fixed 2026-09-23:** the Apple Account was named "Arroyo Church" (First: Arroyo / Last: Church). Changed at account.apple.com →
   Personal Information → Name to **Dakota Yates**, and replied to case 102971677900 from av@ asking Apple to continue the review.
 - **Check 2026-09-23:** Apple Maps has DROPPED the Yelp ratings block — no 4.4 (7), no 1-star review on the card. Two
