@@ -319,6 +319,18 @@ the church in Apple Business, then set the phone, hours and photos there.
   a real person's name, not the church's. Fix at account.apple.com → Personal Information → Name (first + last) on
   av@arroyochurch.com, then reply to Sheldon on that case to restart the review. The organization name in Apple Business stays
   "Arroyo Church"; this is only the person's account name.
+- **APPROVED 2026-09-28** (Sheldon, case 102971677900; org verified email the same morning). Place claimed the same day:
+  Brands → Locations → Add → the existing "Arroyo Church, 945 Concannon Blvd" place (no new location), Apple location id
+  **1554160566452356452**, brand "Arroyo Church" (owned, Church, https://www.arroyochurch.com). The claim took the "Done" path
+  (no phone call to the old number). Location status **In Review, up to 5 days**. Set during the claim: website
+  https://www.arroyochurch.com, hours Sun 10:00–11:30 AM · Mon closed · Tue–Fri 10:00 AM–4:00 PM · Sat closed (matches GBP + Yelp).
+  After the claim: About text saved (483 chars, "Arroyo Church is a Bible-based Christian church in Livermore…"),
+  logo uploaded (white river "A" on navy #0D2530, 1024², rendered from the arroyo-app glyph path) → In Review.
+  **Locked until the location review clears:** Phone (still +1 925-642-1516 — change to 694-0426 first thing) and Actions.
+  **Held for Dakota:** cover photo + gallery (the upload attests the church has rights from everyone pictured), Good to Know
+  (Parking Lot / Nonprofit / Good for Kids ready; free parking + wheelchair access unconfirmed). Photo set, checked for kids/QR
+  codes/trademarks/Apple minimums (cover ≥1600×1040, gallery ≥720×960, logo ≥1024²): session scratchpad `apple-photos/final-v2/`.
+  Apple Business sessions expire quickly; Dakota has to sign back in (Claude never types Apple credentials).
 - **Fixed 2026-09-23:** the Apple Account was named "Arroyo Church" (First: Arroyo / Last: Church). Changed at account.apple.com →
   Personal Information → Name to **Dakota Yates**, and replied to case 102971677900 from av@ asking Apple to continue the review.
 - **Check 2026-09-23:** Apple Maps has DROPPED the Yelp ratings block — no 4.4 (7), no 1-star review on the card. Two
