@@ -668,6 +668,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
 .ac-evbar .evb-short{display:none}
 #header .ac-evbar .evb-x{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);width:34px;height:34px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:rgba(252,244,228,.72);font:400 1.35rem/1 'Manrope',sans-serif;cursor:pointer}
 #header .ac-evbar .evb-x:hover{background:rgba(252,244,228,.12);color:#fcf4e4}
+@media(max-width:767px){html.ac-evbar-on .ac-hero .ac-scroll{display:none}} /* bar pushes the phone hero ~65px down onto the Scroll cue (375x812: address y677-725 vs cue 660-705) */
 @media(max-width:640px){#header .ac-evbar{font-size:.83rem;padding:.55rem 2.7rem .55rem .75rem}.ac-evbar .evb-long,.ac-evbar .evb-more{display:none}.ac-evbar .evb-short{display:inline}}
 .ac-event{background:#12271a;color:#fcf4e4;padding:clamp(4rem,9vh,6.5rem) 0;border-top:1px solid rgba(252,244,228,.08)}
 .ac-event .ev-grid{display:grid;gap:clamp(2rem,4vw,3.75rem);align-items:center}
@@ -1648,7 +1649,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'<span class="evb-more">&middot; Free pumpkins &middot; Everyone&rsquo;s welcome</span>'
       +'<span class="evb-cta">Details <span aria-hidden="true">&rarr;</span></span></a>'
       +'<button class="evb-x" type="button" aria-label="Hide this announcement">&times;</button>';
-    slot.appendChild(bar);
+    slot.appendChild(bar); document.documentElement.classList.add('ac-evbar-on');
     evSetVar(); addEventListener('resize',evSetVar,{passive:true});
     evRelayout(); setTimeout(evRelayout,600); setTimeout(evSetVar,700);
     bar.querySelector('.evb-link').addEventListener('click',function(e){
@@ -1668,10 +1669,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     bar.querySelector('.evb-x').addEventListener('click',function(){
       try{ localStorage.setItem('acEvHide:'+EV.id,'1'); }catch(e){}
       var next=document.querySelector('#header .header-title a, #header a[href="/"]'); /* keep keyboard focus in the header, not on <body> */
-      if(bar.parentNode) bar.parentNode.removeChild(bar); evSetVar(); evRelayout();
+      if(bar.parentNode) bar.parentNode.removeChild(bar); document.documentElement.classList.remove('ac-evbar-on'); evSetVar(); evRelayout();
       if(next){ try{ next.focus({preventScroll:true}); }catch(x){} }
     });
-    var tm=setInterval(function(){ if(!evLive()){ clearInterval(tm); if(bar.parentNode){ bar.parentNode.removeChild(bar); evSetVar(); evRelayout(); } } },60000);
+    var tm=setInterval(function(){ if(!evLive()){ clearInterval(tm); if(bar.parentNode){ bar.parentNode.removeChild(bar); document.documentElement.classList.remove('ac-evbar-on'); evSetVar(); evRelayout(); } } },60000);
   }
   function buildEventCard(){
     if(!HOME()||!evLive()||document.getElementById('ac-event')) return;
