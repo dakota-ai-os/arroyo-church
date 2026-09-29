@@ -22,15 +22,15 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:pumpkin-patch-2026@arroyochurch.com
-DTSTAMP:20260928T120000Z
+DTSTAMP:20260928T230000Z
 DTSTART;TZID=America/Los_Angeles:20261004T100000
 DTEND;TZID=America/Los_Angeles:20261004T130000
 SUMMARY:Pumpkin Patch Party at Arroyo Church
 LOCATION:Arroyo Church\, 945 Concannon Blvd\, Livermore\, CA 94550
-DESCRIPTION:Starts at 10am (end time approximate). Music and a short messag
- e at 10am\, then the party. Take home a free pumpkin. Jump houses\, free B
- BQ\, a photo booth\, and free ice cream from Meadowlark Dairy. Everyone's 
- welcome - bring the kids\, bring a neighbor. https://www.arroyochurch.com
+DESCRIPTION:10am to 1pm. Music and a short message at 10am\, then the party
+  until 1pm. Take home a free pumpkin. Jump houses\, free BBQ\, a photo boo
+ th\, and free ice cream from Meadowlark Dairy. Everyone's welcome - bring 
+ the kids\, bring a neighbor. https://www.arroyochurch.com
 URL:https://www.arroyochurch.com
 END:VEVENT
 END:VCALENDAR
