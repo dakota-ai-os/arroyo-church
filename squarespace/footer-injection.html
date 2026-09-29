@@ -236,11 +236,11 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .vcard h3{font-family:'Fraunces',Georgia,serif;font-weight:480;font-size:clamp(1.4rem,3vw,2.1rem);margin:0 0 .5rem}
 .vcard .v-tag{font-size:1.02rem;font-weight:600;margin:0 0 .8rem}
 .vcard blockquote{font-style:italic;font-size:.95rem;opacity:.82;border-left:2.5px solid currentColor;padding-left:1rem;line-height:1.7;margin:0}
-.vcard:nth-child(1){background:linear-gradient(135deg,#15394a,#0e2a37);top:88px}
-.vcard:nth-child(2){background:linear-gradient(135deg,#7d6228,#5d4a20);top:102px}
-.vcard:nth-child(3){background:linear-gradient(135deg,#1d5a6b,#123c48);top:116px}
-.vcard:nth-child(4){background:linear-gradient(135deg,#274b3b,#16332a);top:130px}
-.vcard:nth-child(5){background:linear-gradient(135deg,#23445e,#152c3f);top:144px}
+.vcard:nth-child(1){background:linear-gradient(135deg,#15394a,#0e2a37);top:calc(88px + var(--ac-evbar-h,0px))}
+.vcard:nth-child(2){background:linear-gradient(135deg,#7d6228,#5d4a20);top:calc(102px + var(--ac-evbar-h,0px))}
+.vcard:nth-child(3){background:linear-gradient(135deg,#1d5a6b,#123c48);top:calc(116px + var(--ac-evbar-h,0px))}
+.vcard:nth-child(4){background:linear-gradient(135deg,#274b3b,#16332a);top:calc(130px + var(--ac-evbar-h,0px))}
+.vcard:nth-child(5){background:linear-gradient(135deg,#23445e,#152c3f);top:calc(144px + var(--ac-evbar-h,0px))}
 @media(max-width:600px){.vcard{grid-template-columns:1fr;gap:.6rem;min-height:0}}
 
 /* ════ SINGLE-PAGE HOME SECTIONS (team / sermons / connect / give / visit) ════ */
@@ -662,8 +662,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
 .ac-evbar .evb-emoji{font-size:1.05rem;line-height:1}
 .ac-evbar strong{font-weight:800}
 .ac-evbar .evb-more{color:rgba(252,244,228,.78)}
-.ac-evbar .evb-cta{display:inline-flex;align-items:center;gap:.3rem;background:#ee6a1e;color:#fff;font-weight:800;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .8rem;border-radius:999px;transition:background .2s,transform .2s}
-#header .ac-evbar a.evb-link:hover .evb-cta{background:#d45710;transform:translateX(2px)}
+.ac-evbar .evb-cta{display:inline-flex;align-items:center;gap:.3rem;background:#c5510f;color:#fff;font-weight:800;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .8rem;border-radius:999px;transition:background .2s,transform .2s}
+#header .ac-evbar a.evb-link:hover .evb-cta{background:#a6450d;transform:translateX(2px)}
 .ac-evbar .evb-short{display:none}
 #header .ac-evbar .evb-x{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);width:34px;height:34px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:rgba(252,244,228,.72);font:400 1.35rem/1 'Manrope',sans-serif;cursor:pointer}
 #header .ac-evbar .evb-x:hover{background:rgba(252,244,228,.12);color:#fcf4e4}
@@ -689,8 +689,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
 .ac-event .ev-note strong{color:#fcf4e4}
 .ac-event .ev-ctas{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.9rem}
 .ac-event .btn svg{width:18px;height:18px;flex:0 0 auto}
-.ac-event .btn-pump{background:#ee6a1e;color:#fff;box-shadow:0 8px 24px -8px rgba(238,106,30,.65)}
-.ac-event .btn-pump:hover{background:#d45710;transform:translateY(-3px)}
+.ac-event .btn-pump{background:#c5510f;color:#fff;box-shadow:0 8px 24px -8px rgba(197,81,15,.7)}
+.ac-event .btn-pump:hover{background:#a6450d;transform:translateY(-3px)}
 @media(max-width:899px){.ac-event .ev-art{max-width:420px}}
 @media(max-width:767px){.ac-event{padding:3rem 0}.ac-event .ev-ctas .btn{flex:1 1 100%;justify-content:center}}
 </style>
@@ -1327,7 +1327,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* ---- nav: repoint links to home anchors + smooth scroll; hide empty About folder ---- */
   function wireNav(){
     var map={'about':'ac-mission','team':'ac-team','beliefs':'ac-beliefs','sermons':'ac-sermons','connect':'ac-connect','give':'ac-give'};
-    function go(id){ var el=document.getElementById(id); if(!el)return; var de=document.documentElement; de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-72); }
+    function go(id){ var el=document.getElementById(id); if(!el)return; var de=document.documentElement; de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-72-evBarH()); }
     function hook(el,id){ if(!id||el.getAttribute('data-ac-nav'))return; el.setAttribute('data-ac-nav','1'); if(el.tagName==='A')el.setAttribute('href','/#'+id); el.style.cursor='pointer'; el.addEventListener('click',function(e){ e.preventDefault(); if(HOME())go(id); else window.location.href='/#'+id; }); }
     document.querySelectorAll('.header-nav-item a, .header-nav-folder-title').forEach(function(el){ hook(el,map[(el.textContent||'').trim().toLowerCase()]); });
     document.querySelectorAll('.header-actions a, .header-actions-action a, .header .sqs-button-element--primary').forEach(function(el){ var t=(el.textContent||'').trim().toLowerCase(); if(t.indexOf('plan')>=0||t.indexOf('visit')>=0) hook(el,'ac-visit-form'); });
@@ -1337,7 +1337,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* ---- mobile menu: kill the empty "About" folder (arrow + blank sub-panel); make every item smooth-scroll & close on tap ---- */
   function wireMobileNav(){
     var map={'about':'ac-mission','team':'ac-team','beliefs':'ac-beliefs','sermons':'ac-sermons','connect':'ac-connect','give':'ac-give'};
-    function mGo(id){ var el=document.getElementById(id); if(!el)return; var de=document.documentElement; de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-72); }
+    function mGo(id){ var el=document.getElementById(id); if(!el)return; var de=document.documentElement; de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-72-evBarH()); }
     function closeMenu(){ if(document.body.classList.contains('header--menu-open')){ var b=document.querySelector('.header-burger-btn'); if(b) b.click(); } }
     var items=document.querySelectorAll('.header-menu-nav-item > a');
     for(var i=0;i<items.length;i++){
@@ -1630,6 +1630,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     return (days>=1&&days<=6)?{long:'This Sunday, Oct 4',short:'Sun, Oct 4',eyebrow:'This Sunday'}:{long:'Sunday, Oct 4',short:'Sun, Oct 4',eyebrow:'Sunday, October 4'};
   }
   function evRelayout(){ try{ window.dispatchEvent(new Event('resize')); }catch(e){} }
+  /* the bar lives inside the fixed header, so every fixed scroll offset and sticky top on the site grows by its height */
+  function evBarH(){ var b=document.getElementById('ac-evbar'); return b?b.offsetHeight:0; }
+  function evSetVar(){ document.documentElement.style.setProperty('--ac-evbar-h', evBarH()+'px'); }
   function buildEventBar(){
     if(!evLive()||document.getElementById('ac-evbar')) return;
     try{ if(localStorage.getItem('acEvHide:'+EV.id)) return; }catch(e){}
@@ -1645,20 +1648,29 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'<span class="evb-cta">Details <span aria-hidden="true">&rarr;</span></span></a>'
       +'<button class="evb-x" type="button" aria-label="Hide this announcement">&times;</button>';
     slot.appendChild(bar);
-    evRelayout(); setTimeout(evRelayout,600);
+    evSetVar(); addEventListener('resize',evSetVar,{passive:true});
+    evRelayout(); setTimeout(evRelayout,600); setTimeout(evSetVar,700);
     bar.querySelector('.evb-link').addEventListener('click',function(e){
       acTrack('event_promo',{event_name:'event_bar_click'});
       var card=document.getElementById('ac-event'); if(!card) return; /* off the home page: follow the link to /#ac-event */
       e.preventDefault();
-      var de=document.documentElement, hd=document.querySelector('#header');
-      de.style.setProperty('scroll-behavior','auto','important');
-      window.scrollTo(0, card.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-((hd&&hd.offsetHeight)||96));
+      var menuOpen=document.body.classList.contains('header--menu-open'); /* the bar sits above the open phone menu */
+      if(menuOpen){ var bb=document.querySelector('.header-burger-btn'); if(bb) bb.click(); }
+      setTimeout(function(){
+        var de=document.documentElement, hd=document.querySelector('#header');
+        de.style.setProperty('scroll-behavior','auto','important');
+        window.scrollTo(0, card.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-((hd&&hd.offsetHeight)||96));
+        if(!card.hasAttribute('tabindex')) card.setAttribute('tabindex','-1');
+        try{ card.focus({preventScroll:true}); }catch(x){}
+      }, menuOpen?80:0);
     });
     bar.querySelector('.evb-x').addEventListener('click',function(){
       try{ localStorage.setItem('acEvHide:'+EV.id,'1'); }catch(e){}
-      if(bar.parentNode) bar.parentNode.removeChild(bar); evRelayout();
+      var next=document.querySelector('#header .header-title a, #header a[href="/"]'); /* keep keyboard focus in the header, not on <body> */
+      if(bar.parentNode) bar.parentNode.removeChild(bar); evSetVar(); evRelayout();
+      if(next){ try{ next.focus({preventScroll:true}); }catch(x){} }
     });
-    var tm=setInterval(function(){ if(!evLive()){ clearInterval(tm); if(bar.parentNode){ bar.parentNode.removeChild(bar); evRelayout(); } } },60000);
+    var tm=setInterval(function(){ if(!evLive()){ clearInterval(tm); if(bar.parentNode){ bar.parentNode.removeChild(bar); evSetVar(); evRelayout(); } } },60000);
   }
   function buildEventCard(){
     if(!HOME()||!evLive()||document.getElementById('ac-event')) return;
@@ -1687,6 +1699,18 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'</div></div>';
     cd.parentNode.insertBefore(sec, cd.nextSibling);
     var cal=sec.querySelector('[data-ev-cal]'); if(cal) cal.addEventListener('click',function(){ acTrack('event_promo',{event_name:'event_calendar_click'}); });
+    /* Arriving at /#ac-event (the bar on other pages, the Google post button): wireNav's generic hash jump
+       uses a fixed 72px offset, which tucks this card under the taller header. Land it under the real
+       header instead; the second pass catches the header shrinking once scrolled, unless the visitor has
+       already scrolled somewhere else. */
+    if(location.hash==='#ac-event'){
+      var evFirst=null;
+      var evJump=function(){ var de=document.documentElement, hd=document.querySelector('#header');
+        var y=sec.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-((hd&&hd.offsetHeight)||96);
+        if(evFirst!==null && Math.abs((window.scrollY||de.scrollTop)-evFirst)>160) return;
+        de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0,y); if(evFirst===null) evFirst=y; };
+      setTimeout(evJump,650); setTimeout(evJump,1500);
+    }
     var tm=setInterval(function(){ if(!evLive()){ clearInterval(tm); if(sec.parentNode) sec.parentNode.removeChild(sec); } },60000);
   }
   /* ---- /plan-your-visit: the Google Ads + SEO landing page. It used to hide Squarespace's native
@@ -1777,7 +1801,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         var target=b.getAttribute('data-ac-scroll')||'ac-visit-form'; /* default = the visit form; e.g. data-ac-scroll="ac-sermons" jumps to the sermons section */
         var el=document.getElementById(target); if(!el) return;
         de.style.setProperty('scroll-behavior','auto','important');
-        window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-80);
+        window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-80-evBarH());
         if(target==='ac-visit-form'){ var inp=el.querySelector('input[name=name]'); if(inp) setTimeout(function(){ inp.focus(); },160); }
       });
     });
