@@ -45,15 +45,17 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 3. `git commit` + `git push` to `main`. GitHub Pages then serves the file at
    `https://dakota-ai-os.github.io/arroyo-church/squarespace/footer-injection.html`
    (~30s–2min lag; cache-bust with `?cb=<timestamp>`).
-4. **Push it live in Squarespace:** Settings → Advanced → Code Injection. Replace
-   the **FOOTER** field with the new file contents, then **Save**.
+4. **Push it live in Squarespace:** Pages → Custom Code → Code Injection (direct URL:
+   `https://arroyo-church-livermore.squarespace.com/config/pages/code-injection`; Squarespace moved it
+   out of Settings → Advanced in 2026). Replace the **FOOTER** field with the new file contents, then **Save**.
    - ⚠️ The Code Injection page has several CodeMirror editors. **idx 0 = HEADER =
      the Church/LocalBusiness JSON-LD schema — NEVER overwrite it.** The FOOTER is
      the editor whose content contains `buildHero`/`ac-hero`. After saving, confirm
      the HEADER still contains `"@type": "Church"`.
    - Squarespace trims ~1 trailing char on save — harmless.
    - Claude's in-browser save (`cm.setValue` + the Save button) was blocked by Claude Code's
-     auto mode on 2026-09-12. If that happens, a human pastes the footer — copy it from
+     auto mode on 2026-09-12 and again on 2026-09-28; the second time it cleared once Dakota allowed
+     browser edits in the Claude app. If it stays blocked, a human pastes the footer — copy it from
      `https://raw.githubusercontent.com/dakota-ai-os/arroyo-church/main/squarespace/footer-injection.html`.
 5. Verify on www.arroyochurch.com (hard refresh; CDN lags ~20–40s).
 
@@ -86,7 +88,9 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
   publishes. The Anthropic key lives only at `~/.config/arroyo/anthropic.env`.
 
 ## Do NOT touch / SEO guardrails
-- The **HEADER** code injection (Church schema).
+- The **HEADER** code injection (Church schema). Change it only with Dakota's explicit go, and edit the one
+  value in place rather than replacing the field. Its Sunday hours (09:30–11:30, set 2026-09-28) must match
+  Google, Yelp and Apple Maps — change all four together (log in `google/PLAN.md`).
 - The standalone pages (/about, /team, /messages, /connect, /give,
   /plan-your-visit) and the **/arroyoblog** blog (34 published posts + ~190 tag pages as of
   2026-09-16; ~30 thin tag pages show in Search Console as crawled but not indexed) — they're kept
