@@ -340,6 +340,9 @@ the church in Apple Business, then set the phone, hours and photos there.
   Self-Parking, Parking Lot. Hours changed to **Sun 9:30–11:30 AM** on Apple, GBP (pending Google review ≤10 min; GBP's separate
   "Worship service" hours stay Sun 10:00–11:30) and the Yelp Livermore page (saved). Still waiting on Apple: location
   verification → then set phone to +1 925-694-0426 and consider Actions.
+- **Site schema aligned 2026-09-28 (Dakota's explicit go):** HEADER code injection (Church JSON-LD) Sunday `closes` 12:00 → 11:30,
+  a 2-character in-place edit (opens was already 09:30). Verified live on / and /plan-your-visit; footer untouched. Every listing
+  and the site now agree: Sun 9:30–11:30 AM, Tue–Fri 10–4 office hours, Mon/Sat closed, (925) 694-0426.
 - **Fixed 2026-09-23:** the Apple Account was named "Arroyo Church" (First: Arroyo / Last: Church). Changed at account.apple.com →
   Personal Information → Name to **Dakota Yates**, and replied to case 102971677900 from av@ asking Apple to continue the review.
 - **Check 2026-09-23:** Apple Maps has DROPPED the Yelp ratings block — no 4.4 (7), no 1-star review on the card. Two
