@@ -668,15 +668,15 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
 #header .ac-evbar .evb-x{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);width:34px;height:34px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:rgba(252,244,228,.72);font:400 1.35rem/1 'Manrope',sans-serif;cursor:pointer}
 #header .ac-evbar .evb-x:hover{background:rgba(252,244,228,.12);color:#fcf4e4}
 @media(max-width:640px){#header .ac-evbar{font-size:.83rem;padding:.55rem 2.7rem .55rem .75rem}.ac-evbar .evb-long,.ac-evbar .evb-more{display:none}.ac-evbar .evb-short{display:inline}}
-.ac-event{background:#1d3a25;color:#fcf4e4;padding:clamp(4rem,9vh,6.5rem) 0;border-top:1px solid rgba(252,244,228,.08)}
+.ac-event{background:#12271a;color:#fcf4e4;padding:clamp(4rem,9vh,6.5rem) 0;border-top:1px solid rgba(252,244,228,.08)}
 .ac-event .ev-grid{display:grid;gap:clamp(2rem,4vw,3.75rem);align-items:center}
 @media(min-width:900px){.ac-event .ev-grid{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}}
-.ac-event .ev-art{margin:0;justify-self:center;width:100%;max-width:520px;border-radius:18px;overflow:hidden;box-shadow:0 30px 60px -25px rgba(0,0,0,.6)}
+.ac-event .ev-art{margin:0;justify-self:center;width:100%;max-width:520px;border-radius:18px;overflow:hidden;border:1px solid rgba(252,244,228,.16);box-shadow:0 34px 70px -28px rgba(0,0,0,.75)}
 .ac-event .ev-art img{display:block;width:100%;height:auto}
-.ac-event .eyebrow{color:#f1ac39}
-.ac-event .h2{color:#fcf4e4}
-.ac-event .h2 em{color:#ee6a1e}
-.ac-event .lead{color:rgba(252,244,228,.82);margin:1.1rem 0 0;max-width:46ch}
+.ac-sec.ac-event .eyebrow{color:#f1ac39}
+.ac-sec.ac-event .h2{color:#fcf4e4}
+.ac-sec.ac-event .h2 em{color:#ee6a1e}
+.ac-sec.ac-event .lead{color:rgba(252,244,228,.82);margin:1.1rem 0 0;max-width:46ch}
 .ac-event .ev-facts{list-style:none;margin:1.9rem 0 0;padding:0;display:grid;gap:1.1rem}
 .ac-event .ev-facts li{display:flex;gap:.95rem;align-items:flex-start;margin:0;padding:0}
 .ac-event .ev-facts li::before{content:none}
@@ -1637,7 +1637,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var w=evWhen();
     var bar=document.createElement('div'); bar.className='ac-evbar'; bar.id='ac-evbar';
     bar.setAttribute('role','region'); bar.setAttribute('aria-label','Upcoming event');
-    bar.innerHTML='<a class="evb-link" href="/#ac-event">'
+    bar.innerHTML='<a class="evb-link" href="/#ac-event" aria-label="Pumpkin Patch Party, '+w.long+' at 10 AM. Free pumpkins, everyone is welcome. See details.">'
       +'<span class="evb-emoji" aria-hidden="true">&#127875;</span>'
       +'<strong>Pumpkin Patch Party</strong>'
       +'<span><span class="evb-long">'+w.long+'</span><span class="evb-short">'+w.short+'</span> &middot; 10 AM</span>'
