@@ -340,6 +340,18 @@ the church in Apple Business, then set the phone, hours and photos there.
   Self-Parking, Parking Lot. Hours changed to **Sun 9:30–11:30 AM** on Apple, GBP (pending Google review ≤10 min; GBP's separate
   "Worship service" hours stay Sun 10:00–11:30) and the Yelp Livermore page (saved). Still waiting on Apple: location
   verification → then set phone to +1 925-694-0426 and consider Actions.
+- **Status 2026-09-29:** Google (Sun 9:30–11:30 live, 5.0 / 52 reviews), Yelp Livermore page (Sun 9:30–11:30, 694, no Regal)
+  and the site schema all agree. Apple location still "In Review" (sent 9/28, up to 5 days); the public Apple Maps card is
+  unchanged (642-1516, no About/photos/logo yet). **Google Ads: advertiser verification due 2026-10-29 or the account pauses**
+  (email to av@ 9/29; verification can take up to 7 business days — start it this week; any ID upload is Dakota's).
+- **Branded Mail (Apple): not yet — decided 2026-09-29.** Apple needs DMARC p=quarantine/reject with pct=100 and DKIM on all
+  mail; ours is `v=DMARC1; p=none` and there is NO SPF record. Only Google Workspace sends as @arroyochurch.com (DKIM d=
+  arroyochurch.com passes); Planning Center sends from its own domains, so its mail would never be branded. The logo would show
+  only on staff one-to-one mail read in iPhone Mail / iCloud web. Plan: (1) add TXT @ `v=spf1 include:_spf.google.com ~all`
+  (keep the apple-domain-verification TXT); (2) set the single _dmarc TXT to `v=DMARC1; p=none; pct=100;
+  rua=mailto:av@arroyochurch.com` (it's inside Squarespace's Email Campaigns preset — keep the squarespace._domainkey CNAME);
+  (3) ask Josh what else sends as the domain; (4) ~2 weeks of clean reports → `p=quarantine`; (5) then Branded Mail. Steps 1–2
+  await Dakota's go. Full research: workflow wf_f4bffad0-877 (session transcripts).
 - **Site schema aligned 2026-09-28 (Dakota's explicit go):** HEADER code injection (Church JSON-LD) Sunday `closes` 12:00 → 11:30,
   a 2-character in-place edit (opens was already 09:30). Verified live on / and /plan-your-visit; footer untouched. Every listing
   and the site now agree: Sun 9:30–11:30 AM, Tue–Fri 10–4 office hours, Mon/Sat closed, (925) 694-0426.
