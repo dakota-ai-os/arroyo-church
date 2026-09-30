@@ -13,7 +13,7 @@ Proven on the copy; same steps on live. ~30–45 min.
 1. **Site Styles → Fonts**: Headings → **Fraunces**, Paragraphs → **Manrope**. (Save)
 2. **Site Styles → Colors → Edit Palette**: apply the warm desert preset (paper/sand/brown). (Save)
 3. **Design → Custom CSS**: paste `custom-css.css` (whole file). (Save) — instant: gold pill buttons, hover cards, accordion styling, scroll-progress bar, section gradients.
-4. **Pages → Custom Code → Code Injection → FOOTER** (was Settings → Advanced before 2026): paste `footer-injection.html`. (Save) — cursor + hero particles + safe scroll-reveal. *This is the piece the trial couldn't run; it runs here.*
+4. **Pages → Website Tools → Code Injection → FOOTER** (was Settings → Advanced before 2026): paste `footer-injection.html`. (Save) — cursor + hero particles + safe scroll-reveal. *This is the piece the trial couldn't run; it runs here.*
 5. **Verify live** (I'll do this): load the home page, confirm buttons/fonts/palette, confirm particles + cursor + reveal animations run, check mobile, check a couple of interior pages.
 6. **Fine-tune** any CSS values that need it against the live layout.
 

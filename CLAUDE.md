@@ -45,7 +45,7 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 3. `git commit` + `git push` to `main`. GitHub Pages then serves the file at
    `https://dakota-ai-os.github.io/arroyo-church/squarespace/footer-injection.html`
    (~30s–2min lag; cache-bust with `?cb=<timestamp>`).
-4. **Push it live in Squarespace:** Pages → Custom Code → Code Injection (direct URL:
+4. **Push it live in Squarespace:** Pages → Website Tools → Code Injection (direct URL:
    `https://arroyo-church-livermore.squarespace.com/config/pages/code-injection`; Squarespace moved it
    out of Settings → Advanced in 2026). Replace the **FOOTER** field with the new file contents, then **Save**.
    - ⚠️ The Code Injection page has several CodeMirror editors. **idx 0 = HEADER =
