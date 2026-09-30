@@ -352,6 +352,19 @@ the church in Apple Business, then set the phone, hours and photos there.
   rua=mailto:av@arroyochurch.com` (it's inside Squarespace's Email Campaigns preset — keep the squarespace._domainkey CNAME);
   (3) ask Josh what else sends as the domain; (4) ~2 weeks of clean reports → `p=quarantine`; (5) then Branded Mail. Steps 1–2
   await Dakota's go. Full research: workflow wf_f4bffad0-877 (session transcripts).
+- **Done 2026-09-29 (Dakota's go):**
+  - DNS (Squarespace Domains, saved as Dakota's domain-manager login after he entered Squarespace's emailed code): added TXT @
+    `v=spf1 include:_spf.google.com ~all` (the apple-domain-verification TXT stays); removed the view-only "Squarespace Email
+    Campaigns" preset and re-added its records as custom: CNAME `squarespace._domainkey` → `squarespace-domainkey.squarespace-mail.com`
+    and TXT `_dmarc` = `v=DMARC1; p=none; pct=100; rua=mailto:av@arroyochurch.com`. Verified on the authoritative NS and 1.1.1.1;
+    MX, A, Google DKIM and the site unchanged. Delivery unchanged (still p=none). DMARC aggregate reports now land in av@
+    (receive-only mailbox — fine). **Next: read the reports ~2026-10-13; if only Google sends as the domain → p=quarantine → Branded Mail.**
+    Still ask Josh whether anything besides Gmail sends as @arroyochurch.com.
+  - Google Ads advertiser verification submitted: EU political ads = No; Dun & Bradstreet task = legal name "Arroyo Church",
+    945 Concannon Blvd, Livermore CA 94550-6482 (prefilled from the payments profile). The form also prefilled D-U-N-S
+    145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
+    D&B lists) — cleared it and submitted without, since it's optional. Required tasks done; Google review 1–10 days.
+    Ad disclosure reads "Ads funded by Arroyo Church". Optional "confirm affiliation" task unlocks later.
 - **Site schema aligned 2026-09-28 (Dakota's explicit go):** HEADER code injection (Church JSON-LD) Sunday `closes` 12:00 → 11:30,
   a 2-character in-place edit (opens was already 09:30). Verified live on / and /plan-your-visit; footer untouched. Every listing
   and the site now agree: Sun 9:30–11:30 AM, Tue–Fri 10–4 office hours, Mon/Sat closed, (925) 694-0426.
