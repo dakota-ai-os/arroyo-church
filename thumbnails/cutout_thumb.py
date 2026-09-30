@@ -68,13 +68,13 @@ def tame_red(img, k):
     return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
 
-def soften_skin(img):
+def soften_skin(img, amount=0.7, sharpen=45):
     """The 'balanced' treatment Dakota approved: gentle bilateral smoothing, light sharpen (not 170%)."""
     import cv2
     arr = np.array(img.convert("RGB"))
     smooth = cv2.bilateralFilter(arr, 7, 40, 7)
-    out = Image.fromarray((arr * 0.3 + smooth * 0.7).astype(np.uint8))
-    return out.filter(ImageFilter.UnsharpMask(radius=1.6, percent=45, threshold=2))
+    out = Image.fromarray((arr * (1 - amount) + smooth * amount).astype(np.uint8))
+    return out.filter(ImageFilter.UnsharpMask(radius=1.6, percent=sharpen, threshold=2))
 
 
 def spaced(draw, xy, text, font, fill, track):
@@ -99,6 +99,8 @@ def main():
     ap.add_argument("--mirror", action="store_true", help="widen the wall crop with its own mirror image")
     ap.add_argument("--wall-bright", type=float, default=0.8)
     ap.add_argument("--tame-red", type=float, default=0.0, help="0..1, calm pink stage-light highlights on skin")
+    ap.add_argument("--smooth", type=float, default=0.7, help="0..1 skin smoothing blend; keep low on real video frames")
+    ap.add_argument("--sharpen", type=int, default=45, help="UnsharpMask percent")
     ap.add_argument("--overlap", type=int, default=22, help="px the text may run behind the pastor")
     a = ap.parse_args()
 
@@ -135,7 +137,7 @@ def main():
     # --- pastor layer, scaled and placed ---
     pw, ph = int(src.width * s), int(src.height * s)
     pl = person.resize((pw, ph), Image.LANCZOS)
-    rgb = soften_skin(tame_red(pl.convert("RGB"), a.tame_red))
+    rgb = soften_skin(tame_red(pl.convert("RGB"), a.tame_red), a.smooth, a.sharpen)
     rgb.putalpha(pl.split()[-1])
     ox = int(a.face_x - cx * s)
     oy = int(a.head_top - top * s)
