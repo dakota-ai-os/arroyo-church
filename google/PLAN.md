@@ -59,8 +59,8 @@ Local church terms each show 100–1K searches/mo, competition **Low**. Bid data
 - 9 photos uploaded from the website (worship gathering, lobby banner, Josh preaching, outdoor tent, 5 team headshots).
 - Posts published: (1) What to expect — Sign up → /plan-your-visit, lobby photo; (2) Connect groups — Learn more → /connect,
   worship-gathering photo. The Monday sermon recap is left to the sermon→blog pipeline (add a GBP post step there).
-  2026-09-13: the service runs about 55 minutes, not 65 (Dakota). **Superseded 2026-09-30: Josh says it's about 70 minutes; all live copy moved to 70.** The copy bank below is corrected, and the live
-  "What to expect" post was edited to 55 the same day (shows Pending while Google reviews the edit).
+  2026-09-13: the service runs about 55 minutes, not 65 (Dakota). **Superseded 2026-09-30: Josh says it's about 70 minutes; all live copy moved to 70.** The copy bank below is corrected. The live
+  "What to expect" post was edited to 55 on 9/13 and to 70 on 9/30 (shows Pending while Google reviews each edit).
 - Phone consolidated to (925) 694-0426: the site-wide Church JSON-LD (Squarespace HEADER injection) now carries it, plus
   a real logo + hero image instead of the placeholder paths. Yelp still needs a manual edit (needs the Yelp for Business login).
 - Conversion tracking LIVE on arroyochurch.com (commit 09fb874): `acTrack()` fires GA4 events on every form success
@@ -369,6 +369,16 @@ the church in Apple Business, then set the phone, hours and photos there.
     145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
     D&B lists) — cleared it and submitted without, since it's optional. Required tasks done; Google review 1–10 days.
     Ad disclosure reads "Ads funded by Arroyo Church". Optional "confirm affiliation" task unlocks later.
+- **Status 2026-09-30:** Apple approved the logo, cover and most gallery photos; one gallery photo came back "Not Approved".
+  Signing in to Apple Business in Chrome was flaky (the SMS code to ••78 never arrived; Safari worked), and web sessions drop
+  after ~30 min idle. Still to do on Apple once Dakota is signed in: phone → +1 (925) 694-0426, find and replace the rejected
+  photo, About "about 55 minutes" → 70, and Josh's ask for a cover **with people** (pick: the baptism group waving on the lawn;
+  more people shots for the gallery; skip any with a QR code or identifiable kids).
+- **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
+  the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
+  scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
+  the GBP "What to expect" post (Pending while Google reviews the edit). No other copy mentions a length: the GBP description,
+  the Yelp page, all 40 published posts and all 29 scheduled/draft posts are clean. Apple's About is the last one.
 - **Site schema aligned 2026-09-28 (Dakota's explicit go):** HEADER code injection (Church JSON-LD) Sunday `closes` 12:00 → 11:30,
   a 2-character in-place edit (opens was already 09:30). Verified live on / and /plan-your-visit; footer untouched. Every listing
   and the site now agree: Sun 9:30–11:30 AM, Tue–Fri 10–4 office hours, Mon/Sat closed, (925) 694-0426.
