@@ -359,7 +359,11 @@ the church in Apple Business, then set the phone, hours and photos there.
     and TXT `_dmarc` = `v=DMARC1; p=none; pct=100; rua=mailto:av@arroyochurch.com`. Verified on the authoritative NS and 1.1.1.1;
     MX, A, Google DKIM and the site unchanged. Delivery unchanged (still p=none). DMARC aggregate reports now land in av@
     (receive-only mailbox — fine). **Next: read the reports ~2026-10-13; if only Google sends as the domain → p=quarantine → Branded Mail.**
-    Still ask Josh whether anything besides Gmail sends as @arroyochurch.com.
+    Josh confirmed (9/29): everything sends through Gmail except his **Squarespace Email Campaigns** newsletters (sender
+    Josh Smith <josh@arroyochurch.com>, verified in Squarespace — no "verify" prompt; 20 sent, latest 9/12, about every 1–3 weeks).
+    Squarespace signs them through the `squarespace._domainkey` CNAME (kept), and its DNS guide asks for no SPF include, so no DNS
+    change is needed. **Gate before p=quarantine:** the DMARC reports must include at least one newsletter sent after 9/29 and show
+    it passing DKIM aligned to arroyochurch.com; if Josh hasn't sent one by ~10/13, wait for his next send.
   - Google Ads advertiser verification submitted: EU political ads = No; Dun & Bradstreet task = legal name "Arroyo Church",
     945 Concannon Blvd, Livermore CA 94550-6482 (prefilled from the payments profile). The form also prefilled D-U-N-S
     145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
