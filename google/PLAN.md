@@ -387,7 +387,21 @@ the church in Apple Business, then set the phone, hours and photos there.
   Quote, Tickets, Activities, Pricing, Shows, Events, Parking, Careers, Gift Card. "Services" reads as worship services on a
   church card, and the page answers that (Sunday 10 AM, what to expect, save-a-seat form). Apple's Action URL guidelines allow
   UTM parameters (and `source=Apple Maps`); they ban GCLID, SSO/login trackers and tokens. In GA4, Apple Maps visits show as
-  source `apple` / medium `organic` / campaign `apple_maps`.
+  source `apple` / medium `organic` / campaign `apple_maps`. (Precedent: Local Church, Holtsville NY, a claimed church, uses
+  the same "Services" action → its /planyourvisit page.)
+- **Apple Maps ratings — researched 2026-09-30 (workflow wf_d592c082-23c, 4 research angles + 2 adversarial checks):**
+  Apple's own ratings are thumbs up/down per category (no written reviews from Apple; written Yelp snippets can still appear).
+  Churches CAN carry Apple ratings (verified on Local Church, Holtsville NY: 100% from 4; Notre Dame Church, North Caldwell NJ:
+  100% from 1) but it's rare. Most Tri-Valley churches show Yelp or nothing. Arroyo's card shows no ratings at all right now.
+  No Apple setting turns ratings on or off, and Insights shows no ratings. Apple publishes no minimum count (web cards show from
+  1). How Apple picks Apple vs Yelp is undocumented. Apple is matched to the new Livermore Yelp page but shows no Yelp stars;
+  don't promise they'll return. Rating happens in the Maps app (iPhone/iPad/Mac), not on maps.apple.com: iOS 26+ → the
+  thumbs-up button on the card; older iOS/Mac → "Rate". There's no link that opens the rating sheet directly. Third-party
+  reports (9to5Mac 2020, MacRumors 2021) say Apple may only offer rating to people who have been there; Apple doesn't confirm.
+  **Our Apple Business showcase Action list includes "Rate Us"** (also Add to Favorites, Add to Guide, Call Now, Get
+  Directions, More Info, Save as Contact, Services, Share This Place). It opens Apple's Rate this Place sheet. Not created.
+  Rules: asking plainly is fine, but no rewards/raffles for ratings (Apple Business Terms ban incentives) and never ask for Yelp
+  reviews (Yelp's "Don't Ask for Reviews" policy; it filters solicited reviews).
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
