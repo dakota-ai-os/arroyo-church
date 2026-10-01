@@ -379,8 +379,15 @@ the church in Apple Business, then set the phone, hours and photos there.
   people; adults only, faces sit in the 2.5:1 crop band); 6 people photos added (couple outside, two friends at the entrance,
   two men waving in the lobby, three men talking outside, baptism in the dome, baptism on the lawn) → gallery 14. All "Sent for
   review on Sep 30" (≤5 business days). The rejected photo was `gallery-04-connect-center.jpg` ("Doesn't Meet Standards"; a big
-  "Connect Center" banner + church logo in frame); Apple removed it itself. Skip frames dominated by signs/logos. "Actions"
-  (link buttons) is now available too, not set up. The Oct 3 scheduled check now verifies all of this instead of editing.
+  "Connect Center" banner + church logo in frame); Apple removed it itself. Skip frames dominated by signs/logos. The Oct 3
+  scheduled check now verifies all of this instead of editing.
+- **Apple Action added 2026-09-30 (Dakota's go):** primary action **Services** →
+  `https://www.arroyochurch.com/plan-your-visit?utm_source=apple&utm_medium=organic&utm_campaign=apple_maps` (Apple review ≤3
+  days). Apple offers no "Plan a visit"/"Learn more" label — the church category's list is Schedule, Services, Availability,
+  Quote, Tickets, Activities, Pricing, Shows, Events, Parking, Careers, Gift Card. "Services" reads as worship services on a
+  church card, and the page answers that (Sunday 10 AM, what to expect, save-a-seat form). Apple's Action URL guidelines allow
+  UTM parameters (and `source=Apple Maps`); they ban GCLID, SSO/login trackers and tokens. In GA4, Apple Maps visits show as
+  source `apple` / medium `organic` / campaign `apple_maps`.
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
