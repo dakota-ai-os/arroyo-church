@@ -374,11 +374,18 @@ the church in Apple Business, then set the phone, hours and photos there.
   after ~30 min idle. Still to do on Apple once Dakota is signed in: phone → +1 (925) 694-0426, find and replace the rejected
   photo, About "about 55 minutes" → 70, and Josh's ask for a cover **with people** (pick: the baptism group waving on the lawn;
   more people shots for the gallery; skip any with a QR code or identifiable kids).
+- **Apple done 2026-09-30 (later, Dakota signed in on Chrome):** location now **Verified**; Phone unlocked and set to
+  +1 (925) 694-0426; About "about 55 minutes" → 70 (only that word); cover → the baptism group waving on the lawn (Josh asked for
+  people; adults only, faces sit in the 2.5:1 crop band); 6 people photos added (couple outside, two friends at the entrance,
+  two men waving in the lobby, three men talking outside, baptism in the dome, baptism on the lawn) → gallery 14. All "Sent for
+  review on Sep 30" (≤5 business days). The rejected photo was `gallery-04-connect-center.jpg` ("Doesn't Meet Standards"; a big
+  "Connect Center" banner + church logo in frame); Apple removed it itself. Skip frames dominated by signs/logos. "Actions"
+  (link buttons) is now available too, not set up. The Oct 3 scheduled check now verifies all of this instead of editing.
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
   the GBP "What to expect" post (Pending while Google reviews the edit). No other copy mentions a length: the GBP description,
-  the Yelp page, all 40 published posts and all 29 scheduled/draft posts are clean. Apple's About is the last one.
+  the Yelp page, all 40 published posts and all 29 scheduled/draft posts are clean. Apple's About was changed the same day.
 - **Site schema aligned 2026-09-28 (Dakota's explicit go):** HEADER code injection (Church JSON-LD) Sunday `closes` 12:00 → 11:30,
   a 2-character in-place edit (opens was already 09:30). Verified live on / and /plan-your-visit; footer untouched. Every listing
   and the site now agree: Sun 9:30–11:30 AM, Tue–Fri 10–4 office hours, Mon/Sat closed, (925) 694-0426.
