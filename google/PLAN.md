@@ -429,6 +429,18 @@ the church in Apple Business, then set the phone, hours and photos there.
     church. **Decision:** build the Rate Us showcase anyway (Dakota's yes) as the real test. If Apple approves it and the card
     shows a working "Rate this Place" button, announce it. If the button reverts to a Maps default, rating is off for our
     listing → swap the showcase to a plan-your-visit message and ask Apple Business support (Dakota's OK before sending).
+  - **Showcase submitted 2026-10-01 (id 1828880345077909452, status In Review):**
+    - Heading: "Been to Arroyo on a Sunday?"
+    - Body: "If you felt welcome here, give us a thumbs-up. It helps neighbors find a church home."
+    - Photo: the two men waving at the entrance (G4, from the Asset Gallery; square crop). Alt text: "Two Arroyo Church members
+      smiling and waving hello at the church entrance".
+    - Action: Rate Us, which the list shows as **"Recommend This Place"** (internal value RATE_THIS_PLACE).
+    - Runs 10/02/2026–11/30/2026, leaving December open for a Christmas Eve showcase. Apple: "generally published within 15
+      minutes, but it may take up to 3 days".
+    - Gotchas: a start date of today fails with "Showcase must provide sufficient lead time", so start tomorrow at the earliest.
+      After Save the app bounced to the empty /showcases/welcome page, and the showcase only appeared in the Scheduled list on a
+      reload a minute later.
+    - **To check once it's live:** on an iPhone, does Arroyo's card show the showcase with a working Recommend/Rate button?
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
