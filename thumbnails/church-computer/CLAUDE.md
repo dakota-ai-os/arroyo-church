@@ -11,11 +11,17 @@ When Dakota asks you to upscale a screenshot:
    folder* with a real `KIE_API_KEY`. If the key is missing, **ask Dakota for it** and
    write it into `.env` — never invent or guess a key.
 2. Run: `python3 upscale.py <screenshot-path>` → saves `<name>_upscaled.png`
-   next to it (~30 seconds, ~$0.04).
+   next to it (~70 seconds, ~$0.05, 2× size; add `--factor 4` for a tiny screenshot).
 3. Report the saved path back to him.
 
 **Do NOT** crop, reframe, or cut out the pastor — keep the whole screenshot; Dakota
 composes it in Canva (template: **"⚙️ Thumbnail Template — Transformational Stories"**).
+
+**Do NOT switch it back to an AI "enhance" model** (Nano Banana, GPT Image, etc.) or
+retouch his face. The script uses Topaz on purpose: it sharpens the real pixels.
+Generative upscalers redraw the face, and Josh stops looking like Josh (rejected
+2026-09-28, confirmed 2026-10-01). It also won't remove captions or app icons. If a
+screenshot has those, use a clean livestream frame instead.
 
 ## 2) Decide the text (thumbnail vs. video title vs. description)
 

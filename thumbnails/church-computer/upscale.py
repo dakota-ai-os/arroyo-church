@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 """Upscale + sharpen a sermon screenshot for the Arroyo thumbnail.
 
-Self-contained: talks to kie.ai's Nano Banana 2 model directly (no ai-os repo
+Self-contained: talks to kie.ai's Topaz Image Upscale model directly (no ai-os repo
 needed). Keeps the whole frame + real background — just makes it high-resolution
 and crisp.
 
-  python3 upscale.py <screenshot.png> [output.png]
+Why Topaz (since 2026-10-01): it's true super-resolution, so it sharpens the pixels
+that are already there. The old model (Nano Banana 2) re-drew Josh's face — opened
+his eyes, restyled his hair, smoothed his skin — and he stopped looking like himself.
+Topaz can't invent detail, so a motion-blurred frame stays a little soft: pick a
+sharp, front-facing moment.
+
+It does NOT remove captions, play/mute icons or app buttons from phone or social
+screenshots — use a clean livestream frame, or hand those to Claude on Dakota's Mac.
+
+  python3 upscale.py <screenshot.png> [output.png] [--factor 2|4]
 
 Setup (once):
   pip install pillow requests
   Put your key in a `.env` file next to this script:  KIE_API_KEY=sk-...
   (or export KIE_API_KEY=...). Get a key at https://kie.ai/api-key
 
-Output: a high-res, sharpened PNG (default: <screenshot>_upscaled.png).
+Output: a high-res, lightly sharpened PNG (default: <screenshot>_upscaled.png).
 Then upload it to Canva and drop it on the thumbnail template.
 """
 import sys, os, time, json, base64, pathlib
@@ -22,10 +31,8 @@ from PIL import Image, ImageFilter
 BASE = "https://api.kie.ai"
 UPLOAD_HOSTS = ["https://kieai.redpandaai.co/api/file-base64-upload",
                 "https://api.kie.ai/api/file-base64-upload"]
-PROMPT = ("Enhance and upscale this photo to high resolution - improve sharpness, clarity, fine detail "
-          "and lighting; reduce noise and motion blur. Keep the ENTIRE original composition, framing, "
-          "background and the man's exact appearance unchanged - do NOT crop, reframe, zoom, or remove "
-          "anything. Photorealistic and natural. No text, no checkerboard, no border.")
+MODEL = "topaz/image-upscale"
+MAX_INPUT = 10 * 1024 * 1024          # Topaz rejects inputs over 10 MB
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
 
 
@@ -44,36 +51,48 @@ def load_key():
 
 
 def main():
-    if len(sys.argv) < 2:
-        sys.exit("usage: python3 upscale.py <screenshot.png> [output.png]")
-    src = sys.argv[1]
+    args, factor = sys.argv[1:], "2"
+    if "--factor" in args:
+        i = args.index("--factor")
+        factor = args[i + 1] if i + 1 < len(args) else ""
+        del args[i:i + 2]
+    if factor not in ("1", "2", "4"):
+        sys.exit("--factor must be 1, 2 or 4")
+    if not args:
+        sys.exit("usage: python3 upscale.py <screenshot.png> [output.png] [--factor 2|4]")
+    src = args[0]
     if not os.path.exists(src):
         sys.exit(f"not found: {src}")
-    out = sys.argv[2] if len(sys.argv) > 2 else os.path.splitext(src)[0] + "_upscaled.png"
+    if os.path.getsize(src) > MAX_INPUT:
+        sys.exit("screenshot is over 10 MB — save it as a JPG (or a smaller PNG) and try again")
+    out = args[1] if len(args) > 1 else os.path.splitext(src)[0] + "_upscaled.png"
     s = requests.Session(); s.headers.update({"Authorization": f"Bearer {load_key()}"})
 
-    # 1) host the screenshot (image-edit models need a URL, not a local file)
+    # 1) host the screenshot (kie's models need a URL, not a local file).
+    #    Bigger uploads sometimes drop with an SSL error, so each host gets a few tries.
     mime = MIME.get(os.path.splitext(src)[1].lower(), "image/png")
     b64 = base64.b64encode(pathlib.Path(src).read_bytes()).decode()
     payload = {"base64Data": f"data:{mime};base64,{b64}", "uploadPath": "images",
                "fileName": os.path.basename(src)}
     url = None
-    for host in UPLOAD_HOSTS:
-        try:
-            r = s.post(host, json=payload, timeout=90).json()
-            u = (r.get("data") or {}).get("downloadUrl")
-            if u and (r.get("success") or r.get("code") == 200):
-                url = u; break
-        except Exception:
-            continue
+    for attempt in range(3):
+        for host in UPLOAD_HOSTS:
+            try:
+                r = s.post(host, json=payload, timeout=180).json()
+                u = (r.get("data") or {}).get("downloadUrl")
+                if u and (r.get("success") or r.get("code") == 200):
+                    url = u; break
+            except Exception:
+                continue
+        if url:
+            break
+        time.sleep(3)
     if not url:
         sys.exit("upload to kie failed (check network / API key)")
     print("· uploaded screenshot", flush=True)
 
     # 2) create the upscale job
-    body = {"model": "nano-banana-2",
-            "input": {"prompt": PROMPT, "aspect_ratio": "auto",
-                      "resolution": "2K", "output_format": "png", "image_input": [url]}}
+    body = {"model": MODEL, "input": {"image_url": url, "upscale_factor": factor}}
     r = s.post(BASE + "/api/v1/jobs/createTask", json=body, timeout=30).json()
     if r.get("code") != 200:
         sys.exit(f"createTask failed: {r.get('msg')}")
@@ -82,8 +101,8 @@ def main():
         sys.exit("createTask returned no taskId")
     print(f"· job {task} running…", flush=True)
 
-    # 3) poll to completion (~25-40s)
-    result_url, deadline, wait = None, time.time() + 240, 3.0
+    # 3) poll to completion (~70s)
+    result_url, deadline, wait = None, time.time() + 420, 3.0
     while time.time() < deadline:
         r = s.get(BASE + "/api/v1/jobs/recordInfo", params={"taskId": task}, timeout=30).json()
         if r.get("code") == 200:
@@ -101,14 +120,15 @@ def main():
     if not result_url:
         sys.exit("timed out waiting for the upscale")
 
-    # 4) download, sharpen, save LOSSLESS (Canva softens JPEGs, so keep PNG)
+    # 4) download, sharpen LIGHTLY (Dakota found 160% showed skin texture), save LOSSLESS
+    #    (Canva softens JPEGs, so keep PNG)
     tmp = out + ".raw"
-    with s.get(result_url, stream=True, timeout=60) as g:
+    with s.get(result_url, stream=True, timeout=120) as g:
         g.raise_for_status()
         with open(tmp, "wb") as fh:
             for ch in g.iter_content(1 << 16):
                 fh.write(ch)
-    img = Image.open(tmp).convert("RGB").filter(ImageFilter.UnsharpMask(radius=3, percent=160, threshold=2))
+    img = Image.open(tmp).convert("RGB").filter(ImageFilter.UnsharpMask(radius=1.6, percent=50, threshold=2))
     img.save(out)
     os.remove(tmp)
     print(f"✓ saved {out}  ({img.width}×{img.height})")
