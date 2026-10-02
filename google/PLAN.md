@@ -402,6 +402,24 @@ the church in Apple Business, then set the phone, hours and photos there.
   Directions, More Info, Save as Contact, Services, Share This Place). It opens Apple's Rate this Place sheet. Not created.
   Rules: asking plainly is fine, but no rewards/raffles for ratings (Apple Business Terms ban incentives) and never ask for Yelp
   reviews (Yelp's "Don't Ask for Reviews" policy; it filters solicited reviews).
+- **Check 2026-10-01:**
+  - **Dakota's iPhone, in the Maps app:** Arroyo's card has no thumbs-up. The ••• menu has Directions, Call, Website, Delete
+    from Places, Add to Guides, Add a Note, Favorite, Pin, Download Map, Share and Report an Issue, but **no "Add Your Photos"**.
+    Apple's iOS 26 guide: you rate with the Like button, add photos via ••• → Add Your Photos, and "If you don't see ratings
+    categories or the Rate button, you can't rate the location… you can't add a photo." So his phone isn't offered rating
+    for Arroyo. The link from chat had opened the maps.apple.com web card, which never has rating controls.
+  - **Category is not the gate:** across 184 religious place cards pulled from Apple's public data, 19 carry Apple ratings,
+    including US churches with categories like ours (Holy Apostles NYC; Grace Cathedral SF; Notre Dame Church NJ and Local
+    Church NY also have `nonprofit_organization`).
+  - **Still unknown:** whether the block is his phone (visit history or settings) or our listing. Control test: open Costco
+    Livermore (Apple rating 84% from 134) in Maps → ••• → is "Add Your Photos" there? If yes there but not for us, it's our
+    listing (ask Apple Business support). If no, it's the phone (retest at church on Sunday).
+  - **Public card (maps.apple.com data):** the new cover, (925) 694-0426, About "70 minutes" and 10 owner photos are live. Not
+    live: the Services action (QUICK_LINK = 0, in review) and **hours** (BUSINESS_HOURS = 0, even though set in Apple Business;
+    Local Church's card has no hours either, Trinity NYC's does). Apple still stores the old 642-1516 as `altTelephone`; the
+    main phone is right.
+  - **Rate Us showcase:** Dakota said yes; not built yet because Apple Business signed out. Hold it if the control test shows
+    Arroyo-specific blocking.
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
