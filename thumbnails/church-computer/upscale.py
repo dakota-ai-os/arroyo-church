@@ -24,7 +24,7 @@ Setup (once):
 Output: a high-res, lightly sharpened PNG (default: <screenshot>_upscaled.png).
 Then upload it to Canva and drop it on the thumbnail template.
 """
-import sys, os, time, json, base64, pathlib
+import sys, os, time, json, base64, pathlib, hashlib
 import requests
 from PIL import Image, ImageFilter
 
@@ -70,10 +70,14 @@ def main():
 
     # 1) host the screenshot (kie's models need a URL, not a local file).
     #    Bigger uploads sometimes drop with an SSL error, so each host gets a few tries.
+    #    Name the upload after its CONTENT: kie's temp store keeps serving an earlier file
+    #    uploaded under the same name, so "screenshot.png" two weeks running would silently
+    #    upscale last week's photo (seen 2026-10-01).
+    data = pathlib.Path(src).read_bytes()
     mime = MIME.get(os.path.splitext(src)[1].lower(), "image/png")
-    b64 = base64.b64encode(pathlib.Path(src).read_bytes()).decode()
+    b64 = base64.b64encode(data).decode()
     payload = {"base64Data": f"data:{mime};base64,{b64}", "uploadPath": "images",
-               "fileName": os.path.basename(src)}
+               "fileName": hashlib.sha1(data).hexdigest()[:16] + os.path.splitext(src)[1].lower()}
     url = None
     for attempt in range(3):
         for host in UPLOAD_HOSTS:
