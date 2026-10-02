@@ -420,6 +420,15 @@ the church in Apple Business, then set the phone, hours and photos there.
     main phone is right.
   - **Rate Us showcase:** Dakota said yes; not built yet because Apple Business signed out. Hold it if the control test shows
     Arroyo-specific blocking.
+  - **Control test result (same day):** Dakota's phone CAN rate. Costco Livermore's card shows a "Rate This Place — Visited 2
+    weeks ago" row with thumbs up/down, a thumbs-up in the bottom bar (+ ☆ 👍 •••) and "Add Photos" in •••. Arroyo shows none
+    of these, even though he's there every Sunday. So Apple isn't offering rating for our listing. The maps.apple.com data
+    doesn't say why: our layout has the same rating/questionnaire modules as Costco and the rated churches, so the decision is
+    made server-side when the app asks. Possible causes, unconfirmed: Apple holds rating while the location is "In Review", or
+    Maps' visit history skips places of worship (a sensitive category), so the visit-based "Rate This Place" never appears for a
+    church. **Decision:** build the Rate Us showcase anyway (Dakota's yes) as the real test. If Apple approves it and the card
+    shows a working "Rate this Place" button, announce it. If the button reverts to a Maps default, rating is off for our
+    listing → swap the showcase to a plan-your-visit message and ask Apple Business support (Dakota's OK before sending).
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
