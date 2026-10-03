@@ -379,6 +379,11 @@ the church in Apple Business, then set the phone, hours and photos there.
       change that sender's From (or set up its domain authentication).
     - **Recommendation:** drop `rua=` (stop the emails) and stay at p=none unless Branded Mail becomes worth it. Re-add `rua` for
       ~2 weeks before tightening.
+    - **Done 2026-10-03 (Dakota's go; he entered Squarespace's emailed code):** `_dmarc` TXT changed to `v=DMARC1; p=none;
+      pct=100` (rua removed). Verified on the authoritative NS (ns-cloud-d4.googledomains.com) and 8.8.8.8. 1.1.1.1 still had the
+      old copy cached (TTL 4 h). SPF, MX, the `squarespace` and `google` DKIM records and the Apple verification TXT are unchanged.
+      Reports already in flight (Yahoo/Microsoft run ~2 days behind) may trickle in through ~Oct 5–6, then stop. To re-enable,
+      add `; rua=mailto:av@arroyochurch.com` back.
   - Google Ads advertiser verification submitted: EU political ads = No; Dun & Bradstreet task = legal name "Arroyo Church",
     945 Concannon Blvd, Livermore CA 94550-6482 (prefilled from the payments profile). The form also prefilled D-U-N-S
     145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
