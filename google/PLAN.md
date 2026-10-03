@@ -364,6 +364,21 @@ the church in Apple Business, then set the phone, hours and photos there.
     Squarespace signs them through the `squarespace._domainkey` CNAME (kept), and its DNS guide asks for no SPF include, so no DNS
     change is needed. **Gate before p=quarantine:** the DMARC reports must include at least one newsletter sent after 9/29 and show
     it passing DKIM aligned to arroyochurch.com; if Josh hasn't sent one by ~10/13, wait for his next send.
+  - **DMARC report review done early, 2026-10-03** (22 reports, Sep 30–Oct 2; parsed files in the session scratchpad):
+    - **Volume:** ~7 report emails a day. Senders: Yahoo (one per hosted domain: aol, att, sbcglobal, ymail, rocketmail…),
+      Google, Comcast, Microsoft, GoDaddy, Mail.Ru, Amazon SES. Dakota asked to stop them on 10/3.
+    - **Results:** 936 messages, 934 pass.
+      - Google Workspace: 35/35 pass (DKIM `google` + SPF, both aligned).
+      - **Josh's Squarespace newsletter went out Oct 1:** 891 deliveries (Mailgun 161.38.201.94/.95), all pass via aligned
+        DKIM d=arroyochurch.com, selector `squarespace`. **The 9/29 gate is met.**
+      - Forwarded copies: 8/8 pass.
+    - **One unknown sender fails:** SendGrid 167.89.17.35 (rDNS o1.email.abusepreventionsystems.com), 2 messages with From
+      @arroyochurch.com, signed only by abusepreventionsystems.com. Abuse Prevention Systems = **MinistrySafe** (child-safety
+      training/background checks); likely a staff account sending invites "from" a church address.
+    - **Under p=quarantine those emails would go to spam.** Before any quarantine/Branded Mail step: confirm with staff and
+      change that sender's From (or set up its domain authentication).
+    - **Recommendation:** drop `rua=` (stop the emails) and stay at p=none unless Branded Mail becomes worth it. Re-add `rua` for
+      ~2 weeks before tightening.
   - Google Ads advertiser verification submitted: EU political ads = No; Dun & Bradstreet task = legal name "Arroyo Church",
     945 Concannon Blvd, Livermore CA 94550-6482 (prefilled from the payments profile). The form also prefilled D-U-N-S
     145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
