@@ -384,6 +384,10 @@ the church in Apple Business, then set the phone, hours and photos there.
       old copy cached (TTL 4 h). SPF, MX, the `squarespace` and `google` DKIM records and the Apple verification TXT are unchanged.
       Reports already in flight (Yahoo/Microsoft run ~2 days behind) may trickle in through ~Oct 5–6, then stop. To re-enable,
       add `; rua=mailto:av@arroyochurch.com` back.
+    - **2026-10-04:** Dakota still saw report emails. All 5 public resolvers + authoritative show no rua. The 13 reports that
+      arrived after the change covered Oct 2–3 mail (sent a day late; Yahoo sends ~9 at once, one per brand). None covered mail
+      after the change. Archived all 35 report threads out of av@'s inbox (INBOX label removed, nothing deleted; search "Report
+      domain"). Expect at most a straggler or two (Microsoft runs ~2 days behind) through Oct 5–6.
   - Google Ads advertiser verification submitted: EU political ads = No; Dun & Bradstreet task = legal name "Arroyo Church",
     945 Concannon Blvd, Livermore CA 94550-6482 (prefilled from the payments profile). The form also prefilled D-U-N-S
     145043643 of unknown origin (no public D&B record for Arroyo Church; Sunset Community Church is the only Livermore church
