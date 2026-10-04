@@ -461,6 +461,17 @@ the church in Apple Business, then set the phone, hours and photos there.
       After Save the app bounced to the empty /showcases/welcome page, and the showcase only appeared in the Scheduled list on a
       reload a minute later.
     - **To check once it's live:** on an iPhone, does Arroyo's card show the showcase with a working Recommend/Rate button?
+- **Check 2026-10-03 (scheduled task; Apple Business was signed out, so public data + Gmail only):**
+  - **Public card live:** phone (925) 694-0426 (old 642-1516 still stored as `altTelephone` only), About "about 70 minutes",
+    cover = the baptism group in black shirts waving on the lawn. Photos: 10 of ours + 1 Yelp (the welcome-tent shot). Of the 6
+    people photos added 9/30, 3 show publicly (baptism on the lawn with the crowd, two men waving, the group shot); the couple
+    outside, two friends at the entrance, three men talking and the dome baptism don't (yet). Expected ~14 owner photos.
+  - **Still not live:** hours (BUSINESS_HOURS = 0), Services action (QUICK_LINK = 0), ratings (RATING = 0).
+  - **Gmail:** a second "One or more photos weren't approved" email arrived **2026-10-01 04:50 UTC** (after the 9/30 uploads; the
+    9/30 14:56 one was the Connect Center photo). The email doesn't name the photo or reason — only the Photos tab does.
+    No other Apple decision emails (no approval, cover, action or showcase emails).
+  - **Not checked (signed out):** "Sent for review" banner, Photos tab count + the rejected photo's reason, Actions status, the
+    Hours row, and the "Been to Arroyo on a Sunday?" showcase (id 1828880345077909452). Re-check after Dakota signs in.
 - **Service length is ~70 minutes (Josh, 2026-09-30).** Changed everywhere it appeared: the site footer (5 lines, commit 4340984;
   the first save that day did NOT persist, so it was redeployed and checked with curl), the /plan-your-visit FAQ accordion, the
   scheduled "What to Wear to Church" post (Oct 3, 7 AM; only "55" → "70" changed in place, still Scheduled, same author/URL), and
