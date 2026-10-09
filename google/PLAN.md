@@ -195,6 +195,24 @@ action's tag and wire its AW-id/label into `acTrack()`; link GA4 a407495086/p553
   3. +2 sitelinks (Upcoming Events → /events; What to Expect → /arroyoblog/what-to-wear-to-church) and a "Services"
      structured snippet.
   4. Decline the bidding switch, Search Partners and Customer Match.
+- **Applied 2026-10-09 (Dakota approved 1, 3 and 4; he is holding off on the Ad Grant for now):**
+  - **Negatives:** all 104 from `google/ads-negatives-2026-10-09.txt` added at campaign level, broad match. The campaign went
+    from 26 to 130 negatives and Google showed no errors.
+  - **Sitelinks:** two campaign-level sitelinks, both "Pending / Under review", for 6 total.
+    - "Upcoming Events" → /events ("See what's coming up at Arroyo" / "Everyone's welcome, bring a friend").
+    - "What to Expect" → /arroyoblog/what-to-wear-to-church ("What to wear and what Sunday's like" / "Come as you are, kids
+      welcome").
+  - **Structured snippet:** campaign level. Google has no "Services" header, so the closest one is used: **"Service catalog:
+    Sunday Worship, Kids Ministry, Student Ministry, Young Adults, Connect Groups"**. Status is Eligible (Limited) under the
+    religious-belief personalization policy, the same as the About and Sermons sitelinks.
+  - **Dismissed recommendations:**
+    - Maximize conversions: "I will do it later". Revisit at ~15 conversions in 30 days.
+    - Search partners: "won't improve performance".
+    - Customer Match: "not relevant".
+  - Optimization score went 78.3% → 99.2%. Left alone: "remove redundant keywords" (phrase+exact pairs, harmless), "business
+    logo", and "improve RSAs".
+  - **Watch at the Nov 9 review:** the share of search-term spend that's off-target (was 52%), clicks per week, and
+    conversions.
 - **Ads URL params** (for scripts): `ocid=8528272776&__u=4662369253&__c=7812266824&authuser=3`. Grids are virtualized: set
   "Show rows" to 500, then scroll the tallest `div.main` and collect `[role=row]` cells. A full page navigation clears any
   data held in `window`.

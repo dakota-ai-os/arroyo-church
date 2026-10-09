@@ -2,7 +2,7 @@
 # Built 2026-10-09 from the Sep 9–Oct 8 search-terms report (353 terms). Tested against all 50 clicked terms:
 # blocks 29 off-target terms ($35.09, 32 clicks, 0 conversions); keeps all 21 good terms (incl. both converters).
 # Deliberately NOT negated: christian, evangelical, non denominational, bible, near me, bay (would block "east bay church").
-# Status: PROPOSED — apply only after Dakota approves.
+# Status: APPLIED 2026-10-09 (Dakota approved). Campaign negatives went 26 → 130.
 # Language / ethnic congregations
 korean
 한국
