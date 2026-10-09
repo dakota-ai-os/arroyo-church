@@ -167,6 +167,38 @@ action's tag and wire its AW-id/label into `acTrack()`; link GA4 a407495086/p553
 - No Ads review had happened since 9/10. The first 30-day review was started 10/9, then blocked on Google's "Verify it's you"
   re-sign-in for av@.
 
+**30-day review 2026-10-09 (Sep 9–Oct 8, read-only):**
+- **Totals:** $125.58 · 1,705 impressions · 145 clicks · **CTR 8.50%** · avg CPC $0.87 · **2 conversions** ("Submit lead forms";
+  "Get directions" 0) · $62.79/conv · optimization score 78.3%. Impressions fell ~56% in the last week (187 vs ~430/wk); watch it.
+- **By ad group:**
+  - Church in Livermore: 96 clicks, $79.96, 1 conv.
+  - Christian / Bible church: 39 clicks, 12.1% CTR, $36.31, 1 conv. Its religious-belief policy review cleared, and it's serving.
+  - Tri-Valley neighbors: 10 clicks, $9.31, 0 conv.
+- **Keywords:** 30/36 eligible. 4 not eligible, too low volume: "family church livermore" and "sunday church service
+  livermore", phrase + exact. "church dublin ca" (phrase + exact) is rarely shown, low Quality Score.
+  - Top spend: "livermore church" P $19.30 / 29 clicks; "church near me" P $17.10 + E $9.60; "christian churches near me" P
+    $16.39; "christian church livermore" P $11.77 (1 conv); "churches in livermore ca" P $10.20 (1 conv).
+- **Search terms:** 353 terms, 50 clicked ($67.11 visible).
+  - **$35.09 (52%) went to people looking for a different church:** named parishes and churches, other languages, other
+    denominations.
+  - The brand term "arroyo church livermore": 14 clicks for $4.11, 1 conv.
+  - The tested negative list is in `google/ads-negatives-2026-10-09.txt` (PROPOSED). It blocks all 29 off-target clicked
+    terms and none of the 21 good ones.
+- **Recommendations tab:**
+  - Maximize conversions (+11.4%): decline. Only 2 conversions; the rule is ~15 in 30 days.
+  - Structured snippets: add. Sitelinks to 6: add 2.
+  - Search Partners and Customer Match: decline.
+  - Auto-apply is OFF (0/21 types).
+- **Proposed to Dakota:**
+  1. Apply the negatives.
+  2. Activate the Ad Grant. Dakota clicks Activate in Google for Nonprofits, because it creates a new Ads account.
+  3. +2 sitelinks (Upcoming Events → /events; What to Expect → /arroyoblog/what-to-wear-to-church) and a "Services"
+     structured snippet.
+  4. Decline the bidding switch, Search Partners and Customer Match.
+- **Ads URL params** (for scripts): `ocid=8528272776&__u=4662369253&__c=7812266824&authuser=3`. Grids are virtualized: set
+  "Show rows" to 500, then scroll the tallest `div.main` and collect `[role=row]` cells. A full page navigation clears any
+  data held in `window`.
+
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
 $2.50 max-CPC cap** for the first 30–60 days ($4/day is too little for Smart Bidding to learn),

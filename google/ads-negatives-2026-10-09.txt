@@ -1,0 +1,114 @@
+# Proposed campaign-level negative keywords (broad match) for "Search - Church in Livermore" (Ads 974-189-2062).
+# Built 2026-10-09 from the Sep 9–Oct 8 search-terms report (353 terms). Tested against all 50 clicked terms:
+# blocks 29 off-target terms ($35.09, 32 clicks, 0 conversions); keeps all 21 good terms (incl. both converters).
+# Deliberately NOT negated: christian, evangelical, non denominational, bible, near me, bay (would block "east bay church").
+# Status: PROPOSED — apply only after Dakota approves.
+# Language / ethnic congregations
+korean
+한국
+한인
+교회
+chinese
+tamil
+telugu
+arab
+arabic
+coptic
+african
+filipino
+japanese
+armenian
+greek
+hispanic
+mexican
+spanish
+español
+iglesia
+iglesias
+cristiana
+cristianas
+cerca
+asian
+# Other traditions / denominations
+quaker
+pentecostal
+baptist
+anabaptist
+anglican
+apostolic
+asambleas
+calvary
+sabbath
+cogic
+foursquare
+ucc
+pca
+opc
+latter
+iafcj
+ifb
+7th
+church of christ
+# Catholic parishes / practices
+cathedral
+mass
+parish
+rosary
+sacrament
+adoration
+saint
+st
+holy cross
+holy spirit
+our lady
+la vang
+mission san jose
+# Other named churches (navigational searches for a different church)
+crosswinds
+gateway
+cedar grove
+valley bible
+valley community
+valley christian
+new beginnings
+living grace
+cornerstone
+celebration
+the well
+crossroads
+altamont
+asbury
+kingdom of grace
+our savior
+ccop
+family of grace
+creekside
+cross point
+crosspoint
+harvest time
+glad tidings
+new hope
+new life
+rock church
+revive
+redemption
+sanctuary
+tlc
+trinity
+vintage
+winners chapel
+montgomery
+happy valley
+rolling hills
+orange church
+mission church
+heritage
+grace bible
+# Out of area / times we don't offer
+tracy
+santa clara
+tonight
+weekday
+friday
+12pm
+7 am
