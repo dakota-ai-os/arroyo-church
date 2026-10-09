@@ -155,6 +155,18 @@ groups 2 and 3 from Campaign → Ad groups → +, same RSA copy, group 3 with a 
 negative list; add the location asset once GBP is linked (Assets → Location); create the "Form submissions" conversion
 action's tag and wire its AW-id/label into `acTrack()`; link GA4 a407495086/p553508954 ↔ Ads.
 
+**Status 2026-10-09 (30-day mark):**
+- **Advertiser verification COMPLETED 2026-09-29** (Google's email "You've completed advertiser verification", 9/29 9:03 PM PT).
+  The Oct 29 pause deadline is resolved.
+- **Google for Nonprofits VERIFIED 2026-09-09** ("Get started with Google for Nonprofits": ARROYO CHURCH, Charity ID
+  94-1347079, user av@). The Ad Grant can now be activated (section 4). Earlier notes calling it "pending" were stale.
+- Google auto-opted the account into **Automated promotions** from Oct 12, 2026 (it extracts "promotions" from the website for
+  campaigns with location assets; opt-out = account-level automated assets → Automated Promotions → Off). Review in the 30-day pass.
+- **Monthly review scheduled:** task `arroyo-google-ads-monthly-review`, 9:00 AM on the 9th of each month (first run Nov 9).
+  Read-only; it proposes tweaks and Dakota approves each one.
+- No Ads review had happened since 9/10. The first 30-day review was started 10/9, then blocked on Google's "Verify it's you"
+  re-sign-in for av@.
+
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
 $2.50 max-CPC cap** for the first 30–60 days ($4/day is too little for Smart Bidding to learn),
