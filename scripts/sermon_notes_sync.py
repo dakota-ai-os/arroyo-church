@@ -724,14 +724,35 @@ def _focus_note(note_id):
         '  end try\n'
         'end tell\n'
         'delay 0.8\n'
+        # `show note` does not move keyboard focus. On 2026-10-11 it stayed in the note LIST,
+        # so the select/copy/paste keystrokes below walked the list instead of editing the
+        # note -- and the run still logged success. Put focus in the body explicitly (the
+        # body is the only text area in the window: splitter group > scroll area > text area).
+        'tell application "System Events" to tell process "Notes"\n'
+        '  repeat with sa in (scroll areas of splitter group 1 of window 1)\n'
+        '    if (count of text areas of sa) > 0 then\n'
+        '      set value of attribute "AXFocused" of (text area 1 of sa) to true\n'
+        '      exit repeat\n'
+        '    end if\n'
+        '  end repeat\n'
+        'end tell\n'
+        'delay 0.5\n'
     )
 
 
 def _keys(lines):
-    body = "\n".join("  " + l for l in lines)
-    _ui('tell application "System Events" to tell process "Notes"\n'
-        '  set frontmost to true\n'
-        '  delay 0.4\n' + body + '\nend tell\n')
+    # Keystrokes go to whatever has keyboard focus, so refuse to send any unless Notes is in
+    # front AND the focus is the note body. Fail closed: nothing typed, nothing pasted.
+    body = "\n".join("    " + l for l in lines)
+    _ui('tell application "System Events"\n'
+        '  tell process "Notes" to set frontmost to true\n'
+        '  delay 0.4\n'
+        '  if (name of (first process whose frontmost is true)) is not "Notes" then '
+        'error "Notes is not frontmost -- refusing to send keystrokes"\n'
+        '  tell process "Notes"\n'
+        '    if role of (value of attribute "AXFocusedUIElement") is not "AXTextArea" then '
+        'error "keyboard focus is not in the note body -- refusing to send keystrokes"\n'
+        + body + '\n  end tell\nend tell\n')
 
 
 def replace_around_image(note_id, header_html, body_html, skip_lines):
@@ -947,6 +968,22 @@ def attachment_count(note_id):
         return None
 
 
+def verify_title(note_id, title, tries=5):
+    """Raise unless the note's name (Notes derives it from the first body line) is now `title`."""
+    def norm(x): return re.sub(r"\s+", " ", (x or "")).strip().lower()
+    name = ""
+    for _ in range(tries):
+        try:
+            name = run_osascript(f'tell application "Notes" to return name of note id "{note_id}"', timeout=60)
+        except Exception as e:
+            name = f"<unreadable: {e}>"
+        if norm(name) == norm(title):
+            log(f'verified: the note now reads "{name}"')
+            return
+        time.sleep(2)
+    raise RuntimeError(f'write not confirmed: the note is titled "{name}", expected "{title}"')
+
+
 def main():
     cfg = load_config()
 
@@ -983,6 +1020,10 @@ def main():
         return 0
 
     title = update_note(cfg["NOTE_ID"], subject, when, text)
+    # update_note() can return normally without having changed anything (2026-10-11: its
+    # keystrokes went to the note list). Read the note back before recording the week as
+    # done, so a silent miss exits non-zero (alert) and the next attempt retries.
+    verify_title(cfg["NOTE_ID"], title)
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(service, encoding="utf-8")
     log(f'updated the shared Apple Note -> retitled "{title}" (service {service})')
