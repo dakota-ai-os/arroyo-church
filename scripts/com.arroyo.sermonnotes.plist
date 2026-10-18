@@ -10,20 +10,23 @@
         <string>/Users/dakotayates/ai-os/ventures/arroyo-church-redesign/scripts/run-sermon-notes.sh</string>
     </array>
 
-    <!-- SEVERAL ATTEMPTS, ON PURPOSE (2026-09-09).
-         A single Sunday 07:00 slot lost three Sundays in a row: launchd fired during a
-         Power Nap dark wake, where the network works but Notes cannot be scripted. The
-         script now detects that in ~0.2s and exits 75 without touching the note, so extra
-         attempts are cheap, and the first one that lands on a real GUI session wins. Once
-         a service date is written the rest stand down, so the note is never rewritten
-         twice (each rewrite is another pass over the protected series graphic).
+    <!-- SATURDAY NIGHT, SEVERAL ATTEMPTS (Dakota, 2026-10-17).
+         The note should be ready Saturday night. Josh emails the outline to dakota@ during
+         the week or on Saturday and sometimes sends a correction late Saturday (10/10 at
+         22:07), so there are three Saturday-night attempts: 20:00, 21:30 and 23:00. A later
+         attempt republishes only if a NEWER outline arrived (the marker stores which email
+         was published); otherwise it stands down, so the series graphic isn't touched twice.
 
-         Saturday 20:00 is the workhorse: Josh sends the notes Saturday early afternoon
-         (8/29 13:00 for the 8/30 service) and the Mac is normally awake and unlocked in
-         the evening. The Sunday slots are the safety net before the 10:00 service. -->
+         Several attempts on purpose (2026-09-09): launchd can fire during a Power Nap dark
+         wake or with the screen locked, where Notes can't be driven. The script detects that
+         in ~0.2s and exits 75 without touching the note, and the next attempt tries again.
+         The Sunday 06:45 / 08:00 / 09:00 slots are a fallback for a Saturday night where the
+         Mac was locked or asleep; they stand down if Saturday already published. -->
     <key>StartCalendarInterval</key>
     <array>
         <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>20</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>21</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>23</integer><key>Minute</key><integer>0</integer></dict>
         <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>45</integer></dict>
         <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
         <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>

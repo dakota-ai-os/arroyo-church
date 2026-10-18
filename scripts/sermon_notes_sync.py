@@ -27,6 +27,12 @@ CONFIG -- ~/.config/arroyo/gmail.env (chmod 600, OUTSIDE the repo):
     SERMON_SENDER=josh@arroyochurch.com      # who sends the notes
     NOTE_ID=x-coredata://.../ICNote/pNNNN    # STABLE id of the note (title changes weekly)
     LOOKBACK_DAYS=8                          # optional; how far back to search
+  Optional extra mailboxes to read (2026-10-17: Josh sends the notes to dakota@ now):
+    GMAIL_USER_2=dakota@arroyochurch.com
+    GMAIL_APP_PASSWORD_2=xxxxxxxxxxxxxxxx
+    GMAIL_MAILBOX_2=[Gmail]/All Mail         # default INBOX; All Mail still finds it once read/archived
+  Add one with `bash scripts/add-gmail-account.sh dakota@arroyochurch.com` -- it asks for
+  the app password at a hidden prompt, tests the login, and writes these three lines.
 
 SAFETY: the note is only ever rewritten when a matching email with a non-empty
 body is found. No email, or an empty one, means the note is left completely
@@ -43,9 +49,13 @@ import re
 import subprocess
 import sys
 import time
+import hashlib
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from email.header import decode_header, make_header
 from pathlib import Path
+
+CHURCH_TZ = ZoneInfo("America/Los_Angeles")   # service dates are church time, wherever the Mac is
 
 INSTRUCT_COLOR = "#AF52DE"   # Apple system purple; change here to restyle the notice
 
@@ -77,6 +87,58 @@ def load_config():
             sys.exit(f"ERROR: {required} missing from {CONFIG}")
     cfg.setdefault("LOOKBACK_DAYS", "8")
     return cfg
+
+
+def accounts(cfg):
+    """Every mailbox to search: (user, app password, mailbox). The primary account is
+    GMAIL_USER (av@, which also sends the failure alerts); GMAIL_USER_2, _3 ... add more.
+
+    Why more than one (2026-10-17): Josh sends the notes to dakota@arroyochurch.com, not
+    av@. Forwarding them by hand didn't work either: Apple Mail quotes the whole forward
+    with ">", and strip_reply() drops quoted text. So the script reads dakota@ directly.
+    av@ stays because guest preachers have sent there (Cristian, 2026-09-06)."""
+    out = [(cfg["GMAIL_USER"], cfg["GMAIL_APP_PASSWORD"], cfg.get("GMAIL_MAILBOX") or "INBOX")]
+    n = 2
+    while cfg.get(f"GMAIL_USER_{n}"):
+        pw = cfg.get(f"GMAIL_APP_PASSWORD_{n}")
+        if not pw:
+            sys.exit(f"ERROR: GMAIL_USER_{n} is set but GMAIL_APP_PASSWORD_{n} is missing from {CONFIG}")
+        out.append((cfg[f"GMAIL_USER_{n}"], pw, cfg.get(f"GMAIL_MAILBOX_{n}") or "INBOX"))
+        n += 1
+    return out
+
+
+def content_hash(text):
+    """Fingerprint of an outline's words, ignoring whitespace, quote style and case, so the
+    same outline arriving again (a forward, a duplicate) is recognised as the same."""
+    t = (text or "").replace("\u201c", '"').replace("\u201d", '"').replace("\u2018", "'").replace("\u2019", "'")
+    return hashlib.sha1(re.sub(r"\s+", " ", t).strip().lower().encode("utf-8")).hexdigest()[:12]
+
+
+def marker_says_current(marker, service, when, text=None):
+    """True when the note already carries this outline for this service.
+
+    The marker (last-written.txt) is "<service date>|<sent time>|<content fingerprint>".
+    * Same fingerprint -> the same outline arrived again (a forward, a re-run): stand down.
+    * Different text sent LATER than what was published -> republish (a correction; the
+      Saturday attempts run 20:00, 21:30 and 23:00, so a late fix still lands).
+    * Older text -> stand down.
+    A bare date (written before 2026-10-17) stands down as before."""
+    svc, stamp, digest = ((marker or "").strip().split("|") + ["", ""])[:3]
+    if svc != service:
+        return False
+    if not stamp:
+        return True
+    if digest and text is not None and digest == content_hash(text):
+        return True
+    try:
+        return when <= datetime.fromisoformat(stamp)
+    except (ValueError, TypeError):
+        return True
+
+
+def marker_value(service, when, text=""):
+    return f"{service}|{when.isoformat()}|{content_hash(text)}"
 
 
 def _csv(cfg, key, fallback):
@@ -111,15 +173,47 @@ def allowed_subjects(cfg):
 
 STRICT_SUBJECTS = ("sermon notes", "sermon outline")
 
-# Book chapter:verse -- the cheapest reliable "this is sermon material" signal.
-SCRIPTURE_ANYWHERE = re.compile(r"\b(?:[1-3]\s*)?[A-Z][a-z]{2,}\s+\d{1,3}:\d{1,3}")
+# Book chapter:verse -- the cheapest reliable "this is sermon material" signal. It names REAL
+# Bible books (2026-10-17 review): the old "any Capitalised word + n:n" pattern matched clock
+# times, so a reply like "see you Sunday 9:30" counted as scripture.
+BIBLE_BOOKS = (
+    r"Genesis|Exodus|Leviticus|Numbers|Deuteronomy|Joshua|Judges|Ruth|Samuel|Kings|Chronicles|"
+    r"Ezra|Nehemiah|Esther|Job|Psalms?|Proverbs|Ecclesiastes|Song of Solomon|Song of Songs|"
+    r"Isaiah|Jeremiah|Lamentations|Ezekiel|Daniel|Hosea|Joel|Amos|Obadiah|Jonah|Micah|Nahum|"
+    r"Habakkuk|Zephaniah|Haggai|Zechariah|Malachi|Matthew|Mark|Luke|John|Acts|Romans|"
+    r"Corinthians|Galatians|Ephesians|Philippians|Colossians|Thessalonians|Timothy|Titus|"
+    r"Philemon|Hebrews|James|Peter|Jude|Revelations?|Phillipians|Phillippians|"
+    # common abbreviations, with or without a period (a guest wrote "-Eph 1:13-14")
+    r"Gen|Exod?|Lev|Num|Deut|Josh|Judg|Sam|Kgs|Chr|Chron|Neh|Esth|Pss?|Psa|Prov|Eccl|Eccles|"
+    r"Isa|Jer|Lam|Ezek|Dan|Hos|Obad|Mic|Nah|Hab|Zeph|Hag|Zech|Mal|Matt|Mt|Mk|Lk|Jn|Rom|Cor|"
+    r"Gal|Eph|Phil|Col|Thess|Tim|Tit|Phlm|Heb|Jas|Pet|Rev")
+# chapter:verse, but not a clock time: a verse never starts with 0 ("8:00") or carries am/pm.
+_CV = r"\d{1,3}:(?!0)\d{1,3}(?!\d)(?!\s*[ap]\.?m\b)"
+SCRIPTURE_ANYWHERE = re.compile(rf"\b(?:[1-3]\s*)?(?:{BIBLE_BOOKS})\.?\s+{_CV}")
+BIBLE_REF_START = re.compile(rf"^\s*(?:[1-3]\s*)?(?:{BIBLE_BOOKS})\.?\s+{_CV}")
+REF_LINE = re.compile(rf"^\s*[-\u2013]\s*(?:[1-3]\s*)?(?:{BIBLE_BOOKS})\.?\s+\d")   # "-Ephesians 2:10" on its own line
 
 
-def is_substantive(text):
-    """True when a body actually carries sermon content: it cites scripture, is a guest
-    slide deck, or has at least two numbered main points."""
+def scripture_refs(text):
+    """Distinct 'Book c:v' citations in a body."""
+    return {re.sub(r"\s+", "", m.group(0)).lower() for m in SCRIPTURE_ANYWHERE.finditer(text or "")}
+
+
+def is_substantive(text, allow_slides=True):
+    """True when a body is an actual OUTLINE: a guest slide deck, two or more distinct verse
+    citations, one citation in a body of real length, or two or more numbered main points.
+
+    One citation used to be enough. That let a thread reply that mentions a verse ("the
+    Ephesians 2:14 slide is ready") replace the outline -- the 9/12 failure -- and reading
+    dakota@'s mail (2026-10-17) puts every reply-all in Josh's thread in front of the job."""
     text = text or ""
-    if SCRIPTURE_ANYWHERE.search(text) or looks_like_slides(text):
+    if allow_slides and looks_like_slides(text):
+        return True
+    refs = scripture_refs(text)
+    if len(refs) >= 2:
+        return True
+    lines = [l for l in text.splitlines() if l.strip()]
+    if refs and len(lines) >= 6 and len(text) >= 300:
         return True
     _, rest = split_title_and_body(text)
     return sum(1 for kind, _ in parse_structure(rest) if kind == "main") >= 2
@@ -131,12 +225,9 @@ def looks_like_sermon(subject, text):
     2026-09-12: an explicit subject used to pass ON ITS OWN. Josh replied inside the
     outline's thread ("Re: Sermon Notes for 9/13/26" -- "Yes EJ has them all...") and that
     84-char reply, being newer and subject-matched, replaced the real outline in the shared
-    note. A subject is no longer evidence of content: strict subjects must be substantive,
-    and loose keywords ("slides", "sermon") must still cite scripture."""
-    s = (subject or "").lower()
-    if any(k in s for k in STRICT_SUBJECTS):
-        return is_substantive(text)
-    return bool(SCRIPTURE_ANYWHERE.search(text or ""))
+    note. A subject is no longer evidence of content: every candidate must be substantive.
+    A reply's numbered to-do list is not a guest slide deck, so replies don't get that path."""
+    return is_substantive(text, allow_slides=not REPLY_SUBJECT.match(subject or ""))
 
 
 def _clean_pw(pw):
@@ -146,17 +237,112 @@ def _clean_pw(pw):
     return re.sub(r"[^A-Za-z0-9]", "", pw)
 
 
+GMAIL_FORWARD = re.compile(r"^-{5,}\s*Forwarded message\s*-{5,}[ \t]*$", re.M | re.I)
+APPLE_FORWARD = re.compile(r"^(?:>[ \t]?)?Begin forwarded message:[ \t]*$", re.M)
+FORWARD_HEADER_LINE = re.compile(r"^\s*(?:From|Subject|Date|Sent|To|Cc|Bcc|Reply-To|Resent-\w+):\s", re.I)
+FORWARD_SUBJECT = re.compile(r"^\s*(?:fwd?|fw)\s*:", re.I)
+REPLY_SUBJECT = re.compile(r"^\s*re\s*:", re.I)
+
+
+def _drop_header_block(lines):
+    """Skip the From/Subject/Date/To block that opens a forwarded message: everything up to the
+    first blank line, so a wrapped 'To:' or 'Cc:' continuation can't become the title."""
+    i = 0
+    while i < len(lines) and not lines[i].strip():
+        i += 1
+    if i < len(lines) and FORWARD_HEADER_LINE.match(lines[i]):
+        while i < len(lines) and lines[i].strip():
+            i += 1
+    while i < len(lines) and not lines[i].strip():
+        i += 1
+    return lines[i:]
+
+
+def _unwrap_once(text):
+    m = GMAIL_FORWARD.search(text)
+    if m:
+        return "\n".join(_drop_header_block(text[m.end():].splitlines())), True
+    m = APPLE_FORWARD.search(text)
+    if not m:
+        return text, False
+    lines = [re.sub(r"^>[ \t]?", "", l) for l in text[m.end():].splitlines()]
+    return "\n".join(_drop_header_block(lines)), True
+
+
+def strip_forward_header(text):
+    """Return a forwarded email's forwarded content, or the text unchanged.
+
+    * Gmail forwards are unquoted and open with a '---------- Forwarded message ---------'
+      line, then a From/Date/Subject/To block.
+    * Apple Mail forwards (2026-10-11 and 10-17: how Dakota forwards Josh's notes to av@)
+      quote EVERYTHING one level with '>' under '> Begin forwarded message:'. strip_reply()
+      drops '>' lines, so the outline vanished and the forward was skipped. Unquote one level.
+    Either way, keep only what follows the header block, or that block (or the forwarder's
+    own 'FYI' and signature above it) would become the note's title. Repeated for a forward
+    of a forward (a guest's notes, forwarded by Josh, forwarded by Dakota)."""
+    # Mail arrives with CRLF line endings; '$' under re.M stops before '\n', not '\r'.
+    text = (text or "").replace("\r\n", "\n").replace("\r", "\n")
+    for _ in range(3):
+        text, unwrapped = _unwrap_once(text)
+        if not unwrapped:
+            break
+    return text
+
+
+_FWD_DATE_FORMATS = ("%a, %b %d, %Y %I:%M %p", "%a, %b %d, %Y %I:%M:%S %p", "%B %d, %Y %I:%M:%S %p",
+                     "%B %d, %Y %I:%M %p", "%a, %d %b %Y %H:%M:%S", "%a, %d %b %Y %H:%M")
+
+
+def forward_sent_date(text):
+    """When the FORWARDED message was sent, from its Date:/Sent: header line, or None.
+    A forward's own date is when Dakota forwarded it, which can be days later -- even after
+    that Sunday's service -- and would file an old outline under the next Sunday."""
+    text = (text or "").replace("\r\n", "\n")
+    m = GMAIL_FORWARD.search(text) or APPLE_FORWARD.search(text)
+    if not m:
+        return None
+    for line in text[m.end():].splitlines()[:12]:
+        line = re.sub(r"^>[ \t]?", "", line).strip()
+        d = re.match(r"(?:Date|Sent):\s*(.+)$", line, re.I)
+        if not d:
+            continue
+        raw = d.group(1).strip()
+        try:
+            dt = email.utils.parsedate_to_datetime(raw)
+            if dt:
+                return dt if dt.tzinfo else dt.replace(tzinfo=CHURCH_TZ)
+        except (TypeError, ValueError):
+            pass
+        clean = re.sub(r"\s+(?!AM$|PM$)[A-Z]{2,4}$", "", raw.replace(" at ", " ").replace("\u202f", " "))   # drop "PDT", keep "PM"
+        for fmt in _FWD_DATE_FORMATS:
+            try:
+                return datetime.strptime(clean, fmt).replace(tzinfo=CHURCH_TZ)
+            except ValueError:
+                continue
+    return None
+
+
 def strip_reply(text):
     """Drop quoted history so only what the sender newly wrote remains. Josh sends
     corrections as replies ("Disregard the first email..."), so the quoted original must
     go or it would be duplicated into the note."""
-    text = re.split(r"^On .+ wrote:\s*$", text or "", maxsplit=1, flags=re.M)[0]
+    text = strip_forward_header(text or "")
+    # Gmail sometimes wraps the attribution: "On Sat, Oct 17 ... Josh Smith <" / "josh@... wrote:"
+    text = re.split(r"^On .+(?:\n.+)?wrote:\s*$", text, maxsplit=1, flags=re.M)[0]
+    # Outlook-style replies don't quote with '>': cut at their separator or From:/Sent: block
+    text = re.split(r"^(?:_{10,}|-{3,}\s*Original Message\s*-{3,})\s*$|^From: .+\n(?:Sent|Date): ",
+                    text, maxsplit=1, flags=re.M | re.I)[0]
     text = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith(">"))
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
 def message_text(msg):
     """Plain-text body of an email (falling back to its HTML), quoted history removed."""
+    return strip_reply(message_body(msg))
+
+
+def message_body(msg):
+    """Plain-text body of an email (falling back to its HTML), untouched."""
     text, html_body = "", ""
     if msg.is_multipart():
         for part in msg.walk():
@@ -183,42 +369,135 @@ def message_text(msg):
         text = re.sub(r"<br\s*/?>|</p>", "\n", html_body, flags=re.I)
         text = re.sub(r"<[^>]+>", "", text)
         text = html.unescape(text)
-    return strip_reply(text)
+    return text
+
+
+def _opens_with_correction(text):
+    first = next((l.strip() for l in (text or "").splitlines() if l.strip()), "")
+    return bool(PREAMBLE.match(first) or PREAMBLE_HINT.search(first))
+
+
+def _replaces(reply_text, base_text):
+    """A reply replaces the week's outline only if it IS a corrected outline: it opens like
+    Josh's corrections ("Disregard the first email...") or carries at least as much scripture
+    as the outline and half its length. A chatty reply-all that names two verses doesn't."""
+    if _opens_with_correction(reply_text):
+        return True
+    return (len(scripture_refs(reply_text)) >= max(2, len(scripture_refs(base_text)))
+            and len(reply_text) >= 0.5 * len(base_text))
 
 
 def choose_candidate(candidates):
     """Pick the email to publish from (datetime, subject, text) tuples, or None.
 
-    Newest wins, because corrections arrive later -- but only among emails that carry an
-    outline. A thread reply that merely chats is skipped, so the real outline it replied
-    to still reaches the note."""
+    Only emails that carry an outline qualify. Then:
+    1. The WEEK: the upcoming Sunday first, then the nearest earlier week, future weeks last
+       (an outline sent early for Christmas Eve or for next week must not displace this one).
+    2. Within the week: the newest ORIGINAL (not "Re:", not "Fwd:"); a newer "Re:" replaces it
+       only when it is a real corrected outline (see _replaces) -- every reply-all in Josh's
+       thread reaches the job now that dakota@ is read, and a reply once replaced the outline
+       (9/12). With no original, a reply that opens like a correction, else a forward (Dakota's
+       deliberate copy), else the newest reply."""
+    qualified = []
     for when, subject, text in sorted(candidates, key=lambda c: c[0], reverse=True):
         if text and looks_like_sermon(subject, text):
-            return subject, when, text
-        log(f'skipping "{subject}" ({when:%a %b %d %H:%M}) -- {len(text or "")} chars with no '
-            f"sermon content once quoted text is stripped")
-    return None
+            qualified.append((when, subject, text))
+        else:
+            log(f'skipping "{subject}" ({when:%a %b %d %H:%M}) -- {len(text or "")} chars with no '
+                f"sermon outline once quoted text is stripped")
+    if not qualified:
+        return None
+
+    up = upcoming_sunday()
+
+    def week(c):
+        return sunday_from_subject(c[1], c[0]).date()
+
+    def week_rank(w):
+        return (0, 0) if w == up else (1, (up - w).days) if w < up else (2, (w - up).days)
+
+    best = min({week(c) for c in qualified}, key=week_rank)
+    wk = [c for c in qualified if week(c) == best]                    # newest first
+    originals = [c for c in wk if not REPLY_SUBJECT.match(c[1] or "") and not FORWARD_SUBJECT.match(c[1] or "")]
+    replies = [c for c in wk if REPLY_SUBJECT.match(c[1] or "")]
+    forwards = [c for c in wk if FORWARD_SUBJECT.match(c[1] or "")]
+    if originals:
+        pick = originals[0]
+        newer = [r for r in replies if r[0] > pick[0] and _replaces(r[2], pick[2])]
+        if newer:
+            pick = newer[0]
+    else:
+        pick = ([r for r in replies if _opens_with_correction(r[2])] or forwards or replies)[0]
+    when, subject, text = pick
+    return subject, when, text
 
 
 def fetch_latest(cfg):
-    """Newest email within LOOKBACK_DAYS that is from an allowed sender, has an allowed
-    subject AND actually carries an outline. Returns (subject, date, text) or None."""
+    """Newest email within LOOKBACK_DAYS, across every configured mailbox, that is from an
+    allowed sender, has an allowed subject AND actually carries an outline.
+    Returns (subject, date, text) or None.
+
+    A mailbox that can't be read (wrong app password, IMAP off) is logged and skipped so the
+    others still count -- but if nothing qualifies AND a mailbox failed, this raises, so the
+    runner emails an alert instead of quietly leaving last week's note up."""
     since = (datetime.now(timezone.utc) - timedelta(days=int(cfg["LOOKBACK_DAYS"]))).strftime("%d-%b-%Y")
-    M = imaplib.IMAP4_SSL("imap.gmail.com")
+    parsed, failed = [], []
+    boxes = accounts(cfg)
+    owners = {u.lower() for u, _, _ in boxes}
+    for n, (user, pw, mailbox) in enumerate(boxes):
+        try:
+            got = _fetch_mailbox(cfg, user, pw, mailbox, since, owners, strict_only=n > 0)
+            log(f"{user} [{mailbox}]: {len(got)} subject-matched email(s)")
+            parsed += got
+        except Exception as e:
+            failed.append(user)
+            log(f"WARNING: could not read {user} [{mailbox}]: {type(e).__name__}: {str(e)[:160]}")
+    picked = choose_candidate(parsed)
+    if failed and (picked is None or sunday_from_subject(picked[0], picked[1]).date() < upcoming_sunday()):
+        # Josh's notes may be sitting in the mailbox that failed; an older outline found
+        # elsewhere must not mask that (it would leave last week's note up, silently).
+        raise RuntimeError(f"could not read {', '.join(failed)} and found no outline for "
+                           f"{upcoming_sunday()} elsewhere -- check that mailbox's app password / IMAP access")
+    return picked
+
+
+def upcoming_sunday(now=None):
+    """The next service date: today if it is Sunday, otherwise the coming Sunday (church time)."""
+    today = (now or datetime.now(CHURCH_TZ)).date()
+    return today + timedelta(days=(6 - today.weekday()) % 7)
+
+
+def _fetch_mailbox(cfg, user, pw, mailbox, since, owners=(), strict_only=False):
+    """(datetime, subject, text) for every allowed-sender, allowed-subject email in one mailbox.
+
+    strict_only (every mailbox after av@): only "sermon notes"/"sermon outline" subjects count.
+    dakota@ is a busy inbox where loose words like "sermon" also hit mail such as a "November
+    sermon calendar" that lists three passages."""
+    # timeout: a half-open connection used to block forever, and launchd will not start the
+    # next attempt while this one still runs.
+    M = imaplib.IMAP4_SSL("imap.gmail.com", timeout=60)
     try:
-        M.login(cfg["GMAIL_USER"], _clean_pw(cfg["GMAIL_APP_PASSWORD"]))
-        M.select("INBOX", readonly=True)  # readonly: never marks the sender's mail as read
-        # Filter in Python rather than with an IMAP query. The allowlists are now
+        M.login(user, _clean_pw(pw))
+        # readonly: never marks the sender's mail as read. Quoted, because "[Gmail]/All Mail"
+        # has a space in it.
+        typ, _ = M.select(f'"{mailbox}"', readonly=True)
+        if typ != "OK":
+            raise RuntimeError(f"could not open mailbox {mailbox!r}")
+        # Filter in Python rather than with an IMAP query. The allowlists are
         # multi-sender AND multi-subject, and IMAP's prefix-notation OR nests horribly
-        # past two terms. The mailbox holds ~12 messages a week, so scanning headers is
-        # cheaper than getting the query wrong.
+        # past two terms.
         #
         # MUST still filter on subject: the newest email from a preacher is often
         # unrelated (worship-night graphics, announcement decks). "Latest from Josh"
         # would overwrite the note with that.
-        typ, data = M.search(None, f"(SINCE {since})")
+        senders = allowed_senders(cfg)
+        subjects = list(STRICT_SUBJECTS) if strict_only else allowed_subjects(cfg)
+        # dakota@ is a busy inbox, so when every allowed sender shares one domain, let the
+        # server narrow to that domain first (a substring match; the exact check is below).
+        domains = {s.split("@")[-1] for s in senders}
+        query = f'(SINCE {since} FROM "{domains.pop()}")' if len(domains) == 1 else f"(SINCE {since})"
+        typ, data = M.search(None, query)
         ids = data[0].split() if typ == "OK" and data and data[0] else []
-        senders, subjects = allowed_senders(cfg), allowed_subjects(cfg)
 
         candidates = []                               # (datetime, message-id)
         for mid in ids:
@@ -230,6 +509,11 @@ def fetch_latest(cfg):
             sub = str(make_header(decode_header(h.get("Subject", "") or "")))
             addr = email.utils.parseaddr(frm)[1]
             if not any(addr == s or addr.endswith(s) for s in senders):
+                continue
+            # Mail FROM any mailbox the job reads never counts, unless it is a forward (Dakota's
+            # deliberate "publish this" copy to av@): dakota@'s All Mail holds Dakota's sent
+            # replies and drafts, he also writes from av@, and av@ mails its failure alerts to itself.
+            if addr in owners and not FORWARD_SUBJECT.match(sub):
                 continue
             if not any(k in sub.lower() for k in subjects):
                 continue
@@ -251,15 +535,18 @@ def fetch_latest(cfg):
                 continue
             msg = email.message_from_bytes(raw[0][1])
             subject = str(make_header(decode_header(msg.get("Subject", "") or "")))
-            parsed.append((when_h, subject, message_text(msg)))
+            body = message_body(msg)
+            # A forward is dated by the message it carries (Dakota may forward days later).
+            when_c = (forward_sent_date(body) or when_h) if FORWARD_SUBJECT.match(subject) else when_h
+            parsed.append((when_c, subject, strip_reply(body)))
     finally:
-        try:
-            M.close()
-        except Exception:
-            pass
-        M.logout()
+        for step in (M.close, M.logout):     # either can raise after a failed login
+            try:
+                step()
+            except Exception:
+                pass
 
-    return choose_candidate(parsed)
+    return parsed
 
 
 def run_osascript(script, timeout=90):
@@ -454,7 +741,15 @@ def sunday_from_subject(subject, fallback):
             return datetime(y, mo, d)
         except ValueError:
             pass
-    return fallback
+    # No date in the subject (Josh's 10/9 email was just "Sermon Notes"): the service is the
+    # Sunday on or after the day it was sent, in local time. Returning the send date itself
+    # put "October 9th" in the byline of a Friday email.
+    # A Sunday send after service (it ends ~11:30) is next week's outline.
+    sent = fallback.astimezone(CHURCH_TZ) if fallback.tzinfo else fallback
+    sunday = sent.date() + timedelta(days=(6 - sent.weekday()) % 7)
+    if sent.weekday() == 6 and sent.hour >= 12:
+        sunday += timedelta(days=7)
+    return datetime(sunday.year, sunday.month, sunday.day)
 
 
 def ordinal(n):
@@ -532,6 +827,91 @@ def parse_structure(body):
             out.append(("subhead", text))
         else:
             out.append(("text", text))
+    return out
+
+
+LONE_MARKER = re.compile(r"(?m)^\s*\d+\.\s*$")
+SUB_MARK = re.compile(r"^\s*(?:[-\u2022\u2013]|#\s*\d+[.):]?)\s*(\S.*)$")   # "-What is sin? ..." / "#1 Same citizenship: ..."
+AUTHOR_NUM = re.compile(r"^\s*(?:#\s*\d+[.):]?|\d+[.)])\s+")                 # Josh's own "1." / "#1" on a heading
+LIST_COUNT = re.compile(r"^\s*([2-9]|two|three|four|five|six|seven|eight|nine)\s+[A-Za-z]+s\b", re.I)   # "2 Reasons", "Three Truths"
+WORD_NUM = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+QUOTE_OPEN = "\"'\u201c\u201d\u2018\u2019"
+
+
+def parse_unnumbered(body):
+    """Josh's outline WITHOUT lone 'N.' markers (from 2026-10-11 on): each point is a short
+    heading followed by its scripture, a heading like "2 Reasons ..." introduces a list, and list
+    items are bare short lines or start with '-' or '#1'. Without this, parse_structure() made
+    every line an h2 and emitted no "Write some notes here" prompts (those follow main points).
+
+    Per paragraph: scripture -> text; a short line (or a single '#1 ...' line) followed by
+    scripture -> numbered main point, unless a counted list ("2 Reasons") still expects items;
+    '-'/'#N' lines -> sub items (split out even when they share a paragraph with their
+    heading); short lines inside a list -> sub items; any other short line -> a list heading.
+    A counted list ends after its count; an uncounted one at the next main point."""
+    paras = []
+    for para in re.split(r"\n\s*\n", body or ""):
+        lines = [l.strip() for l in para.splitlines() if l.strip()]
+        if not lines:
+            continue
+        marked = [bool(SUB_MARK.match(l)) and not REF_LINE.match(l) for l in lines]   # "-Ephesians 2:10" is a citation
+        if all(marked):
+            if len(lines) == 1:
+                paras.append(("bullet1", lines[0]))
+            else:
+                paras += [("bullet", SUB_MARK.match(l).group(1)) for l in lines]
+        elif len(lines) > 1 and not marked[0] and all(marked[1:]):   # "4 Reasons ...\n#1 ...\n#2 ..."
+            paras.append(("para", lines[0]))
+            paras += [("bullet", SUB_MARK.match(l).group(1)) for l in lines[1:]]
+        else:
+            paras.append(("para", " ".join(lines)))
+
+    def is_scripture(t):
+        return t[:1] in QUOTE_OPEN or bool(SCRIPTURE_REF.search(t)) or bool(BIBLE_REF_START.match(t))
+
+    out, n = [], 0
+    in_list, left = False, None            # left = items a counted list still expects
+
+    def sub(t):
+        nonlocal in_list, left
+        out.append(("sub", t))
+        if left is not None:
+            left -= 1
+            if left <= 0:
+                in_list, left = False, None
+
+    def main(t):
+        nonlocal n, in_list, left
+        n += 1
+        out.append(("main", f"{n}. {AUTHOR_NUM.sub('', t)}"))
+        in_list, left = False, None
+
+    for i, (kind, t) in enumerate(paras):
+        nxt = paras[i + 1] if i + 1 < len(paras) else None
+        verse_next = bool(nxt) and nxt[0] == "para" and is_scripture(nxt[1])
+        counted = in_list and left is not None
+        if kind == "bullet":
+            sub(t)
+        elif kind == "bullet1":
+            if verse_next and not counted:
+                main(t)
+            else:
+                sub(SUB_MARK.match(t).group(1))
+        elif is_scripture(t):
+            out.append(("text", t))
+        elif len(t) < 90 and counted:
+            sub(t)
+        elif verse_next and len(t) < 90 and not t.rstrip().endswith("."):
+            main(t)
+        elif len(t) < 90 and in_list:
+            sub(t)
+        elif len(t) < 90:
+            out.append(("subhead", t))
+            m = LIST_COUNT.match(t)
+            in_list = True
+            left = (int(m.group(1)) if m.group(1).isdigit() else WORD_NUM[m.group(1).lower()]) if m else None
+        else:
+            out.append(("text", t))
     return out
 
 
@@ -823,7 +1203,11 @@ def update_note(note_id, subject, when, text):
         title, blocks = parse_slides(text)
     else:
         title, rest = split_title_and_body(text)
-        blocks = parse_structure(rest)
+        if LONE_MARKER.search(rest):
+            blocks = parse_structure(rest)
+        else:
+            log("no 'N.' markers -- using the unnumbered-outline parser")
+            blocks = parse_unnumbered(rest)
     service = sunday_from_subject(subject, when)
     straighten = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
@@ -999,8 +1383,21 @@ def main():
         f"subject~{'|'.join(allowed_subjects(cfg))} (last {cfg['LOOKBACK_DAYS']} days)")
 
     found = fetch_latest(cfg)
+    up = upcoming_sunday()
+    already = STATE.read_text(encoding="utf-8").strip() if STATE.exists() else ""
+    now = datetime.now(CHURCH_TZ)
+    last_chance = now.weekday() == 6 and now.hour >= 9          # the Sunday 09:00 attempt
+    found_svc = sunday_from_subject(found[0], found[1]).date() if found else None
+    if last_chance and already.partition("|")[0] != up.isoformat() and found_svc != up:
+        # Exit non-zero so the runner emails an alert instead of leaving last week's note up.
+        raise RuntimeError(f"no sermon outline for today ({up}) reached the job -- the shared note "
+                           f"still shows {already.partition('|')[0] or 'an older week'}")
     if not found:
         log("no matching sermon-notes email found -- leaving the note untouched.")
+        return 0
+    if found_svc < up:
+        # The note is for the coming service; republishing an older week never helps.
+        log(f'newest outline is for {found_svc} ("{found[0]}"), not {up} -- leaving the note untouched.')
         return 0
 
     subject, when, text = found
@@ -1014,10 +1411,11 @@ def main():
     # Rewriting an already-current note is wasted work AND another pass over the series
     # graphic, so once a service date is written the remaining attempts stand down.
     service = sunday_from_subject(subject, when).date().isoformat()
-    already = STATE.read_text(encoding="utf-8").strip() if STATE.exists() else ""
-    if already == service and "--force" not in sys.argv[1:]:
+    if marker_says_current(already, service, when, text) and "--force" not in sys.argv[1:]:
         log(f"note already written for {service} -- nothing to do (pass --force to rewrite it).")
         return 0
+    if already.partition("|")[0] == service and "--force" not in sys.argv[1:]:
+        log(f"a newer outline for {service} arrived ({when:%a %b %d %H:%M}) -- republishing it")
 
     title = update_note(cfg["NOTE_ID"], subject, when, text)
     # update_note() can return normally without having changed anything (2026-10-11: its
@@ -1025,7 +1423,7 @@ def main():
     # done, so a silent miss exits non-zero (alert) and the next attempt retries.
     verify_title(cfg["NOTE_ID"], title)
     STATE.parent.mkdir(parents=True, exist_ok=True)
-    STATE.write_text(service, encoding="utf-8")
+    STATE.write_text(marker_value(service, when, text), encoding="utf-8")
     log(f'updated the shared Apple Note -> retitled "{title}" (service {service})')
     return 0
 
