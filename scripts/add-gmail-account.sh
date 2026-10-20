@@ -1,7 +1,8 @@
 #!/bin/bash
-# Add (or replace) a mailbox the sermon-notes job reads, e.g. dakota@arroyochurch.com.
+# Add (or replace) an extra Gmail mailbox for the sermon-notes job to read. Not in use: av@
+# is the only mailbox (2026-10-19 -- dakota@, the one this was written for, has no Gmail).
 #
-#   bash scripts/add-gmail-account.sh dakota@arroyochurch.com
+#   bash scripts/add-gmail-account.sh someone@arroyochurch.com
 #
 # You need a Google APP PASSWORD for that account (not its login password):
 # sign in as that account at https://myaccount.google.com/apppasswords (2-Step Verification

@@ -27,12 +27,16 @@ CONFIG -- ~/.config/arroyo/gmail.env (chmod 600, OUTSIDE the repo):
     SERMON_SENDER=josh@arroyochurch.com      # who sends the notes
     NOTE_ID=x-coredata://.../ICNote/pNNNN    # STABLE id of the note (title changes weekly)
     LOOKBACK_DAYS=8                          # optional; how far back to search
-  Optional extra mailboxes to read (2026-10-17: Josh sends the notes to dakota@ now):
-    GMAIL_USER_2=dakota@arroyochurch.com
+  Optional extra Gmail mailboxes to read (none configured; av@ is the only one):
+    GMAIL_USER_2=someone@arroyochurch.com
     GMAIL_APP_PASSWORD_2=xxxxxxxxxxxxxxxx
     GMAIL_MAILBOX_2=[Gmail]/All Mail         # default INBOX; All Mail still finds it once read/archived
-  Add one with `bash scripts/add-gmail-account.sh dakota@arroyochurch.com` -- it asks for
+  Add one with `bash scripts/add-gmail-account.sh someone@arroyochurch.com` -- it asks for
   the app password at a hidden prompt, tests the login, and writes these three lines.
+  Built 2026-10-17 to read dakota@, where Josh had been sending the notes. Dropped
+  2026-10-19: dakota@ has no Gmail to read, so Josh sends to av@ again. If an outline lands
+  in dakota@ anyway, forward it to av@ FROM dakota@ (forwards are unwrapped and dated by the
+  original; mail from outside @arroyochurch.com is ignored).
 
 SAFETY: the note is only ever rewritten when a matching email with a non-empty
 body is found. No email, or an empty one, means the note is left completely
@@ -93,10 +97,11 @@ def accounts(cfg):
     """Every mailbox to search: (user, app password, mailbox). The primary account is
     GMAIL_USER (av@, which also sends the failure alerts); GMAIL_USER_2, _3 ... add more.
 
-    Why more than one (2026-10-17): Josh sends the notes to dakota@arroyochurch.com, not
-    av@. Forwarding them by hand didn't work either: Apple Mail quotes the whole forward
-    with ">", and strip_reply() drops quoted text. So the script reads dakota@ directly.
-    av@ stays because guest preachers have sent there (Cristian, 2026-09-06)."""
+    Why more than one (2026-10-17): Josh was sending the notes to dakota@arroyochurch.com,
+    so this was built to read dakota@ directly. It was never connected -- dakota@ has no
+    Gmail -- so since 2026-10-19 Josh sends to av@ and av@ is the only mailbox. The rules
+    below that mention dakota@ still guard any extra mailbox added later. A copy that lands
+    elsewhere gets forwarded to av@ (unwrapped by strip_forward_header)."""
     out = [(cfg["GMAIL_USER"], cfg["GMAIL_APP_PASSWORD"], cfg.get("GMAIL_MAILBOX") or "INBOX")]
     n = 2
     while cfg.get(f"GMAIL_USER_{n}"):
@@ -205,7 +210,7 @@ def is_substantive(text, allow_slides=True):
 
     One citation used to be enough. That let a thread reply that mentions a verse ("the
     Ephesians 2:14 slide is ready") replace the outline -- the 9/12 failure -- and reading
-    dakota@'s mail (2026-10-17) puts every reply-all in Josh's thread in front of the job."""
+    any busy mailbox (dakota@ was planned 2026-10-17) puts every reply-all in front of the job."""
     text = text or ""
     if allow_slides and looks_like_slides(text):
         return True
@@ -395,7 +400,7 @@ def choose_candidate(candidates):
        (an outline sent early for Christmas Eve or for next week must not displace this one).
     2. Within the week: the newest ORIGINAL (not "Re:", not "Fwd:"); a newer "Re:" replaces it
        only when it is a real corrected outline (see _replaces) -- every reply-all in Josh's
-       thread reaches the job now that dakota@ is read, and a reply once replaced the outline
+       thread can reach the job (it did when Josh cc'd av@), and a reply once replaced the outline
        (9/12). With no original, a reply that opens like a correction, else a forward (Dakota's
        deliberate copy), else the newest reply."""
     qualified = []
