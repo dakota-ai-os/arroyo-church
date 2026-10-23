@@ -42,14 +42,25 @@ SAFETY: the note is only ever rewritten when a matching email with a non-empty
 body is found. No email, or an empty one, means the note is left completely
 alone -- it will never be blanked. The previous body is archived to
 ~/.config/arroyo/note-backups/ before every write.
+
+WEB COPY (2026-10-23): the same outline is also published as JSON to the PUBLIC site repo
+(data/sermon-notes/, served by GitHub Pages) so the website can show the notes -- Android and
+anyone else without the shared Note. The page holds each week back until Sunday 06:45 church
+time (release_at). It is written from a dedicated clone (see publish_web), never the working
+repo, and keeps its own marker, so the web copy and the Note stand down independently.
+WEB_NOTES=0 in gmail.env turns it off. `--web-only` publishes just the web copy (to seed the
+page, or after a hand fix); `--force` redoes both.
 """
 
 import email
 import email.utils
+import fcntl
 import html
 import imaplib
+import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -66,6 +77,8 @@ INSTRUCT_COLOR = "#AF52DE"   # Apple system purple; change here to restyle the n
 CONFIG = Path.home() / ".config" / "arroyo" / "gmail.env"
 BACKUPS = Path.home() / ".config" / "arroyo" / "note-backups"
 STATE = Path.home() / ".config" / "arroyo" / "last-written.txt"
+WEB_STATE = Path.home() / ".config" / "arroyo" / "web-published.txt"     # same format, web copy only
+OUTLINE_CACHE = Path.home() / ".config" / "arroyo" / "outline-cache.json"   # {version: KEY TAKEAWAY}
 
 # Exit code meaning "the GUI session was not usable; try again later." The runner treats
 # this as a quiet retry, NOT a failure, so a dark-wake attempt never raises an alarm.
@@ -327,6 +340,88 @@ def forward_sent_date(text):
     return None
 
 
+def forward_sender(text):
+    """Who wrote the FORWARDED message: the From: value ('Name <addr>') of the innermost
+    forwarded block, or None. Walks the same blocks strip_forward_header() unwraps, so the
+    author matches the content that gets published (Cristian's notes, forwarded by Josh,
+    forwarded by Dakota -> Cristian). A block with no From: line gives None: the forwarder
+    is never the author."""
+    text = (text or "").replace("\r\n", "\n").replace("\r", "\n")
+    sender = None
+    for _ in range(3):
+        m, quoted = GMAIL_FORWARD.search(text), False
+        if not m:
+            m, quoted = APPLE_FORWARD.search(text), True
+        if not m:
+            break
+        lines = text[m.end():].splitlines()
+        if quoted:
+            lines = [re.sub(r"^>[ \t]?", "", l) for l in lines]
+        i, sender = 0, None
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+        while i < len(lines) and lines[i].strip():            # the header block only
+            f = re.match(r"\s*From:\s*(.+)$", lines[i].replace("*", ""), re.I)   # Gmail may bold "*From:*"
+            if f:
+                sender = f.group(1).strip()
+                break
+            i += 1
+        text, _ = _unwrap_once(text)
+    return sender
+
+
+def original_sender(envelope_from, subject, body):
+    """The outline's author as a From value, or None. For a forward (Dakota forwards Josh's
+    mail to av@) that is the forwarded message's From: line, NOT the envelope -- otherwise
+    every forwarded week would be credited to Dakota."""
+    body = (body or "").replace("\r\n", "\n").replace("\r", "\n")
+    if GMAIL_FORWARD.search(body) or APPLE_FORWARD.search(body):
+        return forward_sender(body)
+    if FORWARD_SUBJECT.match(subject or ""):
+        return None                       # "Fwd:" with no readable block: author unknown
+    return envelope_from or None
+
+
+SPEAKERS = {"josh@arroyochurch.com": "Pastor Josh Smith"}          # address -> byline name
+# Josh by NAME too, from any address (a second church address, his own Gmail forwarded by Dakota):
+# without this the Note's byline would read "Josh Smith" where it has always read "Pastor Josh Smith".
+JOSH_NAMES = re.compile(r"^(?:pastor\s+)?josh(?:ua)?\s+smith$", re.I)
+_NAME_PARTICLES = {"de", "del", "della", "da", "di", "la", "le", "van", "von", "der", "den", "du", "dos", "das"}
+_NOT_A_PERSON = re.compile(r"\b(?:arroyo|church|av|office|team|staff|admin|info|media|ministry|ministries|"
+                           r"worship|pastors|support|noreply|no-reply|communications?)\b", re.I)
+
+
+def _name_word(w):
+    """One capitalised name word: "Cristian", "O'Neil", "J.", and any script -- "Jos\u00e9", "Zo\u00eb"
+    (an ASCII-only test dropped every guest with an accent in their name)."""
+    return w[:1].isalpha() and not w[:1].islower() and all(ch.isalpha() or ch in "'\u2019-." for ch in w)
+
+
+def speaker_for(sender):
+    """Byline name for a From value, or None.
+
+    Josh (his address, or the display name "Josh Smith") -> "Pastor Josh Smith". Anyone else ->
+    their display name when it reads like a person's name (2-4 capitalised words, e.g. "Cristian
+    Ayquipa"); a bare address, a first name alone or a mailbox name ("Arroyo AV") gives None --
+    the web page then shows no speaker rather than a wrong one, and the Note falls back to
+    Pastor Josh Smith."""
+    if not sender:
+        return None
+    name, addr = email.utils.parseaddr(sender)
+    if addr.lower() in SPEAKERS:
+        return SPEAKERS[addr.lower()]
+    words = " ".join(name.replace("*", "").split()).strip("\"' ").split()
+    if JOSH_NAMES.match(" ".join(words)):
+        return "Pastor Josh Smith"
+    if not 2 <= len(words) <= 4 or _NOT_A_PERSON.search(" ".join(words)):
+        return None
+    if not (_name_word(words[0]) and _name_word(words[-1])):
+        return None
+    if any(not _name_word(w) and w.lower() not in _NAME_PARTICLES for w in words[1:-1]):
+        return None
+    return " ".join(words)
+
+
 def strip_reply(text):
     """Drop quoted history so only what the sender newly wrote remains. Josh sends
     corrections as replies ("Disregard the first email..."), so the quoted original must
@@ -393,7 +488,9 @@ def _replaces(reply_text, base_text):
 
 
 def choose_candidate(candidates):
-    """Pick the email to publish from (datetime, subject, text) tuples, or None.
+    """Pick the email to publish from (datetime, subject, text, sender) tuples, or None.
+    Returns (subject, datetime, text, sender). The sender (the outline's author, see
+    original_sender) rides along at the END so older 3-tuples still work; it is then None.
 
     Only emails that carry an outline qualify. Then:
     1. The WEEK: the upcoming Sunday first, then the nearest earlier week, future weeks last
@@ -404,9 +501,10 @@ def choose_candidate(candidates):
        (9/12). With no original, a reply that opens like a correction, else a forward (Dakota's
        deliberate copy), else the newest reply."""
     qualified = []
-    for when, subject, text in sorted(candidates, key=lambda c: c[0], reverse=True):
+    for c in sorted(candidates, key=lambda c: c[0], reverse=True):
+        when, subject, text = c[:3]
         if text and looks_like_sermon(subject, text):
-            qualified.append((when, subject, text))
+            qualified.append((when, subject, text, c[3] if len(c) > 3 else None))
         else:
             log(f'skipping "{subject}" ({when:%a %b %d %H:%M}) -- {len(text or "")} chars with no '
                 f"sermon outline once quoted text is stripped")
@@ -433,14 +531,14 @@ def choose_candidate(candidates):
             pick = newer[0]
     else:
         pick = ([r for r in replies if _opens_with_correction(r[2])] or forwards or replies)[0]
-    when, subject, text = pick
-    return subject, when, text
+    when, subject, text, sender = pick
+    return subject, when, text, sender
 
 
 def fetch_latest(cfg):
     """Newest email within LOOKBACK_DAYS, across every configured mailbox, that is from an
     allowed sender, has an allowed subject AND actually carries an outline.
-    Returns (subject, date, text) or None.
+    Returns (subject, date, text, sender) or None.
 
     A mailbox that can't be read (wrong app password, IMAP off) is logged and skipped so the
     others still count -- but if nothing qualifies AND a mailbox failed, this raises, so the
@@ -473,7 +571,8 @@ def upcoming_sunday(now=None):
 
 
 def _fetch_mailbox(cfg, user, pw, mailbox, since, owners=(), strict_only=False):
-    """(datetime, subject, text) for every allowed-sender, allowed-subject email in one mailbox.
+    """(datetime, subject, text, sender) for every allowed-sender, allowed-subject email in one
+    mailbox. sender is the outline's author (original_sender), for the byline.
 
     strict_only (every mailbox after av@): only "sermon notes"/"sermon outline" subjects count.
     dakota@ is a busy inbox where loose words like "sermon" also hit mail such as a "November
@@ -543,7 +642,9 @@ def _fetch_mailbox(cfg, user, pw, mailbox, since, owners=(), strict_only=False):
             body = message_body(msg)
             # A forward is dated by the message it carries (Dakota may forward days later).
             when_c = (forward_sent_date(body) or when_h) if FORWARD_SUBJECT.match(subject) else when_h
-            parsed.append((when_c, subject, strip_reply(body)))
+            # ...and credited to the message it carries (the byline names the preacher).
+            sender = original_sender(str(make_header(decode_header(msg.get("From", "") or ""))), subject, body)
+            parsed.append((when_c, subject, strip_reply(body), sender))
     finally:
         for step in (M.close, M.logout):     # either can raise after a failed login
             try:
@@ -959,7 +1060,10 @@ def key_takeaway(title, body):
         return ""
     try:
         import anthropic
-        msg = anthropic.Anthropic(api_key=key).messages.create(
+        # Bounded (2026-10-23): this now runs before the GUI probe, so a dark wake waits on it.
+        # The SDK default is a 600s read timeout with 2 retries -- ~30 min that could swallow the
+        # next scheduled attempt (launchd never overlaps runs). One sentence takes seconds.
+        msg = anthropic.Anthropic(api_key=key, timeout=60, max_retries=1).messages.create(
             model="claude-opus-4-8", max_tokens=300,
             messages=[{"role": "user", "content":
                 "Write ONE sentence (max 40 words) summarising this sermon, in EXACTLY this "
@@ -1190,20 +1294,57 @@ def strip_markdown_emphasis(text):
     return "\n".join(re.sub(r"[ \t]{2,}", " ", l).rstrip() for l in text.splitlines())
 
 
-def update_note(note_id, subject, when, text):
-    """Refresh the shared note's text, leaving the series graphic untouched.
+# ── one parse, two outputs ───────────────────────────────────────────────────────────────
+# The same outline feeds the shared Note (update_note) and the web copy (publish_web), so it is
+# parsed ONCE into a plain dict. Block kinds: "main" (a numbered point), "subhead", "sub"
+# (consecutive subs are one ordered list), "quote" (scripture: the paragraph opens with a double
+# quote) and "para". The parsers emit "text" for the last two; update_note() always told them
+# apart by that opening quote, and build_outline() now records the same decision in the kind.
 
-    If the note has an image, only the text regions around it are replaced (via UI
-    selection + HTML paste) -- the graphic is never selected, so it is never moved,
-    re-created or lost. Dakota swaps the series banner by hand every few weeks and the
-    automation must not interfere with it.
+def outline_version(title, blocks):
+    """Fingerprint of the parsed outline (12 hex): changes whenever what readers see changes."""
+    raw = json.dumps([title, [list(b) for b in blocks]], ensure_ascii=False)
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
 
-    With no image present, fall back to a plain AppleScript body write.
-    """
-    esc = lambda x: html.escape(x, quote=False)
+
+def cached_takeaway(version, title, body):
+    """key_takeaway(), at most once per distinct outline.
+
+    The web copy can go out on Saturday and the Note on Sunday (a dark wake, a locked screen),
+    and the model words the sentence differently on every call -- the two would disagree. So
+    the sentence is kept by outline version (last ~10). An empty result (API down, sentence
+    rejected) is NOT cached, so a later run can still get one."""
+    try:
+        cache = json.loads(OUTLINE_CACHE.read_text(encoding="utf-8"))
+        cache = cache if isinstance(cache, dict) else {}
+    except (OSError, ValueError):
+        cache = {}
+    if cache.get(version):
+        log("KEY TAKEAWAY reused from the outline cache")
+        return cache[version]
+    out = key_takeaway(title, body)
+    if out:
+        cache.pop(version, None)
+        cache[version] = out                               # newest last; keep the last 10
+        try:
+            OUTLINE_CACHE.parent.mkdir(parents=True, exist_ok=True)
+            tmp = OUTLINE_CACHE.with_suffix(".tmp")
+            tmp.write_text(json.dumps(dict(list(cache.items())[-10:]), ensure_ascii=False, indent=1),
+                           encoding="utf-8")
+            tmp.replace(OUTLINE_CACHE)
+        except OSError as e:
+            log(f"WARNING: could not save the outline cache ({e})")
+    return out
+
+
+def build_outline(subject, when, text, sender=None):
+    """Parse an outline email ONCE into what both the Note and the web copy render:
+    {"title", "service" (a date), "blocks" [(kind, text)], "takeaway" ("" when none),
+     "speaker" (or None), "format" ("outline" | "slides"), "version"}."""
     text = strip_markdown_emphasis(text)
 
-    if looks_like_slides(text):
+    slides = looks_like_slides(text)
+    if slides:
         log("body looks like a guest slide deck -- using the slide parser")
         title, blocks = parse_slides(text)
     else:
@@ -1213,13 +1354,37 @@ def update_note(note_id, subject, when, text):
         else:
             log("no 'N.' markers -- using the unnumbered-outline parser")
             blocks = parse_unnumbered(rest)
-    service = sunday_from_subject(subject, when)
+    service = sunday_from_subject(subject, when).date()
     straighten = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
-    takeaway = key_takeaway(title, "\n".join(v for _, v in blocks))
-    log(f'title="{title}"  service={service:%Y-%m-%d}  takeaway={"yes" if takeaway else "no"}')
+    blocks = [(("quote" if v.lstrip().startswith('"') else "para") if k == "text" else k, v) for k, v in blocks]
+    version = outline_version(title, blocks)
+    takeaway = cached_takeaway(version, title, "\n".join(v for _, v in blocks))
+    speaker = speaker_for(sender)
+    log(f'title="{title}"  service={service:%Y-%m-%d}  speaker={speaker or "unknown"}  '
+        f'takeaway={"yes" if takeaway else "no"}')
+    return {"title": title, "service": service, "blocks": blocks, "takeaway": takeaway,
+            "speaker": speaker, "format": "slides" if slides else "outline", "version": version}
 
-    byline = f"Pastor Josh Smith | {service:%B} {ordinal(service.day)}, {service:%Y}"
+
+def update_note(note_id, outline):
+    """Refresh the shared note's text from build_outline()'s dict, leaving the series graphic
+    untouched.
+
+    If the note has an image, only the text regions around it are replaced (via UI
+    selection + HTML paste) -- the graphic is never selected, so it is never moved,
+    re-created or lost. Dakota swaps the series banner by hand every few weeks and the
+    automation must not interfere with it.
+
+    With no image present, fall back to a plain AppleScript body write.
+    """
+    esc = lambda x: html.escape(x, quote=False)
+    title, blocks, takeaway = outline["title"], outline["blocks"], outline["takeaway"]
+    service = outline["service"]
+
+    # The preacher when the email says who it is (a guest); otherwise Josh, as it always read.
+    byline = (f"{outline.get('speaker') or 'Pastor Josh Smith'} | "
+              f"{service:%B} {ordinal(service.day)}, {service:%Y}")
     instruct = ("*To save and edit this note, click on the share button at the top, press "
                 "“copy” then, create a new note and paste the text into your new note")
 
@@ -1288,14 +1453,14 @@ def update_note(note_id, subject, when, text):
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
         elif kind == "subhead":
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
-        elif val.lstrip().startswith('"'):
+        elif kind == "quote":
             # Scripture: indent it so quotes read as distinct from Josh's teaching. Notes
             # only honours indentation it can model as a list (<blockquote> is silently
             # flattened to a plain div), so use a bulleted list. Consecutive verses are
             # grouped into ONE block so they read together, with a single blank line after.
+            # ("quote" = a paragraph opening with a double quote; build_outline decides.)
             quotes = []
-            while i < len(blocks) and blocks[i][0] not in ("main", "subhead", "sub") \
-                    and blocks[i][1].lstrip().startswith('"'):
+            while i < len(blocks) and blocks[i][0] == "quote":
                 quotes.append(blocks[i][1]); i += 1
             parts.append("".join(f"<div>{esc(q)}</div>" for q in quotes) + "<div><br></div>")
             parts.append("<div><br></div>")
@@ -1373,25 +1538,328 @@ def verify_title(note_id, title, tries=5):
     raise RuntimeError(f'write not confirmed: the note is titled "{name}", expected "{title}"')
 
 
+# ── web copy ─────────────────────────────────────────────────────────────────────────────
+# The website shows the notes too. Each week is published as JSON to the PUBLIC site repo,
+# which GitHub Pages serves (with Access-Control-Allow-Origin: *) at WEB_BASE:
+#   index.json        {"updated", "weeks": [{service, title, speaker, release_at, file}]}
+#                     newest service first, one entry per service date, max 52
+#   <service>.json    {service, title, speaker, release_at, published_at, takeaway, format,
+#                      version, blocks: [{kind, text}]}
+# The field names are a contract with the page -- do not rename them. The page shows a week
+# only from its release_at (Sunday 06:45 church time), so publishing on Saturday is fine.
+
+WEB_BASE = "https://dakota-ai-os.github.io/arroyo-church/data/sermon-notes/"
+PUBLISH_DIR = Path.home() / "Library" / "Application Support" / "arroyo" / "notes-publish"
+PUBLISH_REMOTE = "git@github.com:dakota-ai-os/arroyo-church.git"
+PUBLISH_SSH = "ssh -i /Users/dakotayates/.ssh/dakota_ai_os -o IdentitiesOnly=yes"   # the working repo's key
+NOTES_SUBDIR = "data/sermon-notes"
+WORKING_REPO = Path(__file__).resolve().parent.parent
+MAX_WEEKS = 52
+
+
+def web_enabled(cfg):
+    """WEB_NOTES=0 in gmail.env turns the web copy off. Default on."""
+    return str(cfg.get("WEB_NOTES", "1")).strip().lower() not in ("0", "false", "no", "off")
+
+
+def release_at(service):
+    """When a week goes public: 06:45 church time on its service date, with that day's
+    offset (PDT in July, PST in November -- zoneinfo picks it)."""
+    return datetime(service.year, service.month, service.day, 6, 45, tzinfo=CHURCH_TZ).isoformat()
+
+
+SIG_DELIM = re.compile(r"^--(?:\s|$)")                                      # "-- " signature delimiter
+SIG_END = re.compile(r"^(?:Sent from my\b|Get Outlook for\b)", re.I)        # mail-app footers
+PHONE = re.compile(r"(?<!\d)(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]\d{4}(?!\d)")
+EMAIL_ADDR = re.compile(r"[\w.+\-]+@[\w\-]+(?:\.[\w\-]+)+")
+
+
+def public_blocks(blocks):
+    """The blocks that may go into the PUBLIC repo, where git history keeps them for good.
+
+    Everything after the title reaches the outline, sign-off included, and the Note has always
+    shown that (it can be edited by hand; public history needs a rewrite). So for the web only:
+    stop at a '-- ' signature delimiter or a 'Sent from my iPhone' footer, and drop any block
+    carrying a phone number or an email address (a signature the forward/reply stripping
+    missed). Each drop is logged by name. The Note keeps rendering the full blocks unchanged."""
+    masked = lambda t: EMAIL_ADDR.sub("[email]", PHONE.sub("[phone]", t))[:80]   # not into the log either
+    out = []
+    for kind, text in blocks:
+        t = text.strip()
+        if (SIG_DELIM.match(t) and not SCRIPTURE_ANYWHERE.search(t)) or SIG_END.match(t):
+            log(f"WARNING: web copy stops at a signature/footer block: {masked(t)!r}")
+            break
+        if PHONE.search(t) or EMAIL_ADDR.search(t):
+            log(f"WARNING: web copy drops a block with a phone number or email address: {masked(t)!r}")
+            continue
+        out.append((kind, text))
+    return out
+
+
+def week_doc(outline, published_at):
+    """One week's <service>.json, in contract order."""
+    return {"service": outline["service"].isoformat(), "title": outline["title"],
+            "speaker": outline["speaker"], "release_at": release_at(outline["service"]),
+            "published_at": published_at, "takeaway": outline["takeaway"] or None,
+            "format": outline["format"], "version": outline["version"],
+            "blocks": [{"kind": k, "text": t} for k, t in public_blocks(outline["blocks"])]}
+
+
+def index_entry(doc):
+    return {"service": doc["service"], "title": doc.get("title"), "speaker": doc.get("speaker"),
+            "release_at": doc.get("release_at"), "file": f"{doc['service']}.json"}
+
+
+def merge_index(index, entry, cap=MAX_WEEKS):
+    """The index's weeks with `entry` in: one per service date (a republished week replaces
+    its old entry), newest first, at most `cap`."""
+    weeks = [w for w in (index or {}).get("weeks") or []
+             if isinstance(w, dict) and w.get("service") and w["service"] != entry["service"]]
+    return sorted(weeks + [entry], key=lambda w: w["service"], reverse=True)[:cap]
+
+
+def _read_json(path):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def write_week_files(outline, out_dir, now=None):
+    """Write <service>.json and merge it into index.json, both in out_dir (the index is read
+    from out_dir, i.e. the publish clone -- never the network). Returns True if either changed.
+
+    Republishing an identical outline (a --force, a lost marker) keeps the old timestamps, so
+    the files come out byte-identical and there is nothing to commit."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = (now or datetime.now(CHURCH_TZ)).isoformat(timespec="seconds")
+    week_path, index_path = out_dir / f"{outline['service'].isoformat()}.json", out_dir / "index.json"
+
+    doc = week_doc(outline, stamp)
+    old = _read_json(week_path)
+    if isinstance(old, dict) and {k: v for k, v in old.items() if k != "published_at"} == \
+            {k: v for k, v in doc.items() if k != "published_at"}:
+        doc["published_at"] = old.get("published_at") or stamp
+
+    index = _read_json(index_path)
+    if not isinstance(index, dict) or not isinstance(index.get("weeks"), list):
+        # Missing or hand-broken: rebuild from the week files rather than drop every older week.
+        if index_path.exists():
+            log("WARNING: index.json is unreadable -- rebuilding it from the week files")
+        index = {"weeks": [index_entry(d) for d in map(_read_json, sorted(out_dir.glob("????-??-??.json")))
+                           if isinstance(d, dict) and d.get("service")]}
+    weeks = merge_index(index, index_entry(doc))
+    new_index = {"updated": index.get("updated") if weeks == index["weeks"] and index.get("updated") else stamp,
+                 "weeks": weeks}
+
+    changed = False
+    for path, data in ((week_path, doc), (index_path, new_index)):
+        out = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+        if not path.exists() or path.read_text(encoding="utf-8") != out:
+            path.write_text(out, encoding="utf-8")
+            changed = True
+    return changed
+
+
+def _git(args, cwd=None, timeout=60):
+    """git in the PUBLISH clone -- never the working repo. Raises with git's own message.
+    GIT_CEILING_DIRECTORIES stops git from walking up to some other repo if the clone is
+    missing; stdin is closed and prompts are off, so nothing can wait for a human."""
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_CEILING_DIRECTORIES=str(PUBLISH_DIR.parent))
+    r = subprocess.run(["git", *args], cwd=str(cwd or PUBLISH_DIR), env=env, capture_output=True,
+                       text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    if r.returncode != 0:
+        raise RuntimeError(f"git {args[0]} failed ({r.returncode}): {' '.join((r.stderr or r.stdout).split())[:300]}")
+    return r.stdout
+
+
+def _check_publish_path():
+    target = PUBLISH_DIR.resolve()
+    if target == WORKING_REPO or WORKING_REPO in target.parents:
+        raise RuntimeError(f"refusing to publish from {PUBLISH_DIR}: it is inside the working repo")
+
+
+def _discard_clone():
+    """Throw the publish clone away so the next _ensure_clone() starts fresh. It holds nothing
+    of value -- every attempt hard-resets it to origin/main -- but the path is still checked.
+    Renamed first, then deleted: a run killed mid-delete leaves a stray '.discard' folder
+    (swept next time), never a half-deleted clone at PUBLISH_DIR."""
+    _check_publish_path()
+    if PUBLISH_DIR.resolve().name != "notes-publish":
+        raise RuntimeError(f"refusing to delete {PUBLISH_DIR}: not the publish clone")
+    trash = PUBLISH_DIR.with_name(PUBLISH_DIR.name + ".discard")
+    shutil.rmtree(trash, ignore_errors=True)
+    if PUBLISH_DIR.exists():
+        PUBLISH_DIR.rename(trash)
+    shutil.rmtree(trash, ignore_errors=True)
+
+
+def _sweep_stale_locks(max_age=600):
+    """Delete git *.lock files left in the clone by a git that was killed. subprocess.run's
+    timeout SIGKILLs git, so it never removes its own index.lock / ref locks, and every later
+    git call would then fail with 'File exists' -- forever, on an unattended job. publish_web
+    holds the notes-publish.lock flock, so no other publish is using the clone; the age test
+    only spares a lock that an orphaned child of a just-killed git might still be writing."""
+    cutoff = time.time() - max_age
+    for lock in (PUBLISH_DIR / ".git").rglob("*.lock"):
+        try:
+            if lock.is_file() and lock.stat().st_mtime < cutoff:
+                lock.unlink()
+                log(f"WARNING: removed a stale git lock from the publish clone: {lock.relative_to(PUBLISH_DIR)}")
+        except OSError:
+            pass
+
+
+def _ensure_clone():
+    """The dedicated publish clone, created on first use (shallow; it only ever needs the tip).
+    A clone too broken to name its remote is thrown away and cloned again; one that names a
+    DIFFERENT remote is refused (something else is using the folder -- a human should look)."""
+    _check_publish_path()
+    shutil.rmtree(PUBLISH_DIR.with_name(PUBLISH_DIR.name + ".discard"), ignore_errors=True)
+    if PUBLISH_DIR.is_dir() and not (PUBLISH_DIR / ".git").exists() and not any(PUBLISH_DIR.iterdir()):
+        PUBLISH_DIR.rmdir()                                   # a clone killed before it began
+    if (PUBLISH_DIR / ".git").is_dir():
+        _sweep_stale_locks()
+        try:
+            url = _git(["remote", "get-url", "origin"]).strip()
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            log(f"WARNING: the publish clone is broken ({e}) -- discarding it and cloning again")
+            _discard_clone()
+    if not (PUBLISH_DIR / ".git").is_dir():
+        if PUBLISH_DIR.exists():
+            raise RuntimeError(f"{PUBLISH_DIR} exists but is not a git clone -- move it aside and re-run")
+        PUBLISH_DIR.parent.mkdir(parents=True, exist_ok=True)
+        log(f"creating the publish clone at {PUBLISH_DIR}")
+        _git(["clone", "--depth", "1", "--branch", "main", "--config", f"core.sshCommand={PUBLISH_SSH}",
+              PUBLISH_REMOTE, str(PUBLISH_DIR)], cwd=PUBLISH_DIR.parent, timeout=300)
+        url = _git(["remote", "get-url", "origin"]).strip()
+    if url != PUBLISH_REMOTE:
+        raise RuntimeError(f"the publish clone points at {url!r}, not {PUBLISH_REMOTE}")
+    _git(["config", "core.sshCommand", PUBLISH_SSH])
+
+
+# How long publish_web may keep STARTING attempts. A run that is still busy when the next
+# launchd slot comes round makes launchd skip that slot (Sunday's are 75 and 60 min apart, and
+# 09:00 is the last-chance alert), so a stuck publish gives up and leaves it to the next attempt.
+PUBLISH_BUDGET = 8 * 60
+
+
+def publish_web(outline, cfg):
+    """Publish one week to the website. Returns True when a commit was pushed, False when the
+    site already had exactly this (or WEB_NOTES=0). Raises when it could not publish.
+
+    Runs in a DEDICATED clone (PUBLISH_DIR), never the working repo: the working copy holds
+    Dakota's uncommitted work, and an unattended job must never commit or reset that. The
+    clone is ours alone (a flock on notes-publish.lock keeps a hand-run --web-only out of a
+    scheduled run's way), so every attempt starts from a hard reset to origin/main. The daily
+    YouTube-sync Action also commits to main; a push it beat is rejected -- refetch, rewrite
+    the files on top of its commit, and retry (3 attempts). Any OTHER git failure before the push means the clone itself
+    is damaged (a lock or a half-written ref from a killed git): it is thrown away and cloned
+    again, once per run, so the web copy never stays broken until someone fixes it by hand."""
+    if not web_enabled(cfg):
+        log("WEB_NOTES=0 in gmail.env -- web copy not published")
+        return False
+    _check_publish_path()
+    PUBLISH_DIR.parent.mkdir(parents=True, exist_ok=True)
+    with open(PUBLISH_DIR.with_name(PUBLISH_DIR.name + ".lock"), "w") as held:
+        try:
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)   # released when we exit, even if killed
+        except OSError:
+            raise RuntimeError("another publish is using the clone right now -- the next attempt retries")
+        return _publish_locked(outline)
+
+
+def _publish_locked(outline):
+    _ensure_clone()
+    svc = outline["service"].isoformat()
+    deadline = time.monotonic() + PUBLISH_BUDGET
+    attempt, recloned = 0, False
+    while True:
+        if time.monotonic() > deadline:
+            raise RuntimeError(f"still not published after {PUBLISH_BUDGET // 60} min -- giving up; "
+                               f"the next attempt retries")
+        step = "fetch"
+        try:
+            _git(["fetch", "--depth", "1", "origin", "+main:refs/remotes/origin/main"], timeout=120)
+            step = "prepare"
+            _git(["reset", "--hard", "origin/main"])
+            _git(["clean", "-fdq", "--", NOTES_SUBDIR])          # leftovers of a run that died mid-write
+            write_week_files(outline, PUBLISH_DIR / NOTES_SUBDIR)
+            _git(["add", "--", NOTES_SUBDIR])
+            if not _git(["status", "--porcelain", "--", NOTES_SUBDIR]).strip():
+                log(f"web copy for {svc} is already on the site -- nothing to push")
+                return False
+            _git(["commit", "-q", "-m", f"Sermon notes {svc}: {outline['title']}", "--", NOTES_SUBDIR])
+        except (RuntimeError, subprocess.TimeoutExpired, OSError) as e:
+            # A fetch that TIMED OUT is the network, not the clone: a fresh clone would only
+            # time out too. Anything else gets one fresh clone before the run gives up.
+            if recloned or (step == "fetch" and isinstance(e, subprocess.TimeoutExpired)):
+                raise
+            log(f"WARNING: git failed in the publish clone ({e}) -- discarding it and cloning again")
+            _discard_clone()
+            _ensure_clone()
+            recloned = True
+            continue
+        attempt += 1
+        try:
+            _git(["push", "origin", "HEAD:main"], timeout=120)
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            log(f"WARNING: push failed, attempt {attempt}/3 ({e})")
+            if attempt == 3:
+                raise
+            time.sleep(5 * attempt)
+            continue
+        log(f"web copy published: {WEB_BASE}{svc}.json (public {release_at(outline['service'])})")
+        return True
+
+
+def _mark_web_published(service, when, text, outline, final=False):
+    """Record the web copy as done -- unless it went out WITHOUT a KEY TAKEAWAY (API down, or
+    a sentence takeaway_problem() rejected). Then the marker is held back, so the next attempt
+    rebuilds the outline, asks again (empty results are never cached) and republishes once a
+    sentence exists; until then the republish is byte-identical and commits nothing. Otherwise
+    a later Note write could get a sentence the web copy never would. `final`: the last
+    attempt of the week marks it regardless -- nothing retries after it."""
+    if not outline["takeaway"] and not final:
+        log(f"WARNING: the web copy for {service} has no KEY TAKEAWAY yet -- not marked done, "
+            f"so the next attempt retries it")
+        return
+    WEB_STATE.parent.mkdir(parents=True, exist_ok=True)
+    WEB_STATE.write_text(marker_value(service, when, text), encoding="utf-8")
+
+
+def church_now():
+    return datetime.now(CHURCH_TZ)
+
+
 def main():
     cfg = load_config()
-
-    # Probe BEFORE touching the network so a dark-wake attempt costs ~0.2s and says so
-    # plainly, instead of hanging for minutes and then failing somewhere in Notes.
-    not_ready = gui_session_ready()
-    if not_ready:
-        log(f"GUI session not usable: {not_ready}")
-        log("skipping this attempt without touching the note; a later attempt will retry.")
-        return EX_TEMPFAIL
+    args = sys.argv[1:]
+    force, web_only = "--force" in args, "--web-only" in args
+    web_on = web_enabled(cfg)
+    now = church_now()
+    last_chance = now.weekday() == 6 and now.hour >= 9 and not web_only   # the Sunday 09:00 attempt
 
     log(f"looking for mail from {'/'.join(allowed_senders(cfg))} "
         f"subject~{'|'.join(allowed_subjects(cfg))} (last {cfg['LOOKBACK_DAYS']} days)")
 
-    found = fetch_latest(cfg)
+    # The mail is read BEFORE the GUI probe (2026-10-23). The probe used to come first so a
+    # dark wake cost ~0.2s, but the web copy needs no GUI, and a dark wake has the network
+    # (the IMAP fetch succeeded in every 8/23-9/6 failure) -- so it can still publish the web
+    # copy. A mail failure during a dark wake keeps the quiet 75 it always had (the probe
+    # used to exit before the fetch), except on the last attempt, which nothing retries.
+    try:
+        found = fetch_latest(cfg)
+    except Exception:
+        not_ready = None if (web_only or last_chance) else gui_session_ready()
+        if not_ready:
+            log(f"GUI session not usable: {not_ready}")
+            log("the mail could not be read either -- skipping this attempt; a later attempt will retry.")
+            return EX_TEMPFAIL
+        raise
     up = upcoming_sunday()
     already = STATE.read_text(encoding="utf-8").strip() if STATE.exists() else ""
-    now = datetime.now(CHURCH_TZ)
-    last_chance = now.weekday() == 6 and now.hour >= 9          # the Sunday 09:00 attempt
     found_svc = sunday_from_subject(found[0], found[1]).date() if found else None
     if last_chance and already.partition("|")[0] != up.isoformat() and found_svc != up:
         # Exit non-zero so the runner emails an alert instead of leaving last week's note up.
@@ -1400,29 +1868,82 @@ def main():
     if not found:
         log("no matching sermon-notes email found -- leaving the note untouched.")
         return 0
-    if found_svc < up:
+    if found_svc < up and not web_only:
         # The note is for the coming service; republishing an older week never helps.
         log(f'newest outline is for {found_svc} ("{found[0]}"), not {up} -- leaving the note untouched.')
         return 0
 
-    subject, when, text = found
+    subject, when, text, sender = found
     if not looks_like_sermon(subject, text):
         log(f'found "{subject}" but it cites no scripture and the subject is not an '
             f"explicit sermon-notes one -- treating it as unrelated, note left untouched.")
         return 0
     log(f'found "{subject}" ({when:%a %b %d %H:%M}) -- {len(text)} chars')
+    service = found_svc.isoformat()
+
+    if web_only:
+        # Seeding the page, or re-publishing after a hand fix: the web copy only, for the newest
+        # outline even if its Sunday has passed. No GUI probe, no Note, no Note marker.
+        if not web_on:
+            log("WEB_NOTES=0 in gmail.env -- web publishing is off; nothing published.")
+            return 1
+        outline = build_outline(subject, when, text, sender)
+        publish_web(outline, cfg)
+        _mark_web_published(service, when, text, outline)
+        return 0
 
     # Several attempts are scheduled per week so a single bad wake cannot lose the Sunday.
     # Rewriting an already-current note is wasted work AND another pass over the series
-    # graphic, so once a service date is written the remaining attempts stand down.
-    service = sunday_from_subject(subject, when).date().isoformat()
-    if marker_says_current(already, service, when, text) and "--force" not in sys.argv[1:]:
-        log(f"note already written for {service} -- nothing to do (pass --force to rewrite it).")
+    # graphic, so once a service date is written the remaining attempts stand down. The web
+    # copy keeps its own marker: a dark wake can publish it while the Note waits for a GUI.
+    note_done = not force and marker_says_current(already, service, when, text)
+    web_mark = WEB_STATE.read_text(encoding="utf-8").strip() if WEB_STATE.exists() else ""
+    web_done = not web_on or (not force and marker_says_current(web_mark, service, when, text))
+    if note_done and web_done:
+        log(f"note{' and web copy' if web_on else ''} already written for {service} -- nothing to do "
+            f"(pass --force to rewrite).")
         return 0
-    if already.partition("|")[0] == service and "--force" not in sys.argv[1:]:
+
+    outline = build_outline(subject, when, text, sender)
+
+    web_failed = None
+    if not web_on:
+        log("WEB_NOTES=0 in gmail.env -- web copy skipped")
+    elif web_done:
+        log(f"web copy already published for {service}")
+    else:
+        try:
+            publish_web(outline, cfg)
+            _mark_web_published(service, when, text, outline, final=last_chance)
+        except Exception as e:
+            # Never blocks the Note: log it, carry on, and fail the run at the end.
+            web_failed = f"{type(e).__name__}: {e}"
+            log(f"ERROR: the web copy was NOT published for {service} -- {web_failed}")
+
+    if note_done:
+        log(f"note already written for {service} -- nothing to do for the note (pass --force to rewrite it).")
+        return 1 if web_failed else 0
+
+    not_ready = gui_session_ready()
+    if not_ready:
+        log(f"GUI session not usable: {not_ready}")
+        log("skipping the note without touching it; a later attempt will retry.")
+        # Exit code when the web copy ALSO failed (decided 2026-10-23): 75 means "nothing went
+        # wrong that a later attempt won't redo", and the next attempt does retry the web copy
+        # (its marker was not written) -- so it stays a quiet 75, logged loudly above, and a
+        # failure that persists alerts on the first attempt that has a GUI. The Sunday 09:00
+        # attempt is the last one: nothing retries after it, so there it exits 1 and alerts.
+        if web_failed and last_chance:
+            log("this was the last attempt of the week and the web copy failed -- exiting 1 to alert")
+            return 1
+        if web_failed:
+            log("the web copy failed too -- the next attempt retries both (quiet retry)")
+        return EX_TEMPFAIL
+
+    if already.partition("|")[0] == service and not force:
         log(f"a newer outline for {service} arrived ({when:%a %b %d %H:%M}) -- republishing it")
 
-    title = update_note(cfg["NOTE_ID"], subject, when, text)
+    title = update_note(cfg["NOTE_ID"], outline)
     # update_note() can return normally without having changed anything (2026-10-11: its
     # keystrokes went to the note list). Read the note back before recording the week as
     # done, so a silent miss exits non-zero (alert) and the next attempt retries.
@@ -1430,6 +1951,9 @@ def main():
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(marker_value(service, when, text), encoding="utf-8")
     log(f'updated the shared Apple Note -> retitled "{title}" (service {service})')
+    if web_failed:
+        log("the note is written, but the web copy FAILED (see the ERROR above) -- exiting 1 to alert")
+        return 1
     return 0
 
 

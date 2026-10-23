@@ -39,7 +39,9 @@
  *        10558274 "I want to talk to a pastor"   (exists in PC; deliberately unused here)
  *   "Join a Connect Group"   9567985 -> value = option id (only with next-step "join a group")
  *        10558346 Couples Mon 7p · 10558347 Men Tue 6:30p · 10558348 Women Wed 6p
- *        10558349 Moms · 10558350 RecConnect · 10558351 Young Adults Thu 7p · 10558352 Students
+ *        10558349 Moms · 10558350 RecConnect · 10558351 Young Adults Fri 7p · 10558352 Students (= Youth)
+ *        11609936 Young Families · 12006914 Every Man A Warrior · 12006915 Seniors · 12006916 San Ramon
+ *        (last four read from the live public form 2026-10-23; data/groups.json is the site's list)
  *   "Which team"             9568011 -> value = option id (only with next-step "start serving")
  *        Option ids UNCONFIRMED — TEAM_OPTIONS below is a placeholder whitelist; the
  *        front end does NOT send team yet. Confirm ids in PC, then enable the picker.
@@ -64,7 +66,11 @@ const NEXT_STEP_SERVE = "10558273"; // "I want to start serving"
 // free-text message there by design) but IS used by the /connect Questions-&-Prayer form, which
 // replaced a native Squarespace form that only ever emailed.
 const VALID_NEXT_STEPS = new Set(["10625856","10558271","10558272","10558273","10648022","10558274"]);
-const GROUP_OPTIONS = new Set(["10558346","10558347","10558348","10558349","10558350","10558351","10558352"]);
+// 11609936 + 12006914/15/16 added to PC 2026-10-23 (Young Families existed; EMAW, Seniors, San Ramon new).
+// NOT DEPLOYED YET: wrangler on Dakota's Mac was logged into another Cloudflare account. After the next
+// `npx wrangler deploy`, add the same ids to AC_WORKER_GROUPS in footer-injection.html.
+const GROUP_OPTIONS = new Set(["10558346","10558347","10558348","10558349","10558350","10558351","10558352",
+                               "11609936","12006914","12006915","12006916"]);
 // CONFIRMED 2026-07-22 against the live form (these were previously an unverified placeholder).
 const TEAM_OPTIONS = new Set(["10558402","10558403","10558404","10558405","10558406"]);
 

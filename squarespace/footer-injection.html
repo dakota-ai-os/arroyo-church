@@ -98,6 +98,9 @@ html.ac-hero-on.ac-scrolled .header-title-logo img{max-height:34px!important}
 .ac-cd .cd-live{display:none;font-family:'Fraunces',serif;font-size:clamp(1.4rem,3vw,2rem);line-height:1.6;color:#E3BD6A}
 .ac-cd .cd-live-btn{display:inline-flex;align-items:center;gap:.45rem;margin-left:.5rem;padding:.4rem 1rem;border-radius:999px;background:linear-gradient(135deg,#e3bd6a,#c89a3e);color:#0a161c;font-family:'Manrope',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;vertical-align:middle;white-space:nowrap;box-shadow:0 8px 24px -8px rgba(200,154,62,.55);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}
 .ac-cd .cd-live-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px -8px rgba(200,154,62,.7)}
+/* "Sermon notes" ghost pill beside Watch Live (live window only); same height as the gold pill */
+.ac-cd .cd-notes-btn{display:inline-flex;align-items:center;margin-left:.5rem;padding:calc(.4rem - 1.5px) calc(1rem - 1.5px);border-radius:999px;border:1.5px solid rgba(255,255,255,.45);color:#fff;font-family:'Manrope',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;vertical-align:middle;white-space:nowrap;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .3s,background .3s}
+.ac-cd .cd-notes-btn:hover{transform:translateY(-2px);border-color:#7fd0e0;background:rgba(95,194,212,.12)}
 .ac-cd .cd-live-dot{width:8px;height:8px;border-radius:50%;background:#e23b3b;box-shadow:0 0 0 0 rgba(226,59,59,.6);animation:cdLivePulse 1.6s infinite}
 @keyframes cdLivePulse{0%{box-shadow:0 0 0 0 rgba(226,59,59,.6)}70%{box-shadow:0 0 0 8px rgba(226,59,59,0)}100%{box-shadow:0 0 0 0 rgba(226,59,59,0)}}
 .ac-cd .cd-where{font-size:.92rem;color:rgba(238,246,247,.7)}
@@ -360,6 +363,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .yt-side .yt .play{width:52px;height:38px;border-radius:10px}
 .yt-side .yt .play::after{border-width:7px 0 7px 12px}
 .sermons-cta{margin-top:2.6rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+.sermons-cta .btn svg{width:18px;height:18px;flex:0 0 auto}
 /* minmax(0,…) not 1fr: the 16:9 .browse-tile's min-content (text wrapped a word per line → tall → wide) is ~408px, which made a 1fr track push the home page to 424px wide on a 375px phone */
 @media (max-width:920px){.sermon-grid{grid-template-columns:minmax(0,1fr)}.yt-side{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.yt-side{grid-template-columns:minmax(0,1fr)}}
@@ -388,7 +392,38 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .jg-wrap .visit-form{margin-top:0}
 .jg-ts{margin:1.3rem 0 .2rem;min-height:65px}
 #ac-jg-toggle{cursor:pointer}
+.connect-ctas{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
 @media (max-width:920px){.connect-grid{grid-template-columns:1fr}.ministries{grid-template-columns:1fr}}
+/* CONNECT GROUPS DIRECTORY (/connect; cards built from data/groups.json by buildGroupDirectory) */
+#ac-groups{background:#f6f1e6;color:#16242b;padding:clamp(4rem,9vh,7rem) 0}
+#ac-groups .eyebrow{color:#1f6b7c}
+#ac-groups .gr-head{max-width:62ch;margin:0 0 2.6rem}
+#ac-groups .gr-head .lead{color:rgba(22,36,43,.66);margin:1.1rem 0 0}
+/* minmax(0,…) not 1fr, so a long word or schedule can never widen the page on a phone (see the 2026-09-28 overflow fix) */
+.gr-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem}
+.gr-grid:empty{display:none}
+@media (min-width:700px){.gr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1040px){.gr-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* entrance uses fill-mode BACKWARDS only: a forwards/both fill would pin transform and kill the hover lift */
+.gr-card{display:flex;flex-direction:column;gap:.85rem;background:#fff;border-radius:20px;padding:1.8rem 1.6rem;border:1px solid rgba(22,36,43,.08);box-shadow:0 8px 20px -14px rgba(22,36,43,.2);transition:transform .35s,box-shadow .35s;animation:acRise .6s cubic-bezier(.16,1,.3,1) backwards;animation-delay:var(--d,0s)}
+.gr-card:hover{transform:translateY(-5px);box-shadow:0 22px 40px -18px rgba(22,36,43,.3)}
+.gr-card .gr-photo{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px}
+.gr-card .gr-aud{margin:0 0 -.45rem;font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#1f6b7c}
+.gr-card h3{font-family:'Fraunces',Georgia,serif;font-weight:520;font-size:1.3rem;line-height:1.2;margin:0;color:#16242b}
+.gr-card .gr-desc{font-size:.93rem;line-height:1.6;color:rgba(22,36,43,.66);margin:0}
+.gr-meta{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.gr-meta li{display:flex;gap:.7rem;align-items:flex-start;margin:0;padding:0;font-size:.94rem;line-height:1.45;color:#16242b}
+.gr-meta li::before{content:none}
+.gr-meta .gr-ic{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.16));color:#2e8fa3}
+.gr-meta .gr-ic svg{width:16px;height:16px}
+.gr-meta li>span:last-child{min-width:0;padding-top:.28rem}
+.gr-meta .gr-freq{display:block;margin-top:.2rem;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1f6b7c}
+.gr-meta .gr-ask{color:rgba(22,36,43,.66)}
+.gr-card .gr-join{margin-top:auto;align-self:flex-start}
+.gr-foot{margin:2rem 0 0;font-size:.98rem;color:rgba(22,36,43,.66)}
+.gr-foot .gr-help{background:none;border:0;padding:0;font:inherit;font-weight:700;color:#1f6b7c;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.gr-foot .gr-help:hover{color:#0d2530}
+@media (prefers-reduced-motion:reduce){.gr-card{animation:none}}
 /* GIVE */
 #ac-give{background:#0d2530;color:#eef6f7;padding:clamp(5rem,11vh,9rem) 0;overflow:hidden}
 #ac-give .eyebrow{color:#e3bd6a}
@@ -719,6 +754,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(h.indexOf('tel:')===0) acTrack('call',{event_name:'call_click'});
     else if(h.indexOf('google.com/maps/dir')>-1) acTrack('directions',{event_name:'directions_click'});
     else if(h.indexOf('youtube.com/@arroyochurch/live')>-1) acTrack('watch_live',{event_name:'watch_live_click'});
+    /* Sermon Notes page (links.arroyochurch.com/notes/); data-notes-src says which link: home sermons row, countdown live window, footer */
+    else if(h.indexOf('links.arroyochurch.com/notes')>-1) acTrack(a.getAttribute('data-notes-src')||'sermon_notes',{event_name:'sermon_notes_click'});
   },true);
 
   /* ---- custom cursor ---- */
@@ -789,7 +826,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         '<div class="cd-unit"><div class="cd-num" id="ac-cd-m">&ndash;</div><div class="cd-word">Minutes</div></div>'+
         '<div class="cd-unit"><div class="cd-num" id="ac-cd-s">&ndash;</div><div class="cd-word">Seconds</div></div>'+
       '</div>'+
-      '<div class="cd-live" id="ac-cd-live">We&rsquo;re worshiping right now &mdash; join us in person, or <a class="cd-live-btn" href="https://www.youtube.com/@arroyochurch/live" target="_blank" rel="noopener"><span class="cd-live-dot"></span>Watch Live</a></div>'+
+      '<div class="cd-live" id="ac-cd-live">We&rsquo;re worshiping right now &mdash; join us in person, or <a class="cd-live-btn" href="https://www.youtube.com/@arroyochurch/live" target="_blank" rel="noopener"><span class="cd-live-dot"></span>Watch Live</a><a class="cd-notes-btn" href="https://links.arroyochurch.com/notes/" data-notes-src="sermon_notes_live">Sermon notes</a></div>'+
       '<span class="cd-where">Sundays <strong>10:00 AM</strong> &middot; the round building at <strong>945 Concannon Blvd</strong></span>';
     hero.parentNode.insertBefore(sec, hero.nextSibling);
     startCountdown();
@@ -957,7 +994,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     foot.innerHTML='<div class="wrap"><div class="foot-grid">'+
       '<div class="foot-brand"><img src="https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/d0643920-775c-4c1f-945b-9a8771e757cf/logo-black.png?format=500w" alt="Arroyo Church logo"><p>Knowing and showing the love of Jesus in the Bay Area and beyond.</p><div class="socials">'+fb+ig+yt+'</div></div>'+
       '<div><h3>Visit</h3><ul><li><a href="/plan-your-visit">945 Concannon Blvd<br>Livermore, CA 94550</a></li><li><a href="/plan-your-visit">Sundays &middot; 10:00 AM</a></li></ul></div>'+
-      '<div><h3>Explore</h3><ul><li><a href="/about">About</a></li><li><a href="/team">Team</a></li><li><a href="/about">Beliefs</a></li><li><a href="/messages">Sermons</a></li><li><a href="/connect">Connect</a></li><li><a href="/give">Give</a></li></ul></div>'+
+      '<div><h3>Explore</h3><ul><li><a href="/about">About</a></li><li><a href="/team">Team</a></li><li><a href="/about">Beliefs</a></li><li><a href="/messages">Sermons</a></li><li><a href="https://links.arroyochurch.com/notes/" data-notes-src="sermon_notes_footer">Sermon Notes</a></li><li><a href="/connect">Connect</a></li><li><a href="/give">Give</a></li></ul></div>'+
       '<div><h3>Contact</h3><ul><li><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a></li><li><a href="tel:+19256940426">(925) 694-0426</a></li></ul></div>'+
       '</div><div class="foot-bottom"><span>&copy; 2026 Arroyo Church &middot; Livermore, CA</span><span>&ldquo;I will make a way in the wilderness and rivers in the desert.&rdquo; &mdash; Isaiah 43:19</span></div></div>';
     if(nf && nf.parentNode){ nf.parentNode.insertBefore(foot, nf.nextSibling); } else { document.body.appendChild(foot); }
@@ -979,6 +1016,54 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       body.addEventListener('transitionend',function(){ if(item.classList.contains('open')) body.style.maxHeight='none'; });
     });
   }
+  /* instant scroll to an element; the site's html{scroll-behavior:smooth!important} makes a plain scrollTo no-op (same move as go()/wireScrollLinks) */
+  function acJumpTo(el){ if(!el) return; var de=document.documentElement; de.style.setProperty('scroll-behavior','auto','important'); window.scrollTo(0, el.getBoundingClientRect().top+(window.scrollY||de.scrollTop)-72-evBarH()); }
+  /* ---- CONNECT GROUPS: ONE list for every group picker + the /connect directory (2026-10-23) ----
+     The group <select> used to be hand-copied into three forms (home Join a Group, /connect-group,
+     /connect-tag) and had drifted from Planning Center (7 of its 11 groups, some wrong times). The only
+     list now is data/groups.json in this repo (GitHub Pages, CORS *): edit it + push, and every picker and
+     the /connect cards follow within ~10 minutes. If the fetch fails, a picker just keeps "Not sure yet"
+     and its form still submits. */
+  var AC_GROUPS_URL='https://dakota-ai-os.github.io/arroyo-church/data/groups.json', acGroupsP=null;
+  var AC_GROUP_NONE='Not sure yet &mdash; help me find one';
+  /* Mirror of GROUP_OPTIONS in squarespace/arroyo-connect-worker.js (~line 67). The Worker silently DROPS any
+     other group id, so only these are sent as `group`; any other pick (Young Families 11609936, the groups with
+     no PC option yet) reaches staff through the "Group: <name>" message line alone. Add an id here only AFTER
+     it is in the Worker's list AND the Worker is redeployed. */
+  var AC_WORKER_GROUPS=['10558346','10558347','10558348','10558349','10558350','10558351','10558352'];
+  function acEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  /* fetched at most once per page view; the cache-bust changes every 10 minutes so the browser cache still helps */
+  function acLoadGroups(){
+    if(!acGroupsP) acGroupsP=fetch(AC_GROUPS_URL+'?cb='+Math.floor(Date.now()/6e5))
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ var gs=(d&&Array.isArray(d.groups))?d.groups.filter(function(g){ return g&&g.slug&&g.name&&g.show!==false; }):[]; return gs.length?gs:null; })
+      .catch(function(){ return null; });
+    return acGroupsP;
+  }
+  function acGroupValue(g){ return g.pcOption?String(g.pcOption):'slug:'+g.slug; } /* the PC form option id when PC has one; otherwise a slug token the Worker ignores */
+  function acGroupSelectHtml(){ return '<select name="group"><option value="">'+AC_GROUP_NONE+'</option></select>'; }
+  /* fill any group <select> from groups.json (keeps the current pick); a schedule's "(nickname)" shows on the /connect cards but is trimmed here.
+     A non-weekly frequency is appended ("…, monthly (2nd Sunday)"): the home + /connect-tag pickers have no cards, so the label is all a visitor sees. */
+  function acFillGroupSelect(sel){
+    return acLoadGroups().then(function(gs){
+      if(!sel||!gs) return gs;
+      var keep=sel.value, h='<option value="">'+AC_GROUP_NONE+'</option>';
+      gs.forEach(function(g){ var s=(g.schedule||'').replace(/\s*\([^)]*\)/g,'').trim(), f=String(g.frequency||'').trim();
+        if(f && !/^weekly$/i.test(f)){ f=f.charAt(0).toLowerCase()+f.slice(1); s=s?s+', '+f:f; }
+        h+='<option value="'+acEsc(acGroupValue(g))+'" data-name="'+acEsc(g.name)+'">'+acEsc(g.name)+(s?' &mdash; '+acEsc(s):'')+'</option>'; });
+      sel.innerHTML=h;
+      if(keep){ sel.value=keep; if(sel.selectedIndex<0) sel.selectedIndex=0; }
+      return gs;
+    });
+  }
+  /* what a join form submits for its picker: `id` only when the Worker accepts it, plus a "Group: <name>" line
+     that goes FIRST in the message (the Worker passes message through to PC field 9630046), so staff always see the choice */
+  function acGroupPick(sel){
+    var v=sel?sel.value:'', o=(sel&&sel.selectedIndex>-1)?sel.options[sel.selectedIndex]:null;
+    var name=v?((o&&(o.getAttribute('data-name')||o.textContent))||v):'Not sure yet';
+    return {id:AC_WORKER_GROUPS.indexOf(v)>-1?v:'', line:'Group: '+name};
+  }
+  function acWithGroupLine(pick,msg){ msg=String(msg||'').trim(); return pick.line+(msg?'\n\n'+msg:''); }
   /* ---- beliefs + values (home section) ---- */
   function buildBeliefsValues(){
     if(!HOME()) return;
@@ -1053,7 +1138,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var sP=seriesPanel({series:{title:'Transformational Stories',blurb:'A new message every Sunday.',playlistUrl:'https://www.youtube.com/playlist?list=PLSIHs6mCX_TU'},videos:[{id:'mHu9Aa-JtsM',title:'Forgiving Despite Your Feelings'}]});
     var pP=podcastPanel({playlistUrl:'https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX',videos:[{id:'RGFj3CopCQ0',title:'Pastor Asks College Students About Jesus'},{id:'-nED4vgUEI8',title:'What does the Bible really say about the end times?'},{id:'dn509_C_j8A',title:'Do lukewarm Christians go to heaven?'},{id:'1casv_QOmrc',title:'Answering Hard Questions Part Two'}]});
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-sermons';
-    sec.innerHTML='<div class="wrap"><div class="sermon-head"><div><p class="eyebrow ac-rev">Sermons</p><h2 class="h2 ac-rev">Missed a Sunday? <em>Catch up</em> anytime.</h2></div><p class="ac-rev">Stay connected with our latest sermons and podcasts &mdash; streamed every week on YouTube.</p></div><div class="sermon-tabs ac-rev" role="tablist"><button class="stab" id="stab-series" role="tab" aria-selected="true">Current Series</button><button class="stab" id="stab-podcast" role="tab" aria-selected="false">Arroyo Podcast</button></div><div class="sermon-panel active" id="spanel-series">'+sP+'</div><div class="sermon-panel" id="spanel-podcast">'+pP+'</div><div class="sermons-cta ac-rev"><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch on YouTube</a><span style="color:rgba(238,246,247,.66);font-size:.92rem">New messages every week &middot; youtube.com/@arroyochurch</span></div></div>';
+    sec.innerHTML='<div class="wrap"><div class="sermon-head"><div><p class="eyebrow ac-rev">Sermons</p><h2 class="h2 ac-rev">Missed a Sunday? <em>Catch up</em> anytime.</h2></div><p class="ac-rev">Stay connected with our latest sermons and podcasts &mdash; streamed every week on YouTube.</p></div><div class="sermon-tabs ac-rev" role="tablist"><button class="stab" id="stab-series" role="tab" aria-selected="true">Current Series</button><button class="stab" id="stab-podcast" role="tab" aria-selected="false">Arroyo Podcast</button></div><div class="sermon-panel active" id="spanel-series">'+sP+'</div><div class="sermon-panel" id="spanel-podcast">'+pP+'</div><div class="sermons-cta ac-rev"><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch on YouTube</a><a class="btn btn-ghost" href="https://links.arroyochurch.com/notes/" data-notes-src="sermon_notes_home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Sermon Notes</a><span style="color:rgba(238,246,247,.66);font-size:.92rem">New messages every week &middot; youtube.com/@arroyochurch</span></div></div>';
     anchor.parentNode.insertBefore(sec, anchor.nextSibling);
     var tS=sec.querySelector('#stab-series'),tP=sec.querySelector('#stab-podcast'),qS=sec.querySelector('#spanel-series'),qP=sec.querySelector('#spanel-podcast');
     function tab(ser){ tS.setAttribute('aria-selected',String(ser)); tP.setAttribute('aria-selected',String(!ser)); qS.classList.toggle('active',ser); qP.classList.toggle('active',!ser); }
@@ -1099,28 +1184,36 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var i3='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21C12 21 4 14.5 4 9.5C4 6.5 6.5 4 9.5 4C10.9 4 12 4.8 12 4.8C12 4.8 13.1 4 14.5 4C17.5 4 20 6.5 20 9.5C20 14.5 12 21 12 21Z"/></svg>';
     var mins='<div class="min-card ac-rev"><div class="ic">'+i1+'</div><h3>Connect Groups</h3><p>Weeknight groups across the Tri-Valley to discuss Sunday&rsquo;s message, pray together, and do life together.</p></div><div class="min-card ac-rev"><div class="ic">'+i2+'</div><h3>Children&rsquo;s Ministry</h3><p>Every Sunday, nursery through 5th grade &mdash; a safe and fun environment for your kids to learn about Jesus.</p></div><div class="min-card ac-rev"><div class="ic">'+i3+'</div><h3>Women&rsquo;s Ministry</h3><p>Gatherings and community for women in every season of life, led by our Women&rsquo;s Ministry team.</p></div>';
     if(!document.getElementById('ac-ts-script')){var tss=document.createElement('script');tss.id='ac-ts-script';tss.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';tss.async=true;tss.defer=true;document.head.appendChild(tss);}
-    var jgForm='<div class="jg-wrap" id="ac-jg-wrap"><div><div class="visit-form" id="ac-jg-form"><div class="vf-head"><p class="eyebrow">Join a Connect Group</p><h3>Tell us a bit about you</h3><p class="vf-sub">We&rsquo;ll connect you with a group leader to help you take your next step &mdash; takes about 30 seconds.</p></div><form novalidate><input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><div class="vf-grid"><label class="vf-field"><span>First name *</span><input type="text" name="first" required autocomplete="given-name"></label><label class="vf-field"><span>Last name *</span><input type="text" name="last" required autocomplete="family-name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone *</span><input type="tel" name="phone" required autocomplete="tel"></label><label class="vf-field vf-full"><span>Which group interests you?</span><select name="group"><option value="">Not sure yet &mdash; help me find one</option><option value="10558346">Couples &mdash; Mondays 7pm</option><option value="10558347">Men &mdash; Tuesdays 6:30pm</option><option value="10558348">Women &mdash; Wednesdays 6pm</option><option value="10558349">Moms &mdash; monthly, Sundays after church</option><option value="10558350">RecConnect &mdash; various times</option><option value="10558351">Young Adults &mdash; Fridays 7pm</option><option value="10558352">Students</option></select></label><label class="vf-field vf-full"><span>Anything we should know? (optional)</span><textarea name="message" rows="3"></textarea></label></div><div id="ac-jg-turnstile" class="jg-ts"></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-river">Request to join</button><button type="button" class="btn btn-ghost-dark" id="ac-jg-cancel">Cancel</button></div></form></div></div></div>';
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-connect';
-    sec.innerHTML='<div class="wrap"><div class="connect-grid"><div class="connect-photo ac-rev"><img src="https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/f52a08fb-45fd-4b58-bfb0-064a4acad7ca/503251240_17970029975899813_3744320071993253638_n.jpg?format=1500w" alt="A connect group gathering at Arroyo Church" loading="lazy"></div><div class="connect-copy"><p class="eyebrow ac-rev">Connect groups</p><h2 class="h2 ac-rev">You were created for <em>community.</em></h2><p class="lead ac-rev">At Arroyo we offer a variety of connect groups during the week so you can continue to stay connected with others and grow in your faith. We take time to discuss how Sunday&rsquo;s message applies to our lives, pray for one another, and have a lot of fun &mdash; and sometimes eat a lot of food too.</p><button type="button" class="btn btn-river ac-rev" id="ac-jg-toggle" aria-expanded="false" aria-controls="ac-jg-wrap">Join a Group</button></div></div>'+jgForm+'<div class="ministries">'+mins+'</div><div class="prayer-band ac-rev"><div><h3>Got questions or need prayer?</h3><p>If you have any questions about the church or have any prayer requests, we would love to hear from you.</p></div><a class="btn btn-gold" href="/#ac-visit-form" data-ac-scroll>Send a Message</a></div></div>';
+    sec.innerHTML='<div class="wrap"><div class="connect-grid"><div class="connect-photo ac-rev"><img src="https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/f52a08fb-45fd-4b58-bfb0-064a4acad7ca/503251240_17970029975899813_3744320071993253638_n.jpg?format=1500w" alt="A connect group gathering at Arroyo Church" loading="lazy"></div><div class="connect-copy"><p class="eyebrow ac-rev">Connect groups</p><h2 class="h2 ac-rev">You were created for <em>community.</em></h2><p class="lead ac-rev">At Arroyo we offer a variety of connect groups during the week so you can continue to stay connected with others and grow in your faith. We take time to discuss how Sunday&rsquo;s message applies to our lives, pray for one another, and have a lot of fun &mdash; and sometimes eat a lot of food too.</p><div class="connect-ctas ac-rev"><button type="button" class="btn btn-river" id="ac-jg-toggle" aria-expanded="false" aria-controls="ac-jg-wrap">Join a Group</button><a class="btn btn-ghost-dark" href="/connect#ac-groups">Meet the groups</a></div></div></div>'+joinFormHtml()+'<div class="ministries">'+mins+'</div><div class="prayer-band ac-rev"><div><h3>Got questions or need prayer?</h3><p>If you have any questions about the church or have any prayer requests, we would love to hear from you.</p></div><a class="btn btn-gold" href="/#ac-visit-form" data-ac-scroll>Send a Message</a></div></div>';
     anchor.parentNode.insertBefore(sec, anchor.nextSibling);
-    wireJoinForm(sec);
+    wireJoinForm(sec,'join_group');
   }
-  /* ---- join-a-group: expand-on-click form -> Cloudflare Worker -> Planning Center ---- */
-  function wireJoinForm(sec){
+  /* ---- join-a-group form card: ONE markup + ONE wiring, shared by the home Connect section (source join_group,
+     opened by #ac-jg-toggle) and the /connect directory (source connect_group, opened from each group card). ---- */
+  function joinFormHtml(){
+    return '<div class="jg-wrap" id="ac-jg-wrap"><div><div class="visit-form" id="ac-jg-form"><div class="vf-head"><p class="eyebrow">Join a Connect Group</p><h3>Tell us a bit about you</h3><p class="vf-sub">We&rsquo;ll connect you with a group leader to help you take your next step &mdash; takes about 30 seconds.</p></div><form novalidate><input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><div class="vf-grid"><label class="vf-field"><span>First name *</span><input type="text" name="first" required autocomplete="given-name"></label><label class="vf-field"><span>Last name *</span><input type="text" name="last" required autocomplete="family-name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone *</span><input type="tel" name="phone" required autocomplete="tel"></label><label class="vf-field vf-full"><span>Which group interests you?</span>'+acGroupSelectHtml()+'</label><label class="vf-field vf-full"><span>Anything we should know? (optional)</span><textarea name="message" rows="3"></textarea></label></div><div id="ac-jg-turnstile" class="jg-ts"></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-river">Request to join</button><button type="button" class="btn btn-ghost-dark" id="ac-jg-cancel">Cancel</button></div></form></div></div></div>';
+  }
+  /* ---- join-a-group: expand-on-click form -> Cloudflare Worker -> Planning Center ----
+     Returns {open(groupValue)} so /connect can open it with a group already picked (null if the markup is missing). */
+  function wireJoinForm(sec, source){
     var KEY='0x4AAAAAADo6c47j8dehqH9-', WORKER='https://arroyo-connect.dakota-fac.workers.dev';
     var toggle=sec.querySelector('#ac-jg-toggle'), wrap=sec.querySelector('#ac-jg-wrap'), card=sec.querySelector('#ac-jg-form');
-    if(!toggle||!wrap||!card) return;
-    var form=card.querySelector('form'), tsId=null, pendingSubmit=false, tsWaitTimer=null;
+    if(!wrap||!card) return null; /* toggle is optional: on /connect the group cards open the form */
+    var form=card.querySelector('form'), sel=form.querySelector('select[name=group]'), tsId=null, pendingSubmit=false, tsWaitTimer=null;
+    var formParts=[].slice.call(card.childNodes), submitLabel=form.querySelector('button[type=submit]').textContent; /* kept so open() can bring the form back after the thank-you */
+    acFillGroupSelect(sel);
     function renderTs(){ if(tsId!==null) return; if(window.turnstile){ try{ tsId=window.turnstile.render('#ac-jg-turnstile',{sitekey:KEY,callback:function(tok){ if(pendingSubmit){ pendingSubmit=false; doSubmit(tok); } }}); }catch(e){} } else { setTimeout(renderTs,300); } }
-    function openForm(){ wrap.classList.add('open'); toggle.setAttribute('aria-expanded','true'); renderTs(); setTimeout(function(){ card.scrollIntoView({block:'center'}); var f=card.querySelector('input[name=first]'); if(f) f.focus(); },220); }
-    function closeForm(){ wrap.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
-    toggle.addEventListener('click',function(){ wrap.classList.contains('open')?closeForm():openForm(); });
+    function openForm(){ wrap.classList.add('open'); if(toggle) toggle.setAttribute('aria-expanded','true'); renderTs(); setTimeout(function(){ card.scrollIntoView({block:'center'}); var f=card.querySelector('input[name=first]'); if(f) f.focus(); },220); }
+    function closeForm(){ wrap.classList.remove('open'); if(toggle) toggle.setAttribute('aria-expanded','false'); }
+    if(toggle) toggle.addEventListener('click',function(){ wrap.classList.contains('open')?closeForm():openForm(); });
     var cancel=card.querySelector('#ac-jg-cancel'); if(cancel) cancel.addEventListener('click',closeForm);
     function doSubmit(token){
       clearTimeout(tsWaitTimer);
       var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
       var btn=form.querySelector('button[type=submit]'), orig=btn.getAttribute('data-orig')||btn.textContent; btn.disabled=true; btn.textContent='Sending…';
-      var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; data.source='join_group'; data.intents=['group']; /* explicit next-step contract; worker also has a {group}-only fallback */
+      var data={}; new FormData(form).forEach(function(v,k){ data[k]=v; }); data.turnstileToken=token; data.nextSteps=['10558272']; data.source=source||'join_group'; data.intents=['group']; /* explicit next-step contract; worker also has a {group}-only fallback */
+      var gp=acGroupPick(sel); data.group=gp.id; data.message=acWithGroupLine(gp,data.message); /* id only if the Worker accepts it; the name always (see AC_WORKER_GROUPS) */
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
         .then(function(r){ return r.json(); })
         .then(function(j){ if(j&&j.success){ acTrack(data.source); var name=(data.first||'').trim();
@@ -1134,6 +1227,23 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):''; /* best-effort; never blocks (see connect-tag note) */
       doSubmit(token);
     });
+    /* after a sign-up the card shows the thank-you; a later "Join this group" puts the same form back (contact
+       details kept, message cleared, fresh Turnstile) so it never re-shows a confirmation for a request not sent */
+    function restoreForm(){
+      card.innerHTML=''; formParts.forEach(function(n){ card.appendChild(n); });
+      var btn=form.querySelector('button[type=submit]'); btn.disabled=false; btn.textContent=submitLabel;
+      var m=form.querySelector('textarea[name=message]'); if(m) m.value='';
+      var err=form.querySelector('.vf-err'); if(err) err.textContent='';
+      if(window.turnstile&&tsId!==null){ try{ window.turnstile.remove(tsId); }catch(e){} } tsId=null; /* open() re-renders it */
+    }
+    /* /connect: open with `val` picked ('' = Not sure yet) and land the form just under the header */
+    return { open:function(val){
+      if(!card.contains(form)) restoreForm();
+      if(sel){ sel.value=val||''; if(sel.selectedIndex<0) sel.selectedIndex=0; }
+      wrap.classList.add('open'); if(toggle) toggle.setAttribute('aria-expanded','true'); renderTs();
+      setTimeout(function(){ acJumpTo(wrap); },60);
+      setTimeout(function(){ var f=card.querySelector('input[name=first]'); if(f){ try{ f.focus({preventScroll:true}); }catch(e){} } },600); /* after the .55s expand */
+    } };
   }
   /* ---- CONNECT CLASS (home section, before Connect Groups) -> Worker -> Planning Center (next-step 10558271) ---- */
   function buildConnectClass(){
@@ -1193,6 +1303,59 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var token=(window.turnstile&&tsId!==null)?window.turnstile.getResponse(tsId):''; /* best-effort; never blocks (see connect-tag note) */
       doSubmit(token);
     });
+  }
+  /* ---- /connect: "Find your group" directory (2026-10-23). One card per group in data/groups.json (the same list
+     every group picker uses); "Join this group" opens the ONE shared Join-a-Group form under the grid with that
+     group picked, posting as source `connect_group`. /connect is SEO-protected, so this only ADDS a section after
+     the native Connect Groups intro. The native "JOIN A GROUP" button (a Church Center modal link) stays, but now
+     jumps here instead of opening PC form 1206123 in a modal. ---- */
+  function buildGroupDirectory(){
+    if(!pageIs('/connect')||document.getElementById('ac-groups')) return;
+    var nativeJoin=document.querySelector('a[href*="churchcenter.com/people/forms/1206123"]');
+    var intro=(nativeJoin&&nativeJoin.closest('.page-section'))||document.querySelector('[data-section-id="68a4f6703fdf866a9a4f73af"]');
+    if(!intro||!intro.parentNode) return;
+    if(!document.getElementById('ac-ts-script')){var tss=document.createElement('script');tss.id='ac-ts-script';tss.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';tss.async=true;tss.defer=true;document.head.appendChild(tss);}
+    var icClock='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>';
+    var icLead='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.7 3.6-5.6 7-5.6s6.2 1.9 7 5.6"/></svg>';
+    var icPin='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+    /* every field but name is optional: no description/audience = no line, no schedule = an invitation to ask, no location = omitted */
+    function card(g,i){
+      var when=g.schedule?acEsc(g.schedule)+(g.frequency?'<span class="gr-freq">'+acEsc(g.frequency)+'</span>':''):'<span class="gr-ask">Ask us about the next gathering</span>';
+      return '<article class="gr-card" style="--d:'+(Math.min(i,8)*0.05).toFixed(2)+'s">'
+        +(g.photo?'<img class="gr-photo" src="'+acEsc(g.photo)+'" alt="" loading="lazy">':'')
+        +(g.audience?'<p class="gr-aud">'+acEsc(g.audience)+'</p>':'')
+        +'<h3>'+acEsc(g.name)+'</h3>'
+        +(g.description?'<p class="gr-desc">'+acEsc(g.description)+'</p>':'')
+        +'<ul class="gr-meta"><li><span class="gr-ic">'+icClock+'</span><span>'+when+'</span></li>'
+        +(g.leader?'<li><span class="gr-ic">'+icLead+'</span><span>Led by '+acEsc(g.leader)+'</span></li>':'')
+        +(g.location?'<li><span class="gr-ic">'+icPin+'</span><span>'+acEsc(g.location)+'</span></li>':'')
+        +'</ul><button type="button" class="btn btn-river gr-join" data-group="'+acEsc(acGroupValue(g))+'">Join this group<span class="ac-sronly">: '+acEsc(g.name)+'</span></button></article>';
+    }
+    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-groups'; sec.setAttribute('aria-labelledby','ac-groups-h');
+    sec.innerHTML='<div class="wrap"><div class="gr-head"><p class="eyebrow ac-rev">Connect groups</p><h2 class="h2 ac-rev" id="ac-groups-h">Find your <em>group.</em></h2><p class="lead ac-rev">Every group talks through Sunday&rsquo;s message, prays for one another, and does life together. Pick one that fits your week &mdash; or tell us you&rsquo;re not sure and we&rsquo;ll help you find one.</p></div>'
+      +'<div class="gr-grid"></div><p class="gr-foot"><span class="gr-foot-t">Not sure which one fits?</span> <button type="button" class="gr-help">We&rsquo;ll help you find one &rarr;</button></p>'+joinFormHtml()+'</div>';
+    intro.parentNode.insertBefore(sec, intro.nextSibling);
+    var jf=wireJoinForm(sec,'connect_group'), grid=sec.querySelector('.gr-grid');
+    sec.querySelector('.gr-help').addEventListener('click',function(){ if(jf) jf.open(''); });
+    grid.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.gr-join'); if(b&&jf) jf.open(b.getAttribute('data-group')); });
+    /* wireJoinForm registered its select fill on this same promise first, so the options exist before any card can be clicked */
+    acLoadGroups().then(function(gs){
+      if(gs){ grid.innerHTML=gs.map(card).join(''); }
+      else { var t=sec.querySelector('.gr-foot-t'); if(t) t.textContent='We couldn’t load the group list just now, but we’d still love to get you connected.'; }
+    });
+    /* the native "JOIN A GROUP" button: a plain link + Church Center's modal (a window click listener keyed on
+       data-open-in-church-center-modal). Point it here instead; the button itself stays. */
+    if(nativeJoin&&!nativeJoin.getAttribute('data-ac-groups')){
+      nativeJoin.setAttribute('data-ac-groups','1'); nativeJoin.removeAttribute('data-open-in-church-center-modal'); nativeJoin.setAttribute('href','#ac-groups');
+      nativeJoin.addEventListener('click',function(e){ e.preventDefault(); acJumpTo(sec); });
+    }
+    /* arriving at /connect#ac-groups (the home "Meet the groups" link): wireNav's hash jump fires at 500ms; repeat
+       it once the native images above have loaded, unless the visitor has already scrolled somewhere else */
+    if(location.hash==='#ac-groups'){
+      var grFirst=null;
+      var grJump=function(){ var de=document.documentElement; if(grFirst!==null && Math.abs((window.scrollY||de.scrollTop)-grFirst)>160) return; acJumpTo(sec); grFirst=window.scrollY||de.scrollTop; };
+      setTimeout(grJump,650); setTimeout(grJump,1500);
+    }
   }
   /* ---- GIVE (home section) ---- */
   function buildGive(){
@@ -1364,7 +1527,6 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
      The page, its URL and its copy are untouched, so nothing changes for SEO. */
   function buildPCForms(){
     var WORKER='https://arroyo-connect.dakota-fac.workers.dev';
-    var groupOpts='<option value="">Not sure yet &mdash; help me find one</option><option value="10558346">Couples &mdash; Mondays 7pm</option><option value="10558347">Men &mdash; Tuesdays 6:30pm</option><option value="10558348">Women &mdash; Wednesdays 6pm</option><option value="10558349">Moms &mdash; monthly, Sundays after church</option><option value="10558350">RecConnect &mdash; various times</option><option value="10558351">Young Adults &mdash; Fridays 7pm</option><option value="10558352">Students</option>';
     var CFG=[
       { col:'collection-68b73abd14d0c1662b105409', id:'ac-ns-form', src:'next_steps',
         eyebrow:'Next steps', h:'Take your next step', sub:'Tell us where you&rsquo;re at and someone from our team will reach out this week.',
@@ -1391,7 +1553,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         for(var i=0;i<c.steps.length;i++) stepsHtml+='<label><input type="checkbox" name="nextSteps" value="'+c.steps[i][0]+'" data-intent="'+c.steps[i][1]+'">'+c.steps[i][2]+'</label>';
         stepsHtml+='</div></div>';
       }
-      var groupHtml=c.group?'<label class="vf-field vf-full"><span>Which group interests you?</span><select name="group">'+groupOpts+'</select></label>':'';
+      var groupHtml=c.group?'<label class="vf-field vf-full"><span>Which group interests you?</span>'+acGroupSelectHtml()+'</label>':''; /* options come from data/groups.json */
       var wrap=document.createElement('div');
       wrap.className='visit-form ac-rev'; wrap.id=c.id; wrap.style.margin='0 auto'; wrap.style.maxWidth='680px';
       wrap.innerHTML='<div class="vf-head"><p class="eyebrow">'+c.eyebrow+'</p><h3 tabindex="-1">'+c.h+'</h3><p class="vf-sub">'+c.sub+'</p></div>'
@@ -1408,7 +1570,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         +'<div class="vf-actions"><button type="submit" class="btn btn-gold">'+c.btn+'</button></div></form>';
       block.style.display='none';
       block.parentNode.insertBefore(wrap, block);
-      var form=wrap.querySelector('form');
+      var form=wrap.querySelector('form'), gSel=form.querySelector('select[name=group]');
+      if(gSel) acFillGroupSelect(gSel);
       form.addEventListener('submit',function(e){ e.preventDefault();
         if(!form.checkValidity()){ form.reportValidity(); return; }
         var err=form.querySelector('.vf-err'); if(err) err.textContent='';
@@ -1418,7 +1581,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         var intents=[].slice.call(form.querySelectorAll('input[name=nextSteps]:checked')).map(function(x){return x.getAttribute('data-intent');}).filter(Boolean);
         if(c.src==='connect_group'){ steps=['10558272']; intents=['group']; }
         if(c.src==='prayer'){ steps=['10558274']; intents=['pastor']; }
-        var data={source:c.src,first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:c.group?(fd.get('group')||''):'',nextSteps:steps,intents:intents,team:[],website:fd.get('website')||''};
+        var gp=c.group?acGroupPick(gSel):null, msg=(fd.get('message')||'').trim(); /* group id only if the Worker accepts it; the name always leads the message */
+        var data={source:c.src,first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:gp?acWithGroupLine(gp,msg):msg,group:gp?gp.id:'',nextSteps:steps,intents:intents,team:[],website:fd.get('website')||''};
         fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
           .then(function(r){ return r.json(); })
           .then(function(j){ if(j&&j.success){ acTrack(data.source);
@@ -1441,7 +1605,6 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(!document.getElementById('ac-ts-script')){var tss=document.createElement('script');tss.id='ac-ts-script';tss.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';tss.async=true;tss.defer=true;document.head.appendChild(tss);}
     /* forward the chair-tap attribution onto the Give route-out */
     var giveURL=(function(){ var u='https://donate.overflow.co/arroyochurch/cash'; try{ var p=new URLSearchParams(location.search), q=[]; if(p.get('utm_source'))q.push('utm_source='+encodeURIComponent(p.get('utm_source'))); if(p.get('tap_device_id'))q.push('tap_device_id='+encodeURIComponent(p.get('tap_device_id'))); if(q.length)u+='?'+q.join('&'); }catch(e){} return u; })();
-    var groupOpts='<option value="">Not sure yet &mdash; help me find one</option><option value="10558346">Couples &mdash; Mondays 7pm</option><option value="10558347">Men &mdash; Tuesdays 6:30pm</option><option value="10558348">Women &mdash; Wednesdays 6pm</option><option value="10558349">Moms &mdash; monthly, Sundays after church</option><option value="10558350">RecConnect &mdash; various times</option><option value="10558351">Young Adults &mdash; Fridays 7pm</option><option value="10558352">Students</option>';
     var icSpark='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 5.6L19 10l-5.3 1.4L12 17l-1.7-5.6L5 10l5.3-1.4z"/></svg>';
     var icNew='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8.5 14.5a4.5 4.5 0 007 0"/></svg>';
     var icPray='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.7-7-9.6A4.4 4.4 0 0112 7a4.4 4.4 0 017 3.4C19 15.3 12 20 12 20z"/></svg>';
@@ -1483,7 +1646,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         +'<label class="vf-field" id="ac-ct-emailf"><span>Email *</span><input type="email" name="email" required inputmode="email" autocomplete="email"></label>'
         +'<label class="vf-field"><span>Mobile phone *</span><input type="tel" name="phone" required inputmode="tel" autocomplete="tel"></label>'
       +'</div>'
-      +'<div class="ct-cond" id="ac-ct-groupf" hidden><label class="vf-field"><span>Which group interests you?</span><select name="group">'+groupOpts+'</select></label></div>'
+      +'<div class="ct-cond" id="ac-ct-groupf" hidden><label class="vf-field"><span>Which group interests you?</span>'+acGroupSelectHtml()+'</label></div>' /* options come from data/groups.json (wireConnectTag) */
       +'<label class="vf-field ct-msg" style="margin-top:.9rem"><span id="ac-ct-msglabel">Anything we should know? (optional)</span><textarea name="message" rows="3"></textarea></label>'
       +'<div id="ac-ct-turnstile" class="jg-ts"></div>'
       +'<div class="vf-err" role="alert" aria-live="polite"></div>'
@@ -1504,7 +1667,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var s1=sec.querySelector('#ac-ct-s1'), s2=sec.querySelector('#ac-ct-s2');
     var cont=sec.querySelector('#ac-ct-continue'), nudge=sec.querySelector('.ct-nudge');
     var opts=[].slice.call(sec.querySelectorAll('.ct-opt'));
-    var form=s2.querySelector('form'), tsId=null, tsTries=0, pendingSubmit=false, tsWaitTimer=null;
+    var form=s2.querySelector('form'), gSel=form.querySelector('select[name=group]'), tsId=null, tsTries=0, pendingSubmit=false, tsWaitTimer=null;
+    acFillGroupSelect(gSel);
     opts.forEach(function(b){ b.addEventListener('click',function(){ var on=b.getAttribute('aria-pressed')==='true'; b.setAttribute('aria-pressed',on?'false':'true'); if(nudge) nudge.textContent=''; }); });
     function selectedOpts(){ return opts.filter(function(b){return b.getAttribute('aria-pressed')==='true';}); }
     function selectedSteps(){ return selectedOpts().map(function(b){return b.getAttribute('data-step');}); }
@@ -1544,7 +1708,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       var nextSteps=steps.filter(function(s,i){return /^[0-9]+$/.test(s)&&steps.indexOf(s)===i;});
       var hasJoin=nextSteps.indexOf('10558272')>-1;
       var fd=new FormData(form);
-      var data={source:'connect_tag',first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:(fd.get('message')||'').trim(),group:hasJoin?(fd.get('group')||''):'',nextSteps:nextSteps,intents:selectedIntents(),team:[],website:fd.get('website')||'',turnstileToken:token};
+      var gp=hasJoin?acGroupPick(gSel):null, msg=(fd.get('message')||'').trim(); /* the group picker only shows with "Join a group"; id only if the Worker accepts it, the name always leads the message */
+      var data={source:'connect_tag',first:(fd.get('first')||'').trim(),last:(fd.get('last')||'').trim(),email:(fd.get('email')||'').trim(),phone:(fd.get('phone')||'').trim(),message:gp?acWithGroupLine(gp,msg):msg,group:gp?gp.id:'',nextSteps:nextSteps,intents:selectedIntents(),team:[],website:fd.get('website')||'',turnstileToken:token};
       var hasDecision=steps.indexOf('10625856')>-1;
       var btn=form.querySelector('#ac-ct-submit'), orig=btn.getAttribute('data-orig')||btn.innerHTML; btn.disabled=true; btn.textContent='Sending…';
       fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
@@ -1808,13 +1973,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGive(); buildVisit(); buildCTA(); buildFooter(); buildEventCard(); buildEventBar(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGroupDirectory(); buildGive(); buildVisit(); buildCTA(); buildFooter(); buildEventCard(); buildEventBar(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   /* Squarespace renders the native form block late on some loads; retry so the swap still lands (both are idempotent) */
   setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },600); setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },1800);
   setTimeout(buildEventsPage,600); setTimeout(buildEventsPage,1800);
   setTimeout(buildConnectTag,600); setTimeout(buildConnectTag,1800); setTimeout(buildPCForms,600); setTimeout(buildPCForms,1800); setTimeout(buildPCForms,3200);
   setTimeout(buildGivePage,600); setTimeout(buildGivePage,1800);
+  setTimeout(buildGroupDirectory,600); setTimeout(buildGroupDirectory,1800);
   setTimeout(buildPostNextSteps,600); setTimeout(buildPostNextSteps,1800);
   setTimeout(fixAboutNav,800); setTimeout(fixAboutNav,2200);
   setTimeout(wireMobileNav,800); setTimeout(wireMobileNav,2200);
