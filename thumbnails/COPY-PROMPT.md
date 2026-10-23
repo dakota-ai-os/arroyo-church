@@ -12,6 +12,41 @@ The thumbnail and the YouTube title field do **different jobs**, so they get
 **Hard rule:** never put the full sentence sermon title on the thumbnail (that's the
 title-slide anti-pattern). The thumbnail says the *hook*; the title field says the *headline*.
 
+## The full description — standard blocks, in this order
+
+Real ones: `out/youtube-desc-YYYY-MM-DD.txt` (gitignored, Dakota's Mac). Each block is an ALL-CAPS heading line, its
+content on the next line(s), one blank line between blocks.
+
+1. First line (above) + a short gist paragraph
+2. `WHAT PASTOR JOSH COVERS` — the numbered points, each with its passages
+3. `KEY TAKEAWAY`
+4. `SCRIPTURE IN THIS MESSAGE` — refs separated by ` | `
+5. `SERIES` — skip for a standalone message
+6. `READ THE FULL RECAP` — the blog post URL (the `BLOG_URL` token until it's published)
+7. `SERMON NOTES` — `https://links.arroyochurch.com/notes/?week=YYYY-MM-DD`, the Sunday it was
+   preached: copy the blog draft `.json`'s `notesUrl` (no draft yet: that Sunday's date, if
+   `data/sermon-notes/index.json` lists it). Link links.arroyochurch.com directly: the
+   arroyochurch.com/sermon-notes redirect drops `?week=`. Open it once: it must show that week,
+   not "We couldn't find notes for…". `notesUrl` is null when that week has no notes (guest
+   speaker, no outline): skip the block then, as the blog draft does.
+8. `CHAPTERS` — when timestamps are known (redo them if the team trims the video)
+9. `NEW HERE? PLAN YOUR VISIT` + the links list (Website, Give, All our links, Instagram, Facebook)
+10. `JOIN US IN PERSON`, the closing paragraph, then the hashtags
+
+```
+READ THE FULL RECAP
+https://www.arroyochurch.com/arroyoblog/<slug>
+
+SERMON NOTES
+https://links.arroyochurch.com/notes/?week=2026-10-18
+```
+
+**Length: YouTube caps the description at 5,000 characters.** Measure the final text, with the
+real blog URL in place (~75–90 chars; the `BLOG_URL` token is 8) and the SERMON NOTES block in
+(68 chars with its blank line). A draft that has the SERMON NOTES block but still holds the
+token must be ≤ ~4,900 (a 90-char URL then lands at ~4,982). Trim `WHAT PASTOR JOSH COVERS`
+first, never the link blocks.
+
 ## The prompt (paste the sermon info; Claude returns the copy)
 
 > You are writing YouTube copy for an Arroyo Church (Livermore, CA) sermon.

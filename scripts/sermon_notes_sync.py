@@ -1542,7 +1542,8 @@ def verify_title(note_id, title, tries=5):
 # The website shows the notes too. Each week is published as JSON to the PUBLIC site repo,
 # which GitHub Pages serves (with Access-Control-Allow-Origin: *) at WEB_BASE:
 #   index.json        {"updated", "weeks": [{service, title, speaker, release_at, file}]}
-#                     newest service first, one entry per service date, max 52
+#                     newest service first, one entry per service date, every week ever
+#                     published (the page's archive lists them all -- never trimmed)
 #   <service>.json    {service, title, speaker, release_at, published_at, takeaway, format,
 #                      version, blocks: [{kind, text}]}
 # The field names are a contract with the page -- do not rename them. The page shows a week
@@ -1554,7 +1555,6 @@ PUBLISH_REMOTE = "git@github.com:dakota-ai-os/arroyo-church.git"
 PUBLISH_SSH = "ssh -i /Users/dakotayates/.ssh/dakota_ai_os -o IdentitiesOnly=yes"   # the working repo's key
 NOTES_SUBDIR = "data/sermon-notes"
 WORKING_REPO = Path(__file__).resolve().parent.parent
-MAX_WEEKS = 52
 
 
 def web_enabled(cfg):
@@ -1610,12 +1610,15 @@ def index_entry(doc):
             "release_at": doc.get("release_at"), "file": f"{doc['service']}.json"}
 
 
-def merge_index(index, entry, cap=MAX_WEEKS):
+def merge_index(index, entry):
     """The index's weeks with `entry` in: one per service date (a republished week replaces
-    its old entry), newest first, at most `cap`."""
+    its old entry), newest first. Every week is kept: the page's archive lists the whole index
+    (2026-10-23; it was capped at 52 before the archive existed). ~150 bytes a week, so even
+    20 years of Sundays is a small file. Old <service>.json files are never deleted either --
+    _publish_locked's `git clean` only removes UNTRACKED leftovers of a run that died."""
     weeks = [w for w in (index or {}).get("weeks") or []
              if isinstance(w, dict) and w.get("service") and w["service"] != entry["service"]]
-    return sorted(weeks + [entry], key=lambda w: w["service"], reverse=True)[:cap]
+    return sorted(weeks + [entry], key=lambda w: w["service"], reverse=True)
 
 
 def _read_json(path):
@@ -1784,7 +1787,8 @@ def _publish_locked(outline):
             _git(["fetch", "--depth", "1", "origin", "+main:refs/remotes/origin/main"], timeout=120)
             step = "prepare"
             _git(["reset", "--hard", "origin/main"])
-            _git(["clean", "-fdq", "--", NOTES_SUBDIR])          # leftovers of a run that died mid-write
+            # Leftovers of a run that died mid-write. UNTRACKED files only: every committed week survives.
+            _git(["clean", "-fdq", "--", NOTES_SUBDIR])
             write_week_files(outline, PUBLISH_DIR / NOTES_SUBDIR)
             _git(["add", "--", NOTES_SUBDIR])
             if not _git(["status", "--porcelain", "--", NOTES_SUBDIR]).strip():

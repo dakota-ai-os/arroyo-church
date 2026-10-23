@@ -475,9 +475,10 @@ merged = s.merge_index({"weeks": merged}, wk("2026-10-18", "fixed"))
 check("a republished week replaces its entry",
       [w["service"] for w in merged] == ["2026-10-25", "2026-10-18", "2026-10-11"] and merged[1]["title"] == "fixed")
 many = {"weeks": [wk((date(2025, 1, 5) + timedelta(weeks=n)).isoformat()) for n in range(60)]}
-capped = s.merge_index(many, wk("2026-10-25"))
-check("capped at 52, oldest dropped", len(capped) == 52 and capped[0]["service"] == "2026-10-25"
-      and capped[-1]["service"] == many["weeks"][-51]["service"])
+kept = s.merge_index(many, wk("2026-10-25"))
+check("never capped: every week stays, newest first (the page's archive lists them all)",
+      len(kept) == 61 and kept[0]["service"] == "2026-10-25" and kept[-1]["service"] == "2025-01-05"
+      and [w["service"] for w in kept] == sorted((w["service"] for w in kept), reverse=True))
 check("junk entries are dropped", s.merge_index({"weeks": ["x", {}, None]}, wk("2026-10-25")) == [wk("2026-10-25")])
 
 out_dir = TMP / "web-files"
@@ -867,6 +868,162 @@ try:
     check("--web-only without a takeaway: published, not marked", rc == 0 and c["publish"] and markers() == (None, None))
 finally:
     s.key_takeaway = kt
+
+print("backfill: a saved Note body back into an outline (backfill_web_notes, 2026-10-23)")
+import backfill_web_notes as bf
+NOTICE = ('<div><i><span style="color:#AF52DE">*To save and edit this note, click on the share button at the top, '
+          'press “copy” then, create a new note and paste the text into your new note</span></i></div>')
+IMG = '<div><img src="data:image/png;base64,AAAA"><br></div>'
+
+
+def note_html(outline):
+    """The shared Note as update_note() leaves it: header, graphic, purple notice, body."""
+    got = render_note(outline)
+    return got["header"] + IMG + NOTICE + got["body"]
+
+
+o_guest = dict(o, speaker="Cristian Ayquipa")
+for name, fx in (("lone-N. outline", o), ("unnumbered outline: subheads + labelled subs", ou),
+                 ("slide deck: opens with a subhead, para framing", osl), ("no takeaway", dict(o, takeaway="")),
+                 ("a guest", o_guest)):
+    back = bf.note_to_outline(note_html(fx))
+    check(f"round trip, {name}: same title, date, blocks, takeaway, version",
+          back["title"] == fx["title"] and back["service"] == fx["service"] and back["blocks"] == list(fx["blocks"])
+          and back["takeaway"] == fx["takeaway"] and back["version"] == fx["version"] and back["format"] == "outline")
+check("round trip: the byline gives the speaker back",
+      bf.note_to_outline(note_html(o))["speaker"] == "Pastor Josh Smith"
+      and bf.note_to_outline(note_html(o_guest))["speaker"] == "Cristian Ayquipa")
+
+# Notes' own re-serialisation, shaped like the real 9/13, 10/11 and 10/18 backups: span-size headings,
+# a byline inside <h3>, <font> on the notice, '&quot' with no semicolon, &nbsp;, a label in <b>, a list
+# split in two by a blank line, curly quotes.
+SERIALISED = ('<div><b><span style="font-size: 24px">Grace That Keeps Giving</span></b></div>\n'
+              '<div><b><h3>Pastor Josh Smith | September 13th, 2026</h3></b><br></div>\n<div><br></div>\n'
+              + NOTICE.replace('<span style="color:#AF52DE">', '<font color="#AF52DE">').replace("</span>", "</font>")
+              + "\n" + IMG + "\n<div>KEY TAKEAWAY: Grace never stops giving.</div>\n"
+              '<div><b><span style="font-size: 18px">1. Grace gives you peace</span></b></div>\n<div><br></div>\n'
+              '<div>&quotGrace and peace to you&quot -Ephesians 1:2</div>\n<div><br></div>\n'
+              '<div><i>Write some notes here</i><br></div>\n<div><br></div>\n'
+              '<div><h2>2. Saved from sin</h2></div>\n<div><b><h2>Truths About Sin</h2></b></div>\n'
+              '<ol>\n<li><b>CLARIFICATION:</b> not by works</li>\n<li> Growth&nbsp;only comes from God<b><br></b></li>\n</ol>\n'
+              '<div><br></div>\n<ol>\n<li>Second list</li>\n</ol>\n<div>Josh’s teaching line.</div>\n'
+              '<div><i>Write some notes here</i><br></div>\n')
+back = bf.note_to_outline(SERIALISED)
+check("Notes' serialisation: title, byline date + speaker, takeaway; notice, image and prompts dropped",
+      back["title"] == "Grace That Keeps Giving" and back["service"] == date(2026, 9, 13)
+      and back["speaker"] == "Pastor Josh Smith" and back["takeaway"] == "Grace never stops giving.")
+check("Notes' serialisation: main after a prompt, subhead inside a section, subs, quote, para",
+      back["blocks"] == [("main", "1. Grace gives you peace"), ("quote", '"Grace and peace to you" -Ephesians 1:2'),
+                         ("main", "2. Saved from sin"), ("subhead", "Truths About Sin"),
+                         ("sub", "CLARIFICATION: not by works"), ("sub", "Growth only comes from God"),
+                         ("sub", "Second list"), ("para", "Josh's teaching line.")])
+# The 9/20 backup: no prompts at all, an <h3> subhead, and each label split from its verse(s) into its own <li>.
+NO_PROMPTS = ('<div><b><h1>Walk in His Will</h1></b></div>\n<div><b>Pastor Josh Smith | September 20th, 2026</b><br></div>\n'
+              '<div><b><h2>1. Walk in unity</h2></b></div>\n<div>&quotVerse one&quot -Ephesians 1:10</div>\n'
+              '<div><b><h2>2. Walk by the Holy Spirit</h2></b></div>\n'
+              '<div><u><h3>3 Truths About Walking by the Holy Spirit</h3></u><b><h3><br></h3></b></div>\n'
+              '<ol>\n<li><b>The Holy Spirit was promised</b>: </li>\n<li>&quotA new heart&quot -Ezekiel 36:26-27</li>\n</ol>\n'
+              '<div><br></div>\n<ol>\n<li><b>Every Christian is sealed</b>: </li>\n<li>For those who are led&quot -Romans 8:14</li>\n'
+              '<li>We cry, &quotAbba, Father.&quot -Romans 8:15</li>\n</ol>\n<div><b><h2>Unnumbered, so a subhead</h2></b></div>\n')
+check("no prompts (9/20): numbered <h2> = main, <h3> = subhead, a bare label folds in its verses, "
+      "two verses kept apart by a visible separator",
+      bf.note_to_outline(NO_PROMPTS)["blocks"] ==
+      [("main", "1. Walk in unity"), ("quote", '"Verse one" -Ephesians 1:10'), ("main", "2. Walk by the Holy Spirit"),
+       ("subhead", "3 Truths About Walking by the Holy Spirit"),
+       ("sub", 'The Holy Spirit was promised: "A new heart" -Ezekiel 36:26-27'),
+       ("sub", 'Every Christian is sealed: For those who are led" -Romans 8:14 · We cry, "Abba, Father." -Romans 8:15'),
+       ("subhead", "Unnumbered, so a subhead")])
+check("fails closed: no byline under the title",
+      isinstance(raises(lambda: bf.note_to_outline("<div><h1>T</h1></div><div><h2>1. A</h2></div>")), ValueError))
+check("fails closed: markup it has never seen (nested divs) is not skipped",
+      isinstance(raises(lambda: bf.note_to_outline(SERIALISED.replace("<div>Josh’s teaching line.</div>",
+                                                                       "<div><div>Josh’s teaching line.</div></div>"))),
+                 ValueError))
+
+print("backfill: the command (dry run and publish, git and network faked)")
+keep_weeks, TAKEAWAY_CALLS[:] = bf.WEEKS, []
+o_nov = dict(o_josh, service=date(2026, 11, 1))
+s.BACKUPS.mkdir(parents=True, exist_ok=True)
+(s.BACKUPS / "2026-10-31-200000.html").write_text(note_html(o_josh), encoding="utf-8")
+(s.BACKUPS / "2026-11-07-200000.html").write_text(note_html(o_nov), encoding="utf-8")
+bf.WEEKS = (("2026-10-31-200000.html", o_josh["title"], date(2026, 10, 25)),
+            ("2026-11-07-200000.html", o_nov["title"], date(2026, 11, 1)))
+dry = TMP / "backfill-dry"
+dry.mkdir()
+(dry / "index.json").write_text(json.dumps({"updated": "x", "weeks": [wk("2026-11-01", "live already")]}))
+(dry / "2026-11-01.json").write_text("LIVE")
+clear_markers()
+cache_before = s.OUTLINE_CACHE.read_bytes() if s.OUTLINE_CACHE.exists() else None
+try:
+    check("dry run: exit 0", bf.main(["--dry-run", str(dry)]) == 0)
+    doc = json.loads((dry / "2026-10-25.json").read_text())
+    check("dry run: the week file is the job's contract, blocks and takeaway from the Note",
+          list(doc) == ["service", "title", "speaker", "release_at", "published_at", "takeaway", "format", "version", "blocks"]
+          and [(b["kind"], b["text"]) for b in doc["blocks"]] == list(o_josh["blocks"])
+          and doc["takeaway"] == FAKE_TAKEAWAY and doc["speaker"] == "Pastor Josh Smith" and doc["version"] == o_josh["version"])
+    check("dry run: a week already in the live index is skipped, not overwritten",
+          (dry / "2026-11-01.json").read_text() == "LIVE"
+          and [w["service"] for w in json.loads((dry / "index.json").read_text())["weeks"]] == ["2026-11-01", "2026-10-25"]
+          and json.loads((dry / "index.json").read_text())["weeks"][0]["title"] == "live already")
+    check("no weekly markers, no takeaway cache write, no model call",
+          markers() == (None, None) and not TAKEAWAY_CALLS
+          and (s.OUTLINE_CACHE.read_bytes() if s.OUTLINE_CACHE.exists() else None) == cache_before)
+    bf.main(["--dry-run", str(dry), "--force"])
+    check("--force overwrites the live week", json.loads((dry / "2026-11-01.json").read_text())["service"] == "2026-11-01")
+    bf.WEEKS = (("2026-10-31-200000.html", "Some Other Title", date(2026, 10, 25)),)
+    empty = TMP / "backfill-empty"
+    check("a backup that is not the week the table says is refused, and nothing is written",
+          isinstance(raises(lambda: bf.main(["--dry-run", str(empty)])), ValueError) and not empty.exists())
+
+    bf.WEEKS = (("2026-10-31-200000.html", o_josh["title"], date(2026, 10, 25)),
+                ("2026-11-07-200000.html", o_nov["title"], date(2026, 11, 1)))
+
+    class Resp:
+        def __init__(self, body): self.body = body
+        def read(self): return self.body.encode()
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+
+    urls, contexts, published, live_body = [], [], [], json.dumps({"weeks": [{"service": "2026-10-25"}]})
+    keep_net = (bf.urllib.request.urlopen, s.publish_web, s.load_config)
+
+    def fake_urlopen(url, timeout=None, context=None):
+        urls.append(url)
+        contexts.append(context)
+        if isinstance(live_body, Exception):
+            raise live_body
+        return Resp(live_body)
+
+    bf.urllib.request.urlopen = fake_urlopen
+    s.publish_web = lambda outline, cfg: published.append(outline["service"].isoformat()) or True
+    s.load_config = lambda: {"WEB_NOTES": "1"}
+    try:
+        check("publish: only the weeks the live index lacks go through publish_web",
+              bf.main([]) == 0 and published == ["2026-11-01"] and urls[0].startswith(s.WEB_BASE + "index.json?cb="))
+        # 2026-10-23: python.org's Python has no CA bundle of its own, so a bare urlopen failed
+        # CERTIFICATE_VERIFY_FAILED on every real run. The read must carry a verifying context WITH certs.
+        ctx = contexts[0]
+        check("the live index is read with a verifying TLS context that has CA certificates",
+              isinstance(ctx, bf.ssl.SSLContext) and ctx.verify_mode == bf.ssl.CERT_REQUIRED and ctx.check_hostname
+              and ctx.cert_store_stats()["x509_ca"] > 0)
+        published.clear()
+        check("publish --force: every week, without reading the live index",
+              bf.main(["--force"]) == 0 and published == ["2026-10-25", "2026-11-01"] and len(urls) == 1)
+        published.clear()
+        s.load_config = lambda: {"WEB_NOTES": "0"}
+        check("publish with WEB_NOTES=0: exit 1, nothing published", bf.main(["--force"]) == 1 and not published)
+        live_body = "{not json"
+        check("an unreadable live index refuses the publish",
+              isinstance(raises(lambda: bf.main([])), RuntimeError) and not published)
+        live_body = bf.urllib.error.URLError("[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed")
+        e = raises(lambda: bf.main([]))
+        check("a network/TLS failure reading the index refuses the publish with a clear error, not a traceback",
+              isinstance(e, RuntimeError) and "live index.json" in str(e) and not published)
+        check("...and still no weekly markers", markers() == (None, None))
+    finally:
+        bf.urllib.request.urlopen, s.publish_web, s.load_config = keep_net
+finally:
+    bf.WEEKS = keep_weeks
 
 print()
 if failures:

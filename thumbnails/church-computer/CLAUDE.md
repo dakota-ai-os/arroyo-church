@@ -33,7 +33,9 @@ Full prompt + a worked example are in `../COPY-PROMPT.md`. The rules:
 - **YouTube title field** = a fuller, **searchable** line (~55–70 chars) including the
   scripture passage + "Arroyo Church". Different wording from the thumbnail.
 - **Description (first line)** = one keyword-rich sentence naming the passage and the
-  felt-need promise.
+  felt-need promise. The rest of the description follows the standard blocks in
+  `../COPY-PROMPT.md` (incl. `SERMON NOTES` → `links.arroyochurch.com/notes/?week=<Sunday>`
+  after the recap link), under 5,000 characters.
 
 When Dakota gives you the sermon title + scripture (+ a one-line gist if he has it),
 offer **3 hook options, 3 YouTube-title options, and a description first line** — warm and

@@ -10,6 +10,8 @@ scripture references, a video embed, tasteful (not stuffed) local relevance, a
 meta description, a few meaningful tags, and internal links.
 
 Output: blog-drafts/<date>-<slug>.html (paste-ready) + .json (the fields).
+Every draft links that Sunday's web sermon notes (links.arroyochurch.com/notes/?week=...),
+added by code after generation, unless that week has none -- see blog_notes_link.py.
 Idempotent: skips if a draft already exists for the latest sermon's video id,
 so the weekly run only generates when a NEW sermon appears.
 
@@ -29,9 +31,12 @@ from pathlib import Path
 
 import anthropic
 
+from blog_notes_link import add_notes_link, notes_link
+
 REPO = Path(__file__).resolve().parent.parent
 DRAFTS = REPO / "blog-drafts"
 SERMONS_FILE = REPO / "data" / "sermons.json"
+NOTES_INDEX = REPO / "data" / "sermon-notes" / "index.json"   # the web notes' week list
 
 sermons = json.loads(SERMONS_FILE.read_text(encoding="utf-8"))
 videos = sermons.get("videos") or []
@@ -103,6 +108,8 @@ def fetch_transcript(vid: str) -> str:
 # the video -- and for re-running with a transcript already on disk:
 #   BLOG_VIDEO_ID=... BLOG_VIDEO_TITLE="..." BLOG_SERIES_TITLE="..." BLOG_SERIES_BLURB="..."
 #   BLOG_TRANSCRIPT_FILE=/path/to/transcript.txt
+#   BLOG_SERVICE_DATE=YYYY-MM-DD   (the Sunday it was preached, for the sermon-notes link; set it
+#                                   for a re-upload or a catch-up run a week or more late)
 # With none of these set, behaviour is unchanged: the latest sermon in data/sermons.json.
 if os.environ.get("BLOG_VIDEO_ID"):
     v = {"id": os.environ["BLOG_VIDEO_ID"], "title": os.environ.get("BLOG_VIDEO_TITLE", "")}
@@ -116,6 +123,18 @@ video_url = f"https://www.youtube.com/watch?v={video_id}"
 if already_done(video_id):
     print(f'Draft already exists for {video_id} ("{v.get("title")}") -- nothing to do.')
     sys.exit(0)
+
+# ---- which Sunday's notes to link, and whether to link at all (worked out before the slow
+#      transcription, so a bad BLOG_SERVICE_DATE fails fast). Order: BLOG_SERVICE_DATE, the
+#      video's YouTube date, the most recent Sunday; no link for a week with no web notes --
+#      see blog_notes_link.notes_link. ----
+try:
+    notes = notes_link(video_id, os.environ, NOTES_INDEX)
+except ValueError as e:
+    sys.exit(str(e))
+print(f"sermon notes: {notes.url} (week from {notes.source})" + ("" if notes.add else " -- NOT linked"))
+for w in notes.warnings:
+    print(w)
 
 _tfile = os.environ.get("BLOG_TRANSCRIPT_FILE")
 transcript = Path(_tfile).read_text(encoding="utf-8") if _tfile else fetch_transcript(video_id)
@@ -200,21 +219,30 @@ if isinstance(post.get("bodyHtml"), str):
     n = len(re.findall(r"[\x00-\x09\x0b-\x1f\n]", before))
     if n:
         print(f"repaired {n} mangled character(s) in bodyHtml (lost em-dashes)")
+    # this week's notes, added in code (not left to the model) next to "Watch more sermons"
+    if notes.add:
+        post["bodyHtml"] = add_notes_link(post["bodyHtml"], notes.url)
 
 slug = re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", (post.get("slug") or v.get("title") or "sermon").lower()))[:70]
 base = DRAFTS / f"{today}-{slug}"
 
 (base.with_suffix(".json")).write_text(
     json.dumps({**post, "videoId": video_id, "videoUrl": video_url,
-                "series": series.get("title"), "generated": today}, indent=2) + "\n",
+                "series": series.get("title"), "serviceDate": notes.service.isoformat(),
+                "notesUrl": notes.url if notes.add else None,   # None: no notes that week, skip the YouTube block
+                "generated": today}, indent=2) + "\n",
     encoding="utf-8",
 )
+notes_header = "\n     - ".join(
+    [f"Sermon notes link (in the closing line, week from {notes.source}): {notes.url}" if notes.add
+     else "Sermon notes link: NONE added (see the WARNING below)"] + list(notes.warnings))
 (base.with_suffix(".html")).write_text(
     f"""<!-- PASTE-READY DRAFT -- review, then in Squarespace create a blog post and:
      - Title: {post['title']}
      - SEO Description (Post Settings -> SEO): {post['metaDescription']}
      - Post URL (Settings -> Content -> Post URL; set it on every new post, and never Duplicate an old post): {slug}
      - Tags: {', '.join(post['tags'])}
+     - {notes_header}
      - Body: paste everything below this comment. -->
 {post['bodyHtml']}
 """,
