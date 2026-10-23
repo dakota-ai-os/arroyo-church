@@ -66,9 +66,8 @@ const NEXT_STEP_SERVE = "10558273"; // "I want to start serving"
 // free-text message there by design) but IS used by the /connect Questions-&-Prayer form, which
 // replaced a native Squarespace form that only ever emailed.
 const VALID_NEXT_STEPS = new Set(["10625856","10558271","10558272","10558273","10648022","10558274"]);
-// 11609936 + 12006914/15/16 added to PC 2026-10-23 (Young Families existed; EMAW, Seniors, San Ramon new).
-// NOT DEPLOYED YET: wrangler on Dakota's Mac was logged into another Cloudflare account. After the next
-// `npx wrangler deploy`, add the same ids to AC_WORKER_GROUPS in footer-injection.html.
+// 11609936 + 12006914/15/16 added 2026-10-23 (Young Families existed in PC; EMAW, Seniors, San Ramon new).
+// Keep AC_WORKER_GROUPS in footer-injection.html equal to this list: the site only sends ids the Worker accepts.
 const GROUP_OPTIONS = new Set(["10558346","10558347","10558348","10558349","10558350","10558351","10558352",
                                "11609936","12006914","12006915","12006916"]);
 // CONFIRMED 2026-07-22 against the live form (these were previously an unverified placeholder).

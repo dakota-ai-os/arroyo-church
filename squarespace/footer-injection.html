@@ -1027,10 +1027,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   var AC_GROUPS_URL='https://dakota-ai-os.github.io/arroyo-church/data/groups.json', acGroupsP=null;
   var AC_GROUP_NONE='Not sure yet &mdash; help me find one';
   /* Mirror of GROUP_OPTIONS in squarespace/arroyo-connect-worker.js (~line 67). The Worker silently DROPS any
-     other group id, so only these are sent as `group`; any other pick (Young Families 11609936, the groups with
-     no PC option yet) reaches staff through the "Group: <name>" message line alone. Add an id here only AFTER
-     it is in the Worker's list AND the Worker is redeployed. */
-  var AC_WORKER_GROUPS=['10558346','10558347','10558348','10558349','10558350','10558351','10558352'];
+     other group id, so only these are sent as `group`; any other pick (a group with no PC option yet) reaches
+     staff through the "Group: <name>" message line alone. Add an id here only AFTER it is in the Worker's list
+     AND the Worker is redeployed (all 11 groups since the 2026-10-23 deploy). */
+  var AC_WORKER_GROUPS=['10558346','10558347','10558348','10558349','10558350','10558351','10558352','11609936','12006914','12006915','12006916'];
   function acEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   /* fetched at most once per page view; the cache-bust changes every 10 minutes so the browser cache still helps */
   function acLoadGroups(){

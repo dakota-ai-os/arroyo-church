@@ -21,6 +21,8 @@ Read the row that matches your task — open ONLY those files, skip the rest. Do
 | Fix the Join-a-Group form (→ Planning Center) | `squarespace/arroyo-connect-worker.js` (field map in its header) | `footer-injection.html` build code, `data/` | — |
 | Review / publish the weekly sermon blog | `blog-drafts/` (latest `.html`) + the **Weekly blog** integration note below | `scripts/generate_blog.py` internals, `footer-injection.html` | `/log-decision` |
 | Edit a standalone SEO page (/about, /team, etc.) | `.source_pages/arroyo_<page>.html` (reference) + **Do NOT touch / SEO guardrails** below | `footer-injection.html`, `scripts/` | — |
+| Sermon notes web page (links.arroyochurch.com/notes/, arroyochurch.com/sermon-notes) | `scripts/sermon_notes_sync.py` (`build_outline`, `publish_web`; publishes `data/sermon-notes/` from its own clone, public Sun 06:45 PT) + `../arroyo-link/notes/index.html` (the page) | `footer-injection.html` build code, `blog-drafts/` | — |
+| Edit connect groups (names, times, descriptions, sign-up) | `data/groups.json` (the ONE list: /connect cards + every group picker; push = live in ~10 min, no Squarespace paste). Adding a group also needs a Planning Center form option (form 1206123) + its id in the Worker's `GROUP_OPTIONS` and the footer's `AC_WORKER_GROUPS`, then `npx wrangler deploy` | `scripts/`, `blog-drafts/` | — |
 | Make a promo image / video / jingle | — (no repo files needed) | the whole repo | `/generate-media` |
 
 ## Repo layout
