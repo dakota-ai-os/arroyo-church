@@ -7,23 +7,33 @@
   "videos": [
     {
       "id": "R2h61C2DHGk",
-      "title": "Can God Restore a Broken Relationship? Ephesians 2 | Arroyo Church"
+      "title": "Can God Restore a Broken Relationship? Ephesians 2 | Arroyo Church",
+      "published": "2026-10-19T06:50:18+00:00",
+      "service": "2026-10-18"
     },
     {
       "id": "D6simuUfX4k",
-      "title": "What Does it Mean to Be Saved? | Ephesians 2:1-10"
+      "title": "What Does it Mean to Be Saved? | Ephesians 2:1-10",
+      "published": "2026-10-12T06:46:55+00:00",
+      "service": "2026-10-11"
     },
     {
       "id": "DNuGfYNwVxM",
-      "title": "How Do I Grow Closer to God? | Ephesians 1 Sermon | Arroyo Church"
+      "title": "How Do I Grow Closer to God? | Ephesians 1 Sermon | Arroyo Church",
+      "published": "2026-09-28T06:33:27+00:00",
+      "service": "2026-09-27"
     },
     {
       "id": "Frme6lZDVsY",
-      "title": "What Is God's Will for My Life? | Ephesians 1 Sermon | Arroyo Church"
+      "title": "What Is God's Will for My Life? | Ephesians 1 Sermon | Arroyo Church",
+      "published": "2026-09-21T06:32:54+00:00",
+      "service": "2026-09-20"
     },
     {
       "id": "qrQDZ_0wRLY",
-      "title": "What Is the Grace of God? | Ephesians 1 Sermon | Arroyo Church"
+      "title": "What Is the Grace of God? | Ephesians 1 Sermon | Arroyo Church",
+      "published": "2026-09-14T07:28:11+00:00",
+      "service": "2026-09-13"
     }
   ],
   "updated": "2026-10-23"

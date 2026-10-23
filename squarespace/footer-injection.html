@@ -349,11 +349,35 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .series-bar .sb-kicker{font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e3bd6a}
 .series-bar h3{font-family:'Fraunces',Georgia,serif;font-weight:460;font-size:1.35rem;margin:.15rem 0 .1rem}
 .series-bar p{font-size:.9rem;color:rgba(238,246,247,.66);max-width:46ch;margin:0}
-/* the latest sermon's actions: Watch the Series + Sermon Notes (links.arroyochurch.com/notes/), wrapping under the title on phones */
-.series-bar .sb-ctas{display:flex;flex-wrap:wrap;gap:.7rem}
-.series-bar .sb-ctas .btn svg{width:18px;height:18px;flex:0 0 auto}
-.browse-tile{position:relative;border-radius:20px;aspect-ratio:16/9;border:1.5px dashed rgba(191,231,238,.3);display:flex;flex-direction:column;gap:.5rem;align-items:center;justify-content:center;text-align:center;padding:1rem;color:rgba(238,246,247,.66);font-weight:700;font-size:.95rem;text-decoration:none;transition:border-color .3s,color .3s,transform .35s}
-.browse-tile:hover{border-color:#5fc2d4;color:#eef6f7;transform:translateY(-3px)}
+/* CURRENT SERIES = ONE card: the two newest sermons stacked (a date pill top-right on each player; that sermon's title and
+   ITS week's Sermon notes fused under the player as one object), then the current series, then Browse every series.
+   Centered at a reading width: two stacked 16:9 players at the full 1200px wrap would be ~650px tall each. */
+.sermon-card{max-width:820px;margin:0;border-radius:26px;border:1px solid rgba(191,231,238,.13);background:linear-gradient(180deg,rgba(17,48,61,.62),rgba(13,37,48,.42));box-shadow:0 34px 70px -40px rgba(0,0,0,.7);padding:clamp(.7rem,2.4vw,1.5rem);display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(.9rem,2vw,1.25rem);box-sizing:border-box}
+.sm-unit{border-radius:18px;overflow:hidden;border:1px solid rgba(191,231,238,.14);background:#0d2530}
+.sm-unit .yt{border-radius:0;border:0}
+.sm-unit .yt:hover{transform:none;box-shadow:none}
+/* the service date, top-right of the player; it goes away with the thumbnail when the video starts (YouTube's own controls live there) */
+.sm-date{position:absolute;top:.7rem;right:.7rem;z-index:2;display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .78rem;border-radius:999px;background:rgba(10,22,28,.82);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.76rem;font-weight:800;letter-spacing:.05em;line-height:1;white-space:nowrap;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sm-date::before{content:"";width:6px;height:6px;border-radius:50%;background:#e3bd6a}
+.yt:has(iframe) .sm-date{display:none}
+/* the caption strip: part of the player's frame, so the notes button reads as THIS message's notes */
+.sm-cap{display:flex;align-items:center;justify-content:space-between;gap:.8rem 1.2rem;padding:.95rem 1.1rem .95rem 1.2rem;border-top:1px solid rgba(227,189,106,.3);background:linear-gradient(90deg,#11303d,#0d2530)}
+.sm-txt{min-width:0;flex:1 1 auto}
+.sm-ref{display:block;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#5fc2d4;margin:0 0 .25rem}
+.sm-title{font-family:'Fraunces',Georgia,serif;font-weight:460;font-size:clamp(1.02rem,1.8vw,1.2rem);line-height:1.25;margin:0}
+.ac-sec .btn.sm-notes{flex:0 0 auto;padding:.66rem 1.15rem;font-size:.88rem;white-space:nowrap}
+.sm-notes svg{width:17px;height:17px;flex:0 0 auto}
+.series-bar.sc-series{border:0;border-top:1px solid rgba(191,231,238,.12);border-radius:0;background:none;padding:1.35rem .35rem .25rem}
+.sc-browse{display:flex;align-items:center;gap:.9rem 1rem;padding:.95rem 1rem;border-radius:18px;border:1px solid rgba(191,231,238,.12);background:rgba(10,22,28,.45)}
+.sc-ic{flex:0 0 auto;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(95,194,212,.22),rgba(227,189,106,.2));color:#bfe7ee}
+.sc-ic svg{width:24px;height:24px}
+.sc-txt{flex:1 1 auto;min-width:0}
+.sc-t1{display:block;font-weight:800;font-size:1rem;line-height:1.3;color:#fff}
+.sc-t2{display:block;font-size:.86rem;line-height:1.45;color:rgba(238,246,247,.66);margin-top:.15rem}
+.ac-sec .sc-browse .btn{flex:0 0 auto;padding:.7rem 1.35rem}
+.sc-browse .btn svg{width:16px;height:16px;flex:0 0 auto}
+/* phones: the notes button and Browse take their own full-width row (big tap targets, never squeezing the title) */
+@media (max-width:560px){.sm-cap{flex-direction:column;align-items:stretch;padding:.85rem .95rem .95rem}.ac-sec .btn.sm-notes{justify-content:center}.sc-browse{flex-wrap:wrap}.sc-txt{flex-basis:calc(100% - 64px)}.ac-sec .sc-browse .btn{flex:1 1 100%;justify-content:center}.series-bar.sc-series .btn{flex:1 1 100%;justify-content:center}}
 .yt{position:relative;border-radius:20px;overflow:hidden;background:#000;cursor:pointer;aspect-ratio:16/9;border:1px solid rgba(191,231,238,.12);transition:transform .35s,box-shadow .35s}
 .yt:hover{transform:translateY(-4px);box-shadow:0 24px 48px -20px rgba(46,143,163,.45)}
 .yt .thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;transition:opacity .3s,transform .6s}
@@ -369,7 +393,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .sermons-cta .btn svg{width:18px;height:18px;flex:0 0 auto}
 /* Watch on YouTube + Past Sermon Notes (links.arroyochurch.com/notes/?view=all): on phones they share a row or stack, filling the width, caption underneath */
 @media (max-width:560px){.sermons-cta .btn{flex:1 1 auto;justify-content:center}}
-/* minmax(0,…) not 1fr: the 16:9 .browse-tile's min-content (text wrapped a word per line → tall → wide) is ~408px, which made a 1fr track push the home page to 424px wide on a 375px phone */
+/* minmax(0,…) not 1fr (podcast tab): a 1fr track takes its content's min-content width — the old 16:9 browse tile's ~408px pushed the home page to 424px wide on a 375px phone */
 @media (max-width:920px){.sermon-grid{grid-template-columns:minmax(0,1fr)}.yt-side{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.yt-side{grid-template-columns:minmax(0,1fr)}}
 /* CONNECT */
@@ -538,7 +562,7 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .ac-about .belief.open .chev{color:#0a161c!important}
 .ac-about .vcard h3{color:#ffffff!important}
 #ac-team .tcard .t-name,#ac-team .tcard .t-facts h3{color:#ffffff!important}
-#ac-sermons .series-bar h3{color:#ffffff!important}
+#ac-sermons .series-bar h3,#ac-sermons .sm-title{color:#ffffff!important}
 #ac-connect .prayer-band h3{color:#ffffff!important}
 #ac-give .gcard h3{color:#ffffff!important}
 /* 6: restore card hover-lift (the scroll-reveal end-state was pinning transform:none) */
@@ -1133,17 +1157,40 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var anchor=document.getElementById('ac-expect')||document.getElementById('ac-cd')||document.getElementById('ac-team');
     if(!anchor || document.getElementById('ac-sermons')) return;
     function esc(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function yt(id,title){ var t=esc(title); return '<div class="yt" data-id="'+esc(id)+'" role="button" tabindex="0" aria-label="Play: '+t+'"><img class="thumb" src="https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg" onerror="this.src=\'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg\'" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>'; }
-    var browseTile='<a class="browse-tile" href="https://www.youtube.com/@arroyochurch/playlists" target="_blank" rel="noopener"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="13" height="11" rx="2"/><path d="M19 8l3-2v12l-3-2"/></svg>Browse every series<span style="font-weight:500;font-size:.82rem;opacity:.7">Romans &middot; Psalms &middot; Philippians &amp; more</span></a>';
-    function seriesPanel(d){ var v=(d&&d.videos)||[]; if(!v.length)return null; var s=(d&&d.series)||{}; var side=(v[1]?yt(v[1].id,v[1].title):'')+browseTile;
-      return '<div class="sermon-grid"><div class="sermon-main">'+yt(v[0].id,v[0].title)+'<div class="series-bar"><div><div class="sb-kicker">Current series</div><h3>'+esc(s.title||'Current Series')+'</h3><p>'+esc(s.blurb||'A new message every Sunday.')+'</p></div><div class="sb-ctas"><a class="btn btn-ghost" href="'+esc(s.playlistUrl||'https://www.youtube.com/@arroyochurch/playlists')+'" target="_blank" rel="noopener">Watch the Series</a><a class="btn btn-gold" href="https://links.arroyochurch.com/notes/" data-notes-src="sermon_notes_latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Sermon Notes</a></div></div></div><div class="yt-side">'+side+'</div></div>'; }
+    /* yt(): the lazy player (thumbnail + play, swapped for the iframe on click). pill = extra HTML over the thumbnail
+       (the sermon date; it leaves with the thumbnail when the video starts), when = spoken date added to the label */
+    function yt(id,title,pill,when){ var t=esc(title); return '<div class="yt" data-id="'+esc(id)+'" role="button" tabindex="0" aria-label="Play: '+t+(when?' ('+esc(when)+')':'')+'"><img class="thumb" src="https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg" onerror="this.src=\'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg\'" alt="" loading="lazy"><span class="play" aria-hidden="true"></span>'+(pill||'')+'</div>'; }
+    var noteIc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+    var YMD=/^\d{4}-\d{2}-\d{2}$/;
+    /* service dates are LA calendar days already (data/sermons.json "service"), so format them as plain dates (noon UTC) */
+    function svcDate(ymd,o){ return new Date(ymd+'T12:00:00Z').toLocaleDateString('en-US',Object.assign({timeZone:'UTC'},o)); }
+    function shortDate(ymd){ var yr=new Date().toLocaleDateString('en-US',{timeZone:'America/Los_Angeles',year:'numeric'}); return svcDate(ymd,ymd.slice(0,4)===yr?{month:'short',day:'numeric'}:{month:'short',day:'numeric',year:'numeric'}); }
+    function longDate(ymd){ return svcDate(ymd,{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }
+    /* "Can God Restore a Broken Relationship? Ephesians 2 | Arroyo Church" -> title + scripture ref; drops the
+       "| Arroyo Church" and "Sermon" noise YouTube titles carry for search */
+    function cleanTitle(raw){ raw=String(raw||'');
+      var parts=raw.split('|').map(function(x,i){ x=x.replace(/\s+/g,' ').trim(); return i?x.replace(/\s+sermon$/i,''):x; }).filter(function(x){ return x&&!/^(arroyo church( livermore)?|sermon)$/i.test(x); });
+      var main=parts.shift()||raw, ref=parts.join(' · ');
+      if(!ref){ var m=main.match(/^(.*[?!.])\s+((?:[1-3] )?[A-Z][a-z]+(?: (?:of )?[A-Z][a-z]+)* \d+(?::\d+(?:\s?[-–]\s?\d+)?)?)$/); if(m){ main=m[1]; ref=m[2]; } }
+      return {main:main,ref:ref}; }
+    /* the weeks whose web notes are out: listed in data/sermon-notes/index.json AND past their release_at (Sunday 6:45am PT) */
+    function releasedWeeks(ix){ var out={},now=Date.now(); (ix&&Array.isArray(ix.weeks)?ix.weeks:[]).forEach(function(w){ if(!w||!YMD.test(w.service||''))return; var t=Date.parse(w.release_at||''); if(isNaN(t))t=Date.parse(w.service+'T14:00:00Z'); if(t<=now)out[w.service]=1; }); return out; }
+    /* one sermon = player + caption strip in one frame: date pill on the player, title, and that week's notes (only when released) */
+    function sermonUnit(v,notes){ var c=cleanTitle(v.title), svc=YMD.test(v.service||'')?v.service:'', when=svc?longDate(svc):'';
+      var pill=svc?'<span class="sm-date" aria-hidden="true">'+esc(shortDate(svc))+'</span>':'';
+      var nb=(svc&&notes[svc])?'<a class="btn btn-gold sm-notes" href="https://links.arroyochurch.com/notes/?week='+svc+'" data-notes-src="sermon_notes_card" aria-label="Sermon notes for '+esc(c.main)+' ('+esc(when)+')">'+noteIc+'Sermon notes</a>':'';
+      return '<div class="sm-unit">'+yt(v.id,c.main,pill,when)+'<div class="sm-cap"><div class="sm-txt">'+(c.ref?'<span class="sm-ref">'+esc(c.ref)+'</span>':'')+'<h3 class="sm-title">'+esc(c.main)+'</h3></div>'+nb+'</div></div>'; }
+    var browseRow='<div class="sc-browse"><span class="sc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="14" height="11" rx="2"/><path d="M7 5h11a3 3 0 013 3v8"/><path d="M8.5 11.2v4.6l4-2.3z" fill="currentColor"/></svg></span><span class="sc-txt"><span class="sc-t1">Browse every series</span><span class="sc-t2">Every message, organized by series</span></span><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch/playlists" target="_blank" rel="noopener" aria-label="Browse every series on YouTube (opens in a new tab)">Browse<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>';
+    function seriesPanel(d,notes){ var v=((d&&d.videos)||[]).slice(0,2); if(!v.length)return null; var s=(d&&d.series)||{};
+      return '<div class="sermon-card">'+v.map(function(x){ return sermonUnit(x,notes||{}); }).join('')+'<div class="series-bar sc-series"><div><div class="sb-kicker">Current series</div><h3>'+esc(s.title||'Current Series')+'</h3><p>'+esc(s.blurb||'A new message every Sunday.')+'</p></div><a class="btn btn-ghost" href="'+esc(s.playlistUrl||'https://www.youtube.com/@arroyochurch/playlists')+'" target="_blank" rel="noopener">Watch the Series</a></div>'+browseRow+'</div>'; }
     function podcastPanel(d){ var v=(d&&d.videos)||[]; if(!v.length)return null; var side=''; for(var i=1;i<Math.min(v.length,4);i++){ side+=yt(v[i].id,v[i].title); }
       return '<div class="sermon-grid"><div class="sermon-main">'+yt(v[0].id,v[0].title)+'<div class="series-bar"><div><div class="sb-kicker">Arroyo Podcast</div><h3>Honest conversations, hard questions.</h3><p>The team talks through the questions people actually ask about faith.</p></div><a class="btn btn-ghost" href="'+esc((d&&d.playlistUrl)||'https://www.youtube.com/@arroyochurch/podcasts')+'" target="_blank" rel="noopener">All Episodes</a></div></div><div class="yt-side">'+side+'</div></div>'; }
     /* immediate fallback (last-known-good) — replaced by the auto-synced JSON once it loads */
-    var sP=seriesPanel({series:{title:'Transformational Stories',blurb:'A new message every Sunday.',playlistUrl:'https://www.youtube.com/playlist?list=PLSIHs6mCX_TU'},videos:[{id:'mHu9Aa-JtsM',title:'Forgiving Despite Your Feelings'}]});
+    var FALLBACK_S={series:{title:'Grace for You',blurb:'A new message every Sunday.',playlistUrl:'https://www.youtube.com/playlist?list=PLBlTJb-1c0CQ'},videos:[{id:'R2h61C2DHGk',title:'Can God Restore a Broken Relationship? Ephesians 2',service:'2026-10-18'},{id:'D6simuUfX4k',title:'What Does it Mean to Be Saved? | Ephesians 2:1-10',service:'2026-10-11'}]};
+    var sP=seriesPanel(FALLBACK_S,{});   /* notes buttons appear once data/sermon-notes/index.json confirms the week is out */
     var pP=podcastPanel({playlistUrl:'https://www.youtube.com/playlist?list=PLqCyakXjbp1M974oafBq-gB2Nywu0liuX',videos:[{id:'RGFj3CopCQ0',title:'Pastor Asks College Students About Jesus'},{id:'-nED4vgUEI8',title:'What does the Bible really say about the end times?'},{id:'dn509_C_j8A',title:'Do lukewarm Christians go to heaven?'},{id:'1casv_QOmrc',title:'Answering Hard Questions Part Two'}]});
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-sermons';
-    sec.innerHTML='<div class="wrap"><div class="sermon-head"><div><p class="eyebrow ac-rev">Sermons</p><h2 class="h2 ac-rev">Missed a Sunday? <em>Catch up</em> anytime.</h2></div><p class="ac-rev">Stay connected with our latest sermons and podcasts &mdash; streamed every week on YouTube.</p></div><div class="sermon-tabs ac-rev" role="tablist"><button class="stab" id="stab-series" role="tab" aria-selected="true">Current Series</button><button class="stab" id="stab-podcast" role="tab" aria-selected="false">Arroyo Podcast</button></div><div class="sermon-panel active" id="spanel-series">'+sP+'</div><div class="sermon-panel" id="spanel-podcast">'+pP+'</div><div class="sermons-cta ac-rev"><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch on YouTube</a><a class="btn btn-ghost" href="https://links.arroyochurch.com/notes/?view=all" data-notes-src="sermon_notes_archive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Past Sermon Notes</a><span style="color:rgba(238,246,247,.66);font-size:.92rem">New messages every week &middot; youtube.com/@arroyochurch</span></div></div>';
+    sec.innerHTML='<div class="wrap"><div class="sermon-head"><div><p class="eyebrow ac-rev">Sermons</p><h2 class="h2 ac-rev">Missed a Sunday? <em>Catch up</em> anytime.</h2></div><p class="ac-rev">Stay connected with our latest sermons and podcasts &mdash; streamed every week on YouTube.</p></div><div class="sermon-tabs ac-rev" role="tablist"><button class="stab" id="stab-series" role="tab" aria-selected="true">Current Series</button><button class="stab" id="stab-podcast" role="tab" aria-selected="false">Arroyo Podcast</button></div><div class="sermon-panel active" id="spanel-series">'+sP+'</div><div class="sermon-panel" id="spanel-podcast">'+pP+'</div><div class="sermons-cta ac-rev"><a class="btn btn-river" href="https://www.youtube.com/@arroyochurch" target="_blank" rel="noopener">Watch on YouTube</a><a class="btn btn-ghost" href="https://links.arroyochurch.com/notes/?view=all" data-notes-src="sermon_notes_archive">'+noteIc+'Past Sermon Notes</a><span style="color:rgba(238,246,247,.66);font-size:.92rem">New messages every week &middot; youtube.com/@arroyochurch</span></div></div>';
     anchor.parentNode.insertBefore(sec, anchor.nextSibling);
     var tS=sec.querySelector('#stab-series'),tP=sec.querySelector('#stab-podcast'),qS=sec.querySelector('#spanel-series'),qP=sec.querySelector('#spanel-podcast');
     function tab(ser){ tS.setAttribute('aria-selected',String(ser)); tP.setAttribute('aria-selected',String(!ser)); qS.classList.toggle('active',ser); qP.classList.toggle('active',!ser); }
@@ -1153,8 +1200,15 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     /* hydrate with the auto-synced latest videos (GitHub Action keeps data/*.json fresh) */
     var BASE='https://dakota-ai-os.github.io/arroyo-church/data/';
     function pull(n){ return fetch(BASE+n+'?cb='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}); }
-    Promise.all([pull('sermons.json'),pull('podcasts.json')]).then(function(res){
-      try{ var h=res[0]&&seriesPanel(res[0]); if(h){ qS.innerHTML=h; bindYt(qS); } }catch(e){}
+    Promise.all([pull('sermons.json'),pull('podcasts.json'),pull('sermon-notes/index.json')]).then(function(res){
+      /* re-render the card even when sermons.json fails, so the fallback still gets its released notes buttons */
+      var wk={}; try{ wk=releasedWeeks(res[2]); }catch(e){}
+      /* a synced copy from before the "service" field (old sync script) borrows the hand-checked dates above
+         for the same video ids, so the pills + notes buttons don't vanish if the footer goes live first */
+      var known={}; FALLBACK_S.videos.forEach(function(x){ known[x.id]=x.service; });
+      try{ var sd=res[0]&&res[0].videos&&res[0].videos.length?res[0]:FALLBACK_S;
+        sd={series:sd.series,videos:sd.videos.map(function(x){ return (x&&!x.service&&known[x.id])?Object.assign({},x,{service:known[x.id]}):x; })};
+        var h=seriesPanel(sd,wk); if(h){ qS.innerHTML=h; bindYt(qS); } }catch(e){}
       try{ var h2=res[1]&&podcastPanel(res[1]); if(h2){ qP.innerHTML=h2; bindYt(qP); } }catch(e){}
     });
   }
