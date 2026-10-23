@@ -1,0 +1,36 @@
+{
+  "service": "2026-09-13",
+  "title": "Grace That Keeps Giving",
+  "speaker": "Pastor Josh Smith",
+  "release_at": "2026-09-13T06:45:00-07:00",
+  "published_at": "2026-10-23T15:34:35-07:00",
+  "takeaway": "Grace never stops giving — bringing peace with God, granting a new identity as his chosen and adopted children, and lavishing forgiveness through the redeeming blood of Christ.",
+  "format": "outline",
+  "version": "ed1e873c013e",
+  "blocks": [
+    {
+      "kind": "main",
+      "text": "1. Grace gives you peace"
+    },
+    {
+      "kind": "quote",
+      "text": "\"Paul, an apostle of Christ Jesus by the will of God, To God's holy people in Ephesus, the faithful in Christ Jesus: Grace and peace to you from God our Father and the Lord Jesus Christ.\" -Ephesians 1:1-2"
+    },
+    {
+      "kind": "main",
+      "text": "2. Grace gives you a new identity"
+    },
+    {
+      "kind": "quote",
+      "text": "\"Praise be to the God and Father of our Lord Jesus Christ, who has blessed us in the heavenly realms with every spiritual blessing in Christ. For he chose us in him before the creation of the world to be holy and blameless in his sight. In love he predestined us for adoption to sonship through Jesus Christ, in accordance with his pleasure and will— to the praise of his glorious grace, which he has freely given us in the One he loves.\" -Ephesians 1:3-6"
+    },
+    {
+      "kind": "main",
+      "text": "3. Grace gives you forgiveness"
+    },
+    {
+      "kind": "quote",
+      "text": "\"In him we have redemption through his blood, the forgiveness of sins, in accordance with the riches of God's grace that he lavished on us.\" -Ephesians 1:7-8a"
+    }
+  ]
+}

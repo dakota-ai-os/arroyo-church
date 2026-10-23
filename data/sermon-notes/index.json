@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-23T12:41:08-07:00",
+  "updated": "2026-10-23T15:34:35-07:00",
   "weeks": [
     {
       "service": "2026-10-18",
@@ -7,6 +7,13 @@
       "speaker": "Pastor Josh Smith",
       "release_at": "2026-10-18T06:45:00-07:00",
       "file": "2026-10-18.json"
+    },
+    {
+      "service": "2026-09-13",
+      "title": "Grace That Keeps Giving",
+      "speaker": "Pastor Josh Smith",
+      "release_at": "2026-09-13T06:45:00-07:00",
+      "file": "2026-09-13.json"
     }
   ]
 }
