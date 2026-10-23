@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-23T15:34:39-07:00",
+  "updated": "2026-10-23T15:34:42-07:00",
   "weeks": [
     {
       "service": "2026-10-18",
@@ -7,6 +7,13 @@
       "speaker": "Pastor Josh Smith",
       "release_at": "2026-10-18T06:45:00-07:00",
       "file": "2026-10-18.json"
+    },
+    {
+      "service": "2026-09-27",
+      "title": "Grow in What You Know",
+      "speaker": "Pastor Josh Smith",
+      "release_at": "2026-09-27T06:45:00-07:00",
+      "file": "2026-09-27.json"
     },
     {
       "service": "2026-09-20",
