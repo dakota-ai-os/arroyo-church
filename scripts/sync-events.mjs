@@ -47,7 +47,7 @@
 //
 // Output, sorted by start (times are ISO UTC; format them in America/Los_Angeles):
 //   { updated, events: [ { id, eventId, name, summary, starts, ends, allDay, location, image, url,
-//                          registerUrl, featured, recurrence } ] }
+//                          registerUrl, featured, recurrence, ics } ] }
 //   One row per INSTANCE (id = instance id; instances of one event share eventId). The site folds rows
 //   with the same name + time of day into one card with "More dates" (acEvFold in footer-injection.html).
 //   A recurring series keeps only its next SERIES_ROWS instances (the next one + 3 more dates, all the
@@ -61,6 +61,7 @@
 //   location    the instance's own location text, or null
 //   image/url/registerUrl  http(s) URLs only, else null. url = the Church Center event page
 //   recurrence  the API's recurrence description ("Monthly on the 4th Sunday"), or null
+//   ics         "data/events/ics/<id>.ics", the row's calendar file (see CALENDAR FILES below), or null
 // Window: instances starting in the next ~6 months (WINDOW_DAYS).
 //
 // The file is rewritten only when the events change ("updated" = when they last changed), so the Action
@@ -69,10 +70,20 @@
 // only when PC now hands out one that lasts meaningfully longer, so a URL that expires on a fixed
 // boundary can never make the Action commit on every run.
 //
+// CALENDAR FILES (RFC 5545), written beside data/events.json on every successful run (see writeCalendars):
+//   data/events/ics/<row id>.ics  one event each; the site's "Add to calendar" > Apple / Other link. It has to be a hosted
+//                                 https file (iOS Safari will not open a data: URI), and GitHub Pages serves .ics as
+//                                 text/calendar, so iPhone and Mac Safari open "Add to Calendar".
+//   data/events.ics               every row, a feed people subscribe to (webcal://...). Their calendar app re-reads it on
+//                                 its own schedule (REFRESH-INTERVAL / X-PUBLISHED-TTL are only hints) and so picks up edits
+//                                 and un-publishing. It holds upcoming rows only: an event leaves it (and subscribers'
+//                                 calendars) once it ends.
+// Each is rewritten only when its bytes change, and a row that is no longer public loses its file.
+//
 // Test: node scripts/test-sync-events.mjs (fixture responses, no network, no token).
 
-import { readFileSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFileSync, writeFileSync, renameSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
+import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const API = 'https://api.planningcenteronline.com/calendar/v2';
@@ -390,6 +401,7 @@ function toRow(instance, event, included) {
       registerUrl: httpUrl(e.registration_url),
       featured: e.featured === true,
       recurrence: recurrenceText(a),
+      ics: icsPath(String(instance.id)),
     },
     source: times.source,
     recurring: isRecurring(a),
@@ -489,10 +501,178 @@ function readOld(file) {
   }
 }
 
+// ---- calendar files (RFC 5545) ----
+//   Times     timed rows in UTC ("...Z"); all-day rows as DATE values in Los Angeles calendar days, DTEND the day AFTER
+//             the last one (RFC 5545 makes it exclusive). The day logic is acEvNorm's in footer-injection.html, so the file
+//             and the card agree on the date: an all-day row stamped at UTC midnight is read in UTC.
+//   LOCATION  PC's own text, with a bare "Arroyo Church" expanded to the street address; left out when PC has none.
+//   DESCRIPTION  the summary, a blank line, then "Details: <Church Center page>" and "Register: <link>" when present.
+//   URL       the registration link, else the Church Center page.
+//   TRANSP    all-day rows are TRANSPARENT, so a day-long event does not mark someone busy all day.
+//   DTSTAMP / LAST-MODIFIED  when this sync first wrote the event as it now stands: read back from the existing file and
+//             kept while nothing else in it changes, so a quiet run leaves every byte alone and the Action commits nothing.
+//   SEQUENCE  that stamp in minutes since 2026-01-01, so every restamp raises it (3.8.7.4) and a calendar that already
+//             holds the event can tell the newer copy; derived, not stored, so it is as byte-stable as the stamp.
+// The site builds its Google and Outlook links from the same fields (acEvCalData in footer-injection.html).
+
+export const ICS_DIR = 'data/events/ics/';   // the row's `ics` path, relative to the repo root (= the Pages site root)
+const TIME_ZONE = 'America/Los_Angeles';
+const CHURCH_ADDRESS = 'Arroyo Church, 945 Concannon Blvd, Livermore, CA 94550';
+const SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/;    // PC ids are digits; anything else never becomes a file name
+const CAL_HEAD = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Arroyo Church//Events//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+const FEED_HEAD = [
+  ...CAL_HEAD, 'NAME:Arroyo Church', 'X-WR-CALNAME:Arroyo Church', 'X-WR-TIMEZONE:' + TIME_ZONE,
+  'X-WR-CALDESC:Upcoming events at Arroyo Church in Livermore\\, CA', 'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
+  'X-PUBLISHED-TTL:PT6H',
+];
+const STAMP = /\r\nDTSTAMP:(\d{8}T\d{6}Z)\r\n/;
+const UTC_MIDNIGHT = /T(00:00|23:59)(:\d\d(\.\d+)?)?(Z|[+-]00:?00)$/; // acUtcMid in footer-injection.html
+const SEQ_EPOCH = Date.UTC(2026, 0, 1);
+
+export const icsPath = id => (SAFE_ID.test(id) ? ICS_DIR + id + '.ics' : null);
+
+// TEXT values (3.3.11): backslash, semicolon, comma and line breaks escaped; other control characters dropped.
+export function icsText(s) {
+  return String(s)
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '')
+    .replace(/[;,\\]/g, c => '\\' + c)
+    .replace(/\n/g, '\\n');
+}
+
+// Content lines over 75 octets fold onto continuation lines that start with one space, the space counted (3.1). Splits
+// fall between characters, never inside a multi-byte UTF-8 one (an emoji's surrogate pair stays whole too).
+export function icsFold(line) {
+  const out = [];
+  let cur = '';
+  let size = 0;
+  for (const ch of line) {
+    const n = Buffer.byteLength(ch);
+    if (size + n > 75) { out.push(cur); cur = ' '; size = 1; }
+    cur += ch;
+    size += n;
+  }
+  out.push(cur);
+  return out.join('\r\n');
+}
+
+const icsUtc = t => new Date(t).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+const laDayFmt = new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
+function laDay(t) {
+  const p = {};
+  for (const x of laDayFmt.formatToParts(new Date(t))) p[x.type] = x.value;
+  return p.year + p.month + p.day;
+}
+const utcDay = t => new Date(t).toISOString().slice(0, 10).replace(/-/g, '');
+const nextDay = d => utcDay(Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8) + 1));
+
+// An all-day row -> [first day, the day after its last] as YYYYMMDD. PC stores an all-day day as Los Angeles midnight to
+// 23:59:59; the end steps back a second first, so an end AT midnight does not add a day.
+export function allDayDates(row) {
+  const s = Date.parse(row.starts);
+  const e = row.ends ? Date.parse(row.ends) : NaN;
+  const day = UTC_MIDNIGHT.test(row.starts) ? utcDay : laDay;
+  const first = day(s);
+  let last = e > s ? day(e - 1000) : first;
+  if (last < first) last = first;
+  return [first, nextDay(last)];
+}
+
+export const icsLocation = loc => (loc && /^arroyo church$/i.test(loc.trim()) ? CHURCH_ADDRESS : loc || null);
+
+export function icsDescription(row) {
+  const links = [row.url && 'Details: ' + row.url, row.registerUrl && 'Register: ' + row.registerUrl].filter(Boolean);
+  return [row.summary, links.join('\n')].filter(Boolean).join('\n\n') || null;
+}
+
+// A stamp (YYYYMMDDTHHMMSSZ) -> its SEQUENCE: whole minutes since SEQ_EPOCH, never below 0 (0 for an unreadable stamp).
+export function icsSequence(stamp) {
+  const m = /^(\d{4})(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z$/.exec(stamp);
+  if (!m) return 0;
+  return Math.max(0, Math.floor((Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) - SEQ_EPOCH) / 60000));
+}
+
+// One row -> its VEVENT's content lines (unfolded), stamped `stamp` (YYYYMMDDTHHMMSSZ).
+export function icsEvent(row, stamp) {
+  const lines = ['BEGIN:VEVENT', 'UID:' + row.id + '@arroyochurch.com', 'DTSTAMP:' + stamp, 'LAST-MODIFIED:' + stamp,
+    'SEQUENCE:' + icsSequence(stamp)];
+  if (row.allDay) {
+    const [first, end] = allDayDates(row);
+    lines.push('DTSTART;VALUE=DATE:' + first, 'DTEND;VALUE=DATE:' + end);
+  } else {
+    lines.push('DTSTART:' + icsUtc(Date.parse(row.starts)));
+    if (row.ends) lines.push('DTEND:' + icsUtc(Date.parse(row.ends)));  // no end in PC: none invented
+  }
+  lines.push('SUMMARY:' + icsText(row.name));
+  const loc = icsLocation(row.location);
+  if (loc) lines.push('LOCATION:' + icsText(loc));
+  const desc = icsDescription(row);
+  if (desc) lines.push('DESCRIPTION:' + icsText(desc));
+  const url = row.registerUrl || row.url;            // http(s), no whitespace (httpUrl): a URI value, never escaped
+  if (url) lines.push('URL:' + url);
+  if (row.allDay) lines.push('TRANSP:TRANSPARENT');
+  lines.push('END:VEVENT');
+  return lines;
+}
+
+export const calendarText = (head, vevents) => [...head, ...vevents.flat(), 'END:VCALENDAR'].map(icsFold).join('\r\n') + '\r\n';
+
+function readText(file) {
+  try {
+    return readFileSync(file, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function writeAtomic(file, text) {
+  writeFileSync(file + '.tmp', text);
+  renameSync(file + '.tmp', file);
+}
+
+// Writes each row's file and the feed when their bytes change; deletes the .ics of any row no longer in the list.
+export function writeCalendars(events, { icsDir, feedFile, now }) {
+  const stampNow = icsUtc(now.getTime());
+  mkdirSync(icsDir, { recursive: true });
+  mkdirSync(dirname(feedFile), { recursive: true });
+  const keep = new Set();
+  const vevents = [];
+  let written = 0;
+  let removed = 0;
+  for (const row of events) {
+    if (!row.ics || !SAFE_ID.test(row.id)) continue;
+    const name = row.id + '.ics';
+    const file = join(icsDir, name);
+    keep.add(name);
+    const old = readText(file);
+    const was = old && (old.match(STAMP) || [])[1];
+    let lines = was ? icsEvent(row, was) : null;
+    if (!lines || calendarText(CAL_HEAD, [lines]) !== old) {
+      lines = icsEvent(row, stampNow);
+      writeAtomic(file, calendarText(CAL_HEAD, [lines]));
+      written++;
+    }
+    vevents.push(lines);
+  }
+  for (const name of readdirSync(icsDir)) {
+    if (/\.ics$/i.test(name) && !keep.has(name)) {
+      unlinkSync(join(icsDir, name));
+      removed++;
+    }
+  }
+  const feed = calendarText(FEED_HEAD, vevents);
+  if (readText(feedFile) !== feed) {
+    writeAtomic(feedFile, feed);
+    written++;
+  }
+  return { written, removed };
+}
+
 // ---- main ----
 
 export async function run({
   env = process.env, fetchImpl = fetch, now = new Date(), outFile = OUT_FILE, sleep = wait, log = console.log,
+  icsDir = join(dirname(outFile), 'events', 'ics'), feedFile = join(dirname(outFile), 'events.ics'),
 } = {}) {
   const id = (env.PC_EVENTS_APP_ID || '').trim();
   const secret = (env.PC_EVENTS_SECRET || '').trim();
@@ -521,16 +701,23 @@ export async function run({
   }
 
   const old = readOld(outFile);
+  let status = 'unchanged';
   if (old && sameEvents(old.events, events) && !imageRefreshDue(old.events, events, now)) {
     log('sync-events: no change.');
-    return { status: 'unchanged', events };
+  } else {
+    const out = { updated: iso(now.getTime()), events };
+    mkdirSync(dirname(outFile), { recursive: true });
+    writeFileSync(outFile + '.tmp', JSON.stringify(out, null, 2) + '\n');
+    renameSync(outFile + '.tmp', outFile);
+    log('sync-events: wrote ' + outFile);
+    status = 'written';
   }
-  const out = { updated: iso(now.getTime()), events };
-  mkdirSync(dirname(outFile), { recursive: true });
-  writeFileSync(outFile + '.tmp', JSON.stringify(out, null, 2) + '\n');
-  renameSync(outFile + '.tmp', outFile);
-  log('sync-events: wrote ' + outFile);
-  return { status: 'written', events };
+  // checked on every run, not only when events.json changed: the first run after this shipped had no files yet
+  const calendars = writeCalendars(events, { icsDir, feedFile, now });
+  if (calendars.written || calendars.removed) {
+    log(`sync-events: calendar files: ${calendars.written} written, ${calendars.removed} removed.`);
+  }
+  return { status, events, calendars };
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;

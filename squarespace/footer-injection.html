@@ -341,6 +341,40 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .evl-more{font-size:.84rem;color:rgba(22,36,43,.62)}
 .evl-more strong{font-weight:800;color:rgba(22,36,43,.74)}
 .ac-sec .btn.evl-cta{margin-top:.55rem;padding:.6rem 1.2rem;font-size:.88rem}
+/* ADD TO CALENDAR (2026-10-24): the card's buttons sit in one wrapping row; the button opens an inline list under the card's
+   row (not a popover: .evl-card clips with overflow:hidden), and the Subscribe line sits in the /events head */
+.evl-acts{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.55rem}
+.ac-sec .evl-acts .btn.evl-cta{margin-top:0}
+.ac-sec button.btn.evl-calbtn{background:transparent;font-family:inherit;line-height:1.2;text-transform:none;letter-spacing:.02em;margin:0;-webkit-appearance:none;appearance:none;gap:.4rem}
+.ac-sec .btn.evl-calbtn svg{width:16px;height:16px;flex:0 0 16px;color:#2e8fa3}
+.ac-sec .btn.evl-calbtn .evl-chev{width:14px;height:14px;flex-basis:14px;color:currentColor;transition:transform .25s}
+.ac-sec .btn.evl-calbtn[aria-expanded="true"]{border-color:#2e8fa3;background:rgba(46,143,163,.08);transform:none}
+.ac-sec .btn.evl-calbtn[aria-expanded="true"] .evl-chev{transform:rotate(180deg)}
+.ac-sec .btn.evl-calbtn:focus-visible{outline:2px solid #2e8fa3;outline-offset:2px}
+.evl-cal{border-top:1px solid rgba(22,36,43,.08);background:#faf7f0;padding:.95rem 1.2rem 1.1rem}
+.evl-cal[hidden],.evl-sub[hidden]{display:none!important}
+.evl-cal-h{margin:0 0 .6rem;padding:0;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:800;line-height:1.3;letter-spacing:.18em;text-transform:uppercase;color:#7d6228}
+.evl-cal ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem}
+@media(min-width:560px){.evl-cal ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.evl-cal li{margin:0;padding:0;list-style:none;min-width:0}
+.evl-cal li::before{content:none}
+.evl-calopt{display:flex;align-items:center;gap:.65rem;min-height:48px;box-sizing:border-box;padding:.55rem .8rem;border-radius:12px;background:#fff;border:1px solid rgba(22,36,43,.12);color:#16242b;font-size:.92rem;font-weight:800;line-height:1.25;text-decoration:none;overflow-wrap:anywhere;transition:border-color .2s,background .2s}
+.evl-calopt:hover{border-color:#2e8fa3;background:#f3fafb;color:#16242b}
+.evl-calopt:focus-visible{outline:none;border-color:#2e8fa3;box-shadow:0 0 0 3px rgba(46,143,163,.28)}
+.evl-calopt svg{flex:0 0 18px;width:18px;height:18px;color:#2e8fa3}
+.evl-calopt small{display:block;margin-top:.08rem;font-size:.76rem;font-weight:600;color:rgba(22,36,43,.6)}
+.evl-cal-note{margin:.7rem 0 0;font-size:.82rem;line-height:1.5;color:rgba(22,36,43,.62)}
+#ac-events .evl-sub{margin:1.5rem auto 0;max-width:56ch}
+.evl-sub-line{display:flex;align-items:center;justify-content:center;gap:.45rem;margin:0;font-size:.92rem;font-weight:700;line-height:1.45;color:rgba(22,36,43,.78)}
+.evl-sub-line svg{width:17px;height:17px;flex:0 0 17px;color:#2e8fa3}
+.evl-sub-links{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:.45rem;margin:.6rem 0 0;padding:0}
+.evl-sub-links li{margin:0;padding:0;list-style:none}
+.evl-sub-links li::before{content:none}
+.evl-sub-links a{display:inline-flex;align-items:center;min-height:38px;box-sizing:border-box;padding:.4rem .95rem;border-radius:999px;border:1.5px solid rgba(31,107,124,.3);background:rgba(255,255,255,.6);color:#1f6b7c;font-size:.86rem;font-weight:800;line-height:1.2;text-decoration:none;white-space:nowrap;transition:border-color .2s,background .2s}
+.evl-sub-links a:hover{border-color:#2e8fa3;background:#fff;color:#0d2530}
+.evl-sub-links a:focus-visible{outline:2px solid #2e8fa3;outline-offset:2px}
+.evl-sub-note{margin:.6rem 0 0;font-size:.82rem;line-height:1.5;color:rgba(22,36,43,.58)}
+@media(max-width:560px){.ac-sec .evl-acts .btn{flex:1 1 auto;justify-content:center}.evl-cal{padding:.9rem 1rem 1rem}}
 .evl-tl{display:inline-flex;align-items:center;gap:.3rem;margin-top:.3rem;font-size:.9rem;font-weight:800;color:#1f6b7c;text-decoration:none}
 .evl-tl:hover{color:#0d2530;text-decoration:underline;text-underline-offset:3px}
 .evl-empty{display:flex;gap:1rem;align-items:center;max-width:560px;margin:0 auto;padding:1.3rem 1.5rem;box-sizing:border-box;background:#fff;border:1px solid rgba(22,36,43,.08);border-radius:18px;box-shadow:0 8px 20px -14px rgba(22,36,43,.2);font-size:1.02rem;line-height:1.6;color:rgba(22,36,43,.78)}
@@ -1886,7 +1920,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
      data/events.json is written by a GitHub Action from PC Calendar. The token belongs to an admin, so the SYNC filters:
      only events staff set to Church Center visibility Published or Featured get in (Mom's Group, internal and private
      events stay Unpublished). The repo is public, so the JSON only ever holds public events. Contract:
-       { updated, events:[{id,eventId,name,summary,starts,ends,allDay,location,image,url,registerUrl,featured,recurrence}] }
+       { updated, events:[{id,eventId,name,summary,starts,ends,allDay,location,image,url,registerUrl,featured,recurrence,ics}] }
+     (ics = "data/events/ics/<id>.ics", that row's calendar file; see "Add to calendar" below)
      starts/ends = ISO timestamps (PC sends UTC "…Z") or a plain YYYY-MM-DD for an all-day event (then `ends` is the
      LAST day, inclusive); everything is shown in America/Los_Angeles. All of it is staff-typed, so text is escaped and
      only http(s) links/images are used. Instances of one event (same name + same time of day) fold into ONE card with
@@ -1978,7 +2013,109 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     else when=s.day.wd+' &middot; '+tod;
     return {name:name,sum:acEvText(e.summary,400),loc:acEvText(e.location,120),img:acEvUrl(e.image),url:acEvUrl(e.url),reg:acEvUrl(e.registerUrl),
       featured:e.featured===true,rec:acEvRec(e.recurrence),all:all,multi:multi,s:s,last:last,tod:tod,when:when,
-      iso:s.dateOnly?e.starts:new Date(s.t).toISOString(),more:[]};
+      iso:s.dateOnly?e.starts:new Date(s.t).toISOString(),more:[],cal:acEvCalData(e,name,s,en,all,last)};
+  }
+  /* ---- Add to calendar (2026-10-24) ----
+     The sync also writes one calendar file per row (data/events/ics/<id>.ics, RFC 5545; GitHub Pages serves .ics as
+     text/calendar) and a feed of every public event (data/events.ics). Each /events card's "Add to calendar" opens a short
+     list: Apple Calendar = the hosted file (iOS Safari won't open a data: URI; on iPhone/iPad/Mac Safari the file opens
+     "Add to Calendar"), Google Calendar + Outlook.com = their "new event" pages prefilled from the SAME fields the file
+     carries (title, LA dates or UTC times, location, summary + Church Center link), Other = the file again (a computer
+     downloads it; the Outlook app, Samsung Calendar and the rest open it). Apple devices list Apple first, everyone else
+     Google. An added event is a copy and won't follow later edits; the "Subscribe" line at the top of /events adds the
+     feed instead, which picks them up whenever the person's calendar app next refreshes it (the app decides when). The
+     feed holds upcoming events only. Apple + Other (and the Subscribe line) need the row's `ics` path, so a card from a
+     sync that predates the files just shows Google + Outlook.
+     AC_FEED lives on in every subscriber's calendar: keep that URL working for good (a repo or account rename breaks
+     every subscription silently). */
+  var AC_PAGES='https://dakota-ai-os.github.io/arroyo-church/', AC_FEED='dakota-ai-os.github.io/arroyo-church/data/events.ics';
+  var AC_ADDR='Arroyo Church, 945 Concannon Blvd, Livermore, CA 94550', acPlatC=null;
+  var acEvIcDl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+  var acEvIcWeb='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>';
+  var acEvIcChev='<svg class="evl-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  function acPlat(){
+    if(acPlatC) return acPlatC; var ua=navigator.userAgent||'', ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+    return (acPlatC={apple:ios||/Macintosh|Mac OS X/.test(ua),mobile:ios||/Android|Mobi/i.test(ua)});
+  }
+  /* staff text with its line breaks kept (a calendar description), length-capped; the sync already sends plain text */
+  function acEvLines(v,max){
+    if(typeof v!=='string') return ''; var s=v;
+    if(/<[a-z\/!]/i.test(s)){ try{ s=new DOMParser().parseFromString(s.replace(/<br\s*\/?>|<\/(p|div|li)>/gi,'\n'),'text/html').body.textContent||''; }catch(e){ s=s.replace(/<\/?[a-z][^>]*>/gi,' '); } }
+    return s.split(/\r\n|\r|\n/).map(function(l){ return l.replace(/\s+/g,' ').trim(); }).filter(Boolean).join('\n').slice(0,max);
+  }
+  function acPad(n){ return (n<10?'0':'')+n; }
+  function acYmd(p,dash){ var j=dash?'-':''; return p.y+j+acPad(p.m)+j+acPad(p.d); }
+  function acZ(t,compact){ var v=new Date(t).toISOString().replace(/\.\d{3}Z$/,'Z'); return compact?v.replace(/[-:]/g,''):v; }
+  /* one instance -> its calendar fields, the same ones the sync writes into the .ics (icsEvent in scripts/sync-events.mjs):
+     a bare "Arroyo Church" location becomes the street address, no location stays none, no end time stays none */
+  function acEvCalData(e,name,s,en,all,last){
+    try{
+      var loc=acEvText(e.location,200), url=acEvUrl(e.url), reg=acEvUrl(e.registerUrl), links=[];
+      if(/^arroyo church$/i.test(loc)) loc=AC_ADDR;
+      if(url) links.push('Details: '+url); if(reg) links.push('Register: '+reg);
+      var c={title:name,loc:loc,all:all,desc:[acEvLines(e.summary,600),links.join('\n')].filter(Boolean).join('\n\n'),
+        ics:(typeof e.ics==='string'&&/^data\/events\/ics\/[A-Za-z0-9_-]{1,64}\.ics$/.test(e.ics))?AC_PAGES+e.ics:''};
+      if(all){ c.d0=s.day; c.dl=last; c.d1=acUtcDay(Date.UTC(last.y,last.m-1,last.d+1)); } /* d1 = the day after the last (exclusive) */
+      else{ c.t0=s.t; c.t1=en?en.t:s.t; }
+      return c;
+    }catch(x){ return null; }
+  }
+  /* the menu's links, in this device's order */
+  function acCalLinks(c){
+    var E=encodeURIComponent, p=acPlat();
+    var g='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+E(c.title)
+      +'&dates='+(c.all?acYmd(c.d0)+'%2F'+acYmd(c.d1):acZ(c.t0,1)+'%2F'+acZ(c.t1,1))
+      +(c.desc?'&details='+E(c.desc):'')+(c.loc?'&location='+E(c.loc):'')+(c.all?'':'&ctz=America%2FLos_Angeles');
+    /* Outlook.com's compose deep link (Microsoft documents none; this is the form add-to-calendar-button ships). An all-day
+       end is the day after on a computer but the last day itself on a phone, where Outlook's mobile web counts it inclusively */
+    var o='https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent'
+      +'&startdt='+(c.all?acYmd(c.d0,1):E(acZ(c.t0)))+'&enddt='+(c.all?acYmd(p.mobile?c.dl:c.d1,1):E(acZ(c.t1)))
+      +'&allday='+(c.all?'true':'false')+'&subject='+E(c.title)+(c.loc?'&location='+E(c.loc):'')+(c.desc?'&body='+E(c.desc):'');
+    var all={
+      apple:c.ics&&{k:'apple',label:'Apple Calendar',hint:'iPhone, iPad, Mac',href:c.ics,ic:acEvIcCal},
+      google:{k:'google',label:'Google Calendar',hint:'Android, Gmail',href:g,ext:true,ic:acEvIcWeb},
+      outlook:{k:'outlook',label:'Outlook.com',hint:'Outlook on the web',href:o,ext:true,ic:acEvIcWeb},
+      ics:c.ics&&{k:'ics',label:'Other calendar',hint:'Download the .ics file',href:c.ics,ic:acEvIcDl}
+    };
+    return (p.apple?['apple','google','outlook','ics']:['google','outlook','apple','ics']).map(function(k){ return all[k]; }).filter(Boolean);
+  }
+  function acEvCalBtn(ev,i){
+    return ev.cal?'<button type="button" class="btn btn-ghost-dark evl-cta evl-calbtn" aria-expanded="false" aria-controls="evl-cal-'+i+'" data-ev-calbtn data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc('Add to calendar: '+ev.name)+'">'+acEvIcCal+'Add to calendar'+acEvIcChev+'</button>':'';
+  }
+  function acEvCalMenu(ev,i){
+    var c=ev.cal; if(!c) return '';
+    var items=acCalLinks(c).map(function(o){
+      return '<li><a class="evl-calopt" href="'+acEsc(o.href)+'"'+(o.ext?' target="_blank" rel="noopener"':'')+' data-ev-cal="'+o.k+'">'+o.ic
+        +'<span>'+o.label+'<small>'+o.hint+(o.ext?'<span class="ac-sronly"> (opens in a new tab)</span>':'')+'</small></span></a></li>';
+    }).join('');
+    /* a folded card adds its next date only; say so, and point at the feed for the rest */
+    var note=ev.more.length?'<p class="evl-cal-note">This adds '+acShortDay(ev.s.day)+'.'+(c.ics?' For every date, subscribe to our calendar at the top of this page.':'')+'</p>':'';
+    return '<div class="evl-cal" id="evl-cal-'+i+'" hidden><p class="evl-cal-h">Add to your calendar</p><ul>'+items+'</ul>'+note+'</div>';
+  }
+  function acCalSet(btn,open){
+    var p=document.getElementById(btn.getAttribute('aria-controls')); if(!p) return;
+    btn.setAttribute('aria-expanded',open?'true':'false'); p.hidden=!open;
+  }
+  function acCalCloseAll(except){ [].forEach.call(document.querySelectorAll('[data-ev-calbtn][aria-expanded="true"]'),function(b){ if(b!==except) acCalSet(b,false); }); }
+  /* once per page: a click outside an open list or Escape closes it (Escape hands focus back to its button) */
+  var acCalDoc=false;
+  function acCalWireDoc(){
+    if(acCalDoc) return; acCalDoc=true;
+    document.addEventListener('click',function(e){ if(!(e.target.closest&&e.target.closest('.evl-cal,[data-ev-calbtn]'))) acCalCloseAll(); });
+    document.addEventListener('keydown',function(e){
+      if(e.key!=='Escape'&&e.key!=='Esc') return; var b=document.querySelector('[data-ev-calbtn][aria-expanded="true"]'); if(!b) return;
+      acCalSet(b,false); b.focus();
+    });
+  }
+  /* the /events "Subscribe" line: webcal:// opens Apple Calendar's subscribe sheet; Google and Outlook.com add a feed by URL */
+  function acEvSubLine(){
+    var E=encodeURIComponent, sr='<span class="ac-sronly"> (opens in a new tab)</span>';
+    var l={apple:'<a href="webcal://'+AC_FEED+'" data-ev-sub="apple">Apple Calendar</a>',
+      google:'<a href="https://calendar.google.com/calendar/r?cid='+E('webcal://'+AC_FEED)+'" target="_blank" rel="noopener" data-ev-sub="google">Google Calendar'+sr+'</a>',
+      outlook:'<a href="https://outlook.live.com/calendar/0/addfromweb/?url='+E('https://'+AC_FEED)+'&amp;name='+E('Arroyo Church')+'" target="_blank" rel="noopener" data-ev-sub="outlook">Outlook.com'+sr+'</a>'};
+    return '<p class="evl-sub-line" id="evl-sub-h">'+acEvIcCal+'<span>Subscribe to our calendar</span></p><ul class="evl-sub-links" aria-labelledby="evl-sub-h">'
+      +(acPlat().apple?['apple','google','outlook']:['google','apple','outlook']).map(function(k){ return '<li>'+l[k]+'</li>'; }).join('')+'</ul>'
+      +'<p class="evl-sub-note">Subscribe once and our upcoming events, and any changes to them, show up in your calendar on their own.</p>';
   }
   /* upcoming only, soonest first; same name + same time of day = one card (the next one) with its later dates in .more */
   function acEvFold(list){
@@ -2017,13 +2154,25 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +(!compact&&ev.rec?'<p class="evl-loc evl-repeat">'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></p>':'')
       +(ev.loc?'<p class="evl-loc">'+acEvIcPin+'<span>'+acEsc(ev.loc)+'</span></p>':'')
       +(!compact&&ev.sum?'<p class="evl-sum">'+acEsc(ev.sum)+'</p>':'')
-      +more+btn+'</div></div></article></li>';
+      +more+(compact?btn:((btn||ev.cal)?'<div class="evl-acts">'+btn+acEvCalBtn(ev,i)+'</div>':''))+'</div></div>'
+      +(compact?'':acEvCalMenu(ev,i))+'</article></li>';
   }
   /* GA4 for the card buttons (event_register_click / event_signup_click / event_details_click, event_label = the event's
      name) and the home "See all events" link; an on-site link on the home page jumps instantly (smooth-scroll is !important) */
   function acEvWireClicks(sec,src){
     sec.addEventListener('click',function(e){
       var all=e.target.closest&&e.target.closest('a[data-ev-all]'); if(all){ acTrack(src,{event_name:'events_see_all_click'}); return; }
+      /* Add to calendar: event_add_calendar_open (label = the event), event_add_calendar + event_subscribe_calendar (label =
+         apple / google / outlook / ics). Picking one closes the list and puts focus back on its button. */
+      var cb=e.target.closest&&e.target.closest('[data-ev-calbtn]');
+      if(cb){ var open=cb.getAttribute('aria-expanded')!=='true'; acCalCloseAll(cb); acCalSet(cb,open);
+        if(open) acTrack(src,{event_name:'event_add_calendar_open',label:cb.getAttribute('data-ev-name')}); return; }
+      var co=e.target.closest&&e.target.closest('a[data-ev-cal]');
+      if(co){ acTrack(src,{event_name:'event_add_calendar',label:co.getAttribute('data-ev-cal')});
+        var box=co.closest('.evl-cal'), ob=box&&sec.querySelector('[aria-controls="'+box.id+'"]');
+        if(ob) setTimeout(function(){ acCalSet(ob,false); ob.focus(); },0); return; }
+      var su=e.target.closest&&e.target.closest('a[data-ev-sub]');
+      if(su){ acTrack(src,{event_name:'event_subscribe_calendar',label:su.getAttribute('data-ev-sub')}); return; }
       var a=e.target.closest&&e.target.closest('a[data-ev-cta]'); if(!a) return;
       acTrack(src,{event_name:'event_'+a.getAttribute('data-ev-cta')+'_click',label:a.getAttribute('data-ev-name')});
       var h=a.getAttribute('href')||''; if(h.indexOf('/#')===0&&HOME()){ var el=document.getElementById(h.slice(2)); if(el){ e.preventDefault(); acJumpTo(el); } }
@@ -2065,7 +2214,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       :'Thinking about coming to Arroyo? We&rsquo;d love to have you. Drop your info below and someone from our team will reach out to help you plan your visit.';
     var sec=document.createElement('section'); sec.className='ac-sec ac-events'; sec.id='ac-events';
     sec.innerHTML='<div class="wrap">'
-      +'<div class="evl"><div class="ev-head"><p class="eyebrow ac-rev">What&rsquo;s coming up</p><h1 class="h2 ac-rev">Upcoming at <em>Arroyo.</em></h1><p class="lead ac-rev">Here&rsquo;s what&rsquo;s on the calendar. Everyone is welcome, and we gather every Sunday at 10:00 AM.</p><a class="evl-jump ac-rev" href="#ac-ev-visit">New here? Plan your first visit <span aria-hidden="true">&darr;</span></a></div>'
+      +'<div class="evl"><div class="ev-head"><p class="eyebrow ac-rev">What&rsquo;s coming up</p><h1 class="h2 ac-rev">Upcoming at <em>Arroyo.</em></h1><p class="lead ac-rev">Here&rsquo;s what&rsquo;s on the calendar. Everyone is welcome, and we gather every Sunday at 10:00 AM.</p><a class="evl-jump ac-rev" href="#ac-ev-visit">New here? Plan your first visit <span aria-hidden="true">&darr;</span></a><div class="evl-sub" hidden></div></div>'
       +'<div class="evl-list" aria-busy="true"><div class="evl-grid" aria-hidden="true"><div class="evl-skel"></div><div class="evl-skel"></div></div></div></div>'
       +'<div class="ev-invite" id="ac-ev-visit"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">Plan your <em>first visit.</em></h2><p class="lead ac-rev">'+lead+'</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>'
       +'</div>';
@@ -2080,7 +2229,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var nat=document.getElementById('ac-upcoming'), natBox=null, fallback=false;
     if(nat){ var ns=nat.closest('.page-section'); natBox=(ns&&ns.querySelectorAll('.sqs-block').length===1)?ns:(nat.closest('.fe-block')||nat.closest('.sqs-block')||nat); natBox.style.display='none'; }
     sec.querySelector('.evl-jump').addEventListener('click',function(e){ e.preventDefault(); acJumpTo(document.getElementById('ac-ev-visit')); });
-    acEvWireClicks(sec,'events_page');
+    acEvWireClicks(sec,'events_page'); acCalWireDoc();
     acLoadEvents().then(function(evs){
       var box=sec.querySelector('.evl-list'); if(!box) return; box.removeAttribute('aria-busy');
       if(evs===null&&natBox){
@@ -2102,6 +2251,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         if(k!==cur){ html+=(cur===null?'':'</ul></div>')+'<div class="evl-month"><h2 class="evl-mh">'+AC_MONTH[d.m-1]+(d.y!==yr?' '+d.y:'')+'</h2><ul class="evl-grid">'; cur=k; }
         html+=acEvCard(ev,i,false); });
       box.innerHTML=html+'</ul></div>';
+      /* the Subscribe line only once a row proves the sync writes calendar files (so the feed exists); not ac-rev: it
+         arrives after the reveal observer ran */
+      var sub=sec.querySelector('.evl-sub');
+      if(sub&&evs.some(function(ev){ return ev.cal&&ev.cal.ics; })){ sub.innerHTML=acEvSubLine(); sub.hidden=false; }
     });
     /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live;
        desktop + mobile header heights differ). In the fallback the old block sits above it, so it keeps its normal padding. */

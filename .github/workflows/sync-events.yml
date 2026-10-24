@@ -3,14 +3,15 @@ name: Sync events from Planning Center
 on:
   schedule:
     # Every 30 minutes, so an event published in PC Calendar (Church Center visibility = Published)
-    # reaches arroyochurch.com/events and the home page's "Coming up" strip within ~30 min.
+    # reaches arroyochurch.com/events, the home page's "Coming up" strip and the calendar files
+    # (data/events.ics feed + data/events/ics/<id>.ics, the site's "Add to calendar") within ~30 min.
     # Minutes 13 and 43 rather than */30: GitHub delays, and under load drops, scheduled runs at the
     # top of the hour. Cron is UTC; at a fixed interval that does not matter here.
     - cron: '13,43 * * * *'
   workflow_dispatch:            # allow manual runs from the Actions tab
 
 permissions:
-  contents: write              # needed to commit a refreshed data/events.json
+  contents: write              # needed to commit a refreshed data/events.json + calendar files
 
 concurrency:
   group: sync-events
@@ -48,7 +49,15 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/events.json
+          # The calendar files ride along: the feed (data/events.ics) and one file per event
+          # (data/events/ics/*.ics). -A stages deletions too, so an un-published event's file leaves
+          # the repo (and the site). A path that neither exists nor is tracked is left out: git add
+          # fails on it.
+          paths="data/events.json"
+          for p in data/events.ics data/events; do
+            if [ -e "$p" ] || [ -n "$(git ls-files -- "$p")" ]; then paths="$paths $p"; fi
+          done
+          git add -A -- $paths
           if git diff --staged --quiet; then
             echo "No changes — events already current."
           else

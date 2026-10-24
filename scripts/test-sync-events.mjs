@@ -4,15 +4,16 @@
 // events and event times) and mixes the church's real public events with the private ones that must
 // never reach the public data/events.json. The private ones are in the fixture as if the server had
 // ignored the where[] params, so the script's own filter is what keeps them out. A second fixture
-// answers the pending/rejected event-request query.
+// answers the pending/rejected event-request query. The calendar tests read the .ics files a run writes beside the JSON.
 // The results must not depend on the machine's time zone: run it under TZ=UTC and TZ=America/Los_Angeles.
 
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import {
   run, buildEvents, plainText, isPublic, firstPageUrl, urlExpiry, publicTimes, utcTime, imageRefreshDue,
+  icsText, icsFold, icsEvent, icsSequence, allDayDates, calendarText, writeCalendars,
   API, API_VERSION, WINDOW_DAYS, SERIES_ROWS, HELD_BACK_SCOPE,
 } from './sync-events.mjs';
 
@@ -146,8 +147,8 @@ const HELD = {
 };
 const NO_HELD = { links: { next: null }, data: [], included: [], meta: { total_count: 0, count: 0 } };
 
-const row = r => ({ summary: null, ends: null, allDay: false, location: null, image: null, url: `${CC}/calendar/event/${r.id}`, registerUrl: null, featured: false, recurrence: null, ...r });
-const KEYS = ['id', 'eventId', 'name', 'summary', 'starts', 'ends', 'allDay', 'location', 'image', 'url', 'registerUrl', 'featured', 'recurrence'];
+const row = r => ({ summary: null, ends: null, allDay: false, location: null, image: null, url: `${CC}/calendar/event/${r.id}`, registerUrl: null, featured: false, recurrence: null, ics: `data/events/ics/${r.id}.ics`, ...r });
+const KEYS = ['id', 'eventId', 'name', 'summary', 'starts', 'ends', 'allDay', 'location', 'image', 'url', 'registerUrl', 'featured', 'recurrence', 'ics'];
 const ordered = r => Object.fromEntries(KEYS.map(k => [k, r[k]]));
 const CONNECT = { eventId: '2', name: 'Connect class', summary: 'New to Arroyo? Start here.', recurrence: 'Monthly on the 4th Sunday' };
 const FOUNDATIONS = { eventId: '3', name: 'Foundations class', registerUrl: 'https://arroyo-church-434989.churchcenter.com/registrations/events/2840001' };
@@ -201,7 +202,16 @@ const tests = [];
 const test = (name, fn) => tests.push({ name, fn });
 const tmp = mkdtempSync(join(tmpdir(), 'sync-events-test-'));
 let n = 0;
-const outPath = () => join(tmp, `events-${++n}.json`);
+// a fresh folder per run, since the calendar files land beside the JSON (events/ics/*.ics + events.ics)
+const outPath = () => { const d = join(tmp, `run-${++n}`); mkdirSync(d); return join(d, 'events.json'); };
+const icsDirOf = file => join(dirname(file), 'events', 'ics');
+const feedOf = file => join(dirname(file), 'events.ics');
+const icsFiles = file => (existsSync(icsDirOf(file)) ? readdirSync(icsDirOf(file)).sort() : []);
+const readIcs = (file, id) => readFileSync(join(icsDirOf(file), id + '.ics'), 'utf8');
+// a calendar file -> its unfolded content lines (CRLF + one space = a fold)
+const unfold = text => text.replace(/\r\n /g, '').split('\r\n').filter(Boolean);
+const prop = (text, name) => (unfold(text).find(l => l.startsWith(name + ':') || l.startsWith(name + ';')) || null);
+const allSnapshot = file => Object.fromEntries([...icsFiles(file).map(f => [f, readFileSync(join(icsDirOf(file), f), 'utf8')]), ['feed', existsSync(feedOf(file)) ? readFileSync(feedOf(file), 'utf8') : null]]);
 
 // ---- tests ----
 
@@ -403,6 +413,8 @@ test('missing secrets: skip, exit cleanly, never touch the file or the network',
     assert.equal(r.status, 'skipped');
   }
   assert.equal(f.calls.length, 0);
+  assert.equal(existsSync(icsDirOf(file)), false, 'no calendar files either');
+  assert.equal(existsSync(feedOf(file)), false);
   assert.equal(readFileSync(file, 'utf8'), '{"updated":"x","events":[]}\n');
   const fresh = outPath();
   await run({ env: {}, fetchImpl: f.impl, now: NOW, outFile: fresh, ...quiet });
@@ -432,6 +444,8 @@ test('API errors keep the last-good file, never echo the secret, and say whether
     });
   }
   assert.equal(readFileSync(file, 'utf8'), 'LAST GOOD');
+  assert.equal(existsSync(icsDirOf(file)), false, 'a failed run writes no calendar files');
+  assert.equal(existsSync(feedOf(file)), false);
 });
 
 test('retries a 429 after Retry-After, then succeeds', async () => {
@@ -491,6 +505,183 @@ test('the log names kept events only', async () => {
   for (const word of PRIVATE) assert.ok(!text.includes(word), 'log leaked: ' + word);
   assert.match(text, /held back: event request pending or rejected/);
   assert.match(text, /Parents Night Out/);
+});
+
+// ---- calendar files ----
+
+test('calendar text: escaping and control characters', () => {
+  assert.equal(icsText('Back\\slash; semi, comma\nline\r\nCRLF\rCR'), 'Back\\\\slash\\' + '; semi\\, comma\\nline\\nCRLF\\nCR');
+  assert.equal(icsText('tab\tok\u0007bell\u0000nul'), 'tab\tokbellnul', 'HTAB kept, other controls dropped');
+  assert.equal(icsText('Pizza & “quotes” — fine: 🙏'), 'Pizza & “quotes” — fine: 🙏');
+});
+
+test('folding: 75 octets max, never inside a UTF-8 character, unfolds to the original', () => {
+  const cases = [
+    'DESCRIPTION:' + 'a'.repeat(200),
+    'SUMMARY:' + 'é'.repeat(80),                                  // 2-byte chars across every fold
+    'DESCRIPTION:' + 'x'.repeat(62) + '🙏🏽 Café niño ' + '漢字'.repeat(40) + ' 👨‍👩‍👧 end', // fold lands inside the emoji run
+    'LOCATION:' + 'b'.repeat(66),                                 // exactly 75: no fold
+    'LOCATION:' + 'b'.repeat(67),                                 // 76: one fold
+  ];
+  for (const line of cases) {
+    const folded = icsFold(line);
+    const parts = folded.split('\r\n');
+    for (const [k, p] of parts.entries()) {
+      const bytes = Buffer.from(p, 'utf8');
+      assert.ok(bytes.length <= 75, `line ${k} is ${bytes.length} octets`);
+      assert.equal(bytes.toString('utf8'), p, 'each physical line is whole UTF-8');
+      assert.ok(!p.includes('�'));
+      if (k > 0) assert.equal(p[0], ' ', 'continuations start with one space');
+      if (k > 0) assert.ok(bytes.length > 1, 'no empty continuation');
+    }
+    assert.equal(folded.replace(/\r\n /g, ''), line);
+  }
+  assert.equal(icsFold('LOCATION:' + 'b'.repeat(66)).includes('\r\n'), false);
+  assert.equal(icsFold('LOCATION:' + 'b'.repeat(67)).split('\r\n').length, 2);
+  // a continuation never splits a surrogate pair either
+  const folded = icsFold('X:' + '🙏'.repeat(60));
+  for (const p of folded.split('\r\n')) assert.ok(!/[\uD800-\uDBFF]$/.test(p) && !/^ ?[\uDC00-\uDFFF]/.test(p));
+});
+
+test('all-day dates: Los Angeles days, exclusive end, multi-day, across DST, UTC-midnight stamps', () => {
+  const d = (starts, ends) => allDayDates({ starts, ends, allDay: true });
+  assert.deepEqual(d('2026-10-25T07:00:00Z', '2026-10-26T06:59:59Z'), ['20261025', '20261026'], 'one PDT day');
+  assert.deepEqual(d('2026-11-07T08:00:00Z', '2026-11-08T07:59:59Z'), ['20261107', '20261108'], 'one PST day');
+  assert.deepEqual(d('2026-11-06T08:00:00Z', '2026-11-09T07:59:59Z'), ['20261106', '20261109'], 'Fri-Sun');
+  assert.deepEqual(d('2026-10-31T07:00:00Z', '2026-11-02T07:59:59Z'), ['20261031', '20261102'], 'across the Nov 1 DST change');
+  assert.deepEqual(d('2026-12-31T08:00:00Z', '2027-01-02T08:00:00Z'), ['20261231', '20270102'], 'end AT midnight adds no day; year rollover');
+  assert.deepEqual(d('2026-12-24T00:00:00Z', '2026-12-25T00:00:00Z'), ['20261224', '20261225'], 'UTC-midnight stamp read in UTC (as the site does)');
+  assert.deepEqual(d('2026-11-18T08:00:00Z', null), ['20261118', '20261119'], 'no end: one day');
+});
+
+test('event fields: UTC times, location, description, URL, all-day transparency', () => {
+  const pno = { ...EXPECTED.find(e => e.id === '1201'), location: 'Arroyo Church' };
+  const l = icsEvent(pno, '20261024T160000Z');
+  assert.deepEqual(l.slice(0, 7), ['BEGIN:VEVENT', 'UID:1201@arroyochurch.com', 'DTSTAMP:20261024T160000Z', 'LAST-MODIFIED:20261024T160000Z', 'SEQUENCE:427200', 'DTSTART:20270213T010000Z', 'DTEND:20270213T040000Z']);
+  assert.ok(l.includes('SUMMARY:Parents Night Out'));
+  assert.ok(l.includes('LOCATION:Arroyo Church\\, 945 Concannon Blvd\\, Livermore\\, CA 94550'), 'bare "Arroyo Church" expanded');
+  assert.ok(l.includes('DESCRIPTION:Drop the kids off for a night of games & pizza.\\nAges 3–10.\\nFree — just RSVP.\\n\\nDetails: ' + CC + '/calendar/event/1201\\nRegister: ' + CC + '/registrations/events/2850002'));
+  assert.ok(l.includes('URL:' + CC + '/registrations/events/2850002'), 'URL = the registration link');
+  assert.ok(!l.includes('TRANSP:TRANSPARENT'));
+  // a room name stays as PC has it; no location in PC = no LOCATION line
+  assert.ok(icsEvent(EXPECTED[1], 'x').includes('LOCATION:Arroyo Church\\, Room 4'));
+  const bap = icsEvent(EXPECTED[0], '20261024T160000Z');
+  assert.ok(!bap.some(x => x.startsWith('LOCATION')), 'no invented location');
+  assert.ok(bap.includes('DTSTART;VALUE=DATE:20261025') && bap.includes('DTEND;VALUE=DATE:20261026') && bap.includes('TRANSP:TRANSPARENT'));
+  assert.ok(bap.includes('DESCRIPTION:Details: ' + CC + '/calendar/event/101') && bap.includes('URL:' + CC + '/calendar/event/101'));
+  // no end in PC: no DTEND invented; no url either: no DESCRIPTION / URL
+  const bare = icsEvent({ id: '9', name: 'Bare', starts: '2026-11-01T19:00:00Z', ends: null, allDay: false, location: null, summary: null, url: null, registerUrl: null }, 'x');
+  assert.deepEqual(bare.slice(4), ['SEQUENCE:0', 'DTSTART:20261101T190000Z', 'SUMMARY:Bare', 'END:VEVENT']);
+  // the whole file: CRLF only, folded, valid frame
+  const text = calendarText(['BEGIN:VCALENDAR', 'VERSION:2.0'], [l]);
+  assert.ok(!/[^\r]\n/.test(text) && text.endsWith('END:VCALENDAR\r\n'));
+  assert.ok(text.split('\r\n').every(x => Buffer.byteLength(x) <= 75));
+});
+
+test('SEQUENCE: the stamp in minutes since 2026-01-01, so a later stamp always gets a higher one', () => {
+  assert.equal(icsSequence('20261024T160000Z'), 427200);
+  assert.equal(icsSequence('20261024T160059Z'), 427200, 'whole minutes');
+  assert.equal(icsSequence('20261024T160100Z'), 427201);
+  assert.equal(icsSequence('20260101T000000Z'), 0);
+  assert.equal(icsSequence('20251231T235959Z'), 0, 'never below 0');
+  assert.equal(icsSequence('x'), 0, 'unreadable stamp');
+  assert.ok(icsSequence('20991231T235959Z') < 2 ** 31, 'an RFC 5545 INTEGER for decades');
+});
+
+test('a run writes one file per public row + the feed, and nothing for a private or held-back event', async () => {
+  const file = outPath();
+  const r = await run({ env: ENV, fetchImpl: fakeFetch().impl, now: NOW, outFile: file, ...quiet });
+  assert.deepEqual(r.calendars, { written: EXPECTED.length + 1, removed: 0 });
+  assert.deepEqual(icsFiles(file), EXPECTED.map(e => e.id + '.ics').sort());
+  assert.deepEqual(JSON.parse(readFileSync(file, 'utf8')).events.map(e => e.ics), EXPECTED.map(e => `data/events/ics/${e.id}.ics`));
+  const feed = readFileSync(feedOf(file), 'utf8');
+  const all = feed + icsFiles(file).map(f => readFileSync(join(icsDirOf(file), f), 'utf8')).join('');
+  for (const word of [...PRIVATE, 'Private Ln', 'Festival Field', 'UID:601@', 'UID:801@', 'UID:901@', 'UID:701@', 'UID:1001@', 'UID:1301@', 'UID:1401@', 'UID:1402@']) {
+    assert.ok(!all.includes(word), 'leaked into a calendar file: ' + word);
+  }
+  // the feed: calendar name, zone, refresh hints, every row once, in order
+  for (const h of ['X-WR-CALNAME:Arroyo Church', 'X-WR-TIMEZONE:America/Los_Angeles', 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H', 'METHOD:PUBLISH', 'CALSCALE:GREGORIAN']) {
+    assert.ok(unfold(feed).includes(h), 'feed has ' + h);
+  }
+  assert.deepEqual(unfold(feed).filter(x => x.startsWith('UID:')), EXPECTED.map(e => `UID:${e.id}@arroyochurch.com`));
+  assert.equal(unfold(feed).filter(x => x === 'BEGIN:VEVENT').length, EXPECTED.length);
+  // a single-event file: the same VEVENT the feed carries, no feed-only headers
+  const one = readIcs(file, '1201');
+  assert.equal(unfold(one)[0], 'BEGIN:VCALENDAR');
+  assert.ok(!one.includes('X-WR-CALNAME'));
+  const vevent = t => t.slice(t.indexOf('BEGIN:VEVENT'), t.indexOf('END:VEVENT') + 10);
+  assert.ok(feed.includes(vevent(one)));
+  assert.equal(prop(one, 'DTSTAMP'), 'DTSTAMP:20261024T160000Z');
+  for (const f of icsFiles(file)) {
+    const t = readFileSync(join(icsDirOf(file), f), 'utf8');
+    assert.ok(!/[^\r]\n/.test(t), f + ': CRLF only');
+    assert.ok(t.split('\r\n').every(x => Buffer.byteLength(x) <= 75), f + ': folded');
+  }
+});
+
+test('calendar files are byte-stable across runs: no commit every 30 minutes', async () => {
+  const file = outPath();
+  await run({ env: ENV, fetchImpl: fakeFetch().impl, now: NOW, outFile: file, ...quiet });
+  const first = allSnapshot(file);
+  for (let k = 1; k <= 3; k++) {
+    const r = await run({ env: ENV, fetchImpl: fakeFetch().impl, now: new Date(NOW.getTime() + k * 30 * 60000), outFile: file, ...quiet });
+    assert.equal(r.status, 'unchanged');
+    assert.deepEqual(r.calendars, { written: 0, removed: 0 });
+  }
+  assert.deepEqual(allSnapshot(file), first);
+});
+
+test('editing one event re-stamps only that file (and the feed); the others keep their bytes', async () => {
+  const file = outPath();
+  await run({ env: ENV, fetchImpl: fakeFetch().impl, now: NOW, outFile: file, ...quiet });
+  const before = allSnapshot(file);
+  const moved = structuredClone(PAGE1);
+  Object.assign(moved.data.find(i => i.id === '301').attributes, { location: 'Arroyo Church' });
+  const later = new Date('2026-10-25T03:13:00Z');
+  const r = await run({ env: ENV, fetchImpl: fakeFetch([moved, PAGE2]).impl, now: later, outFile: file, ...quiet });
+  assert.equal(r.status, 'written');
+  assert.deepEqual(r.calendars, { written: 2, removed: 0 });
+  const after = allSnapshot(file);
+  for (const f of Object.keys(before)) if (f !== '301.ics' && f !== 'feed') assert.equal(after[f], before[f], f + ' untouched');
+  assert.equal(prop(after['301.ics'], 'DTSTAMP'), 'DTSTAMP:20261025T031300Z');
+  assert.equal(prop(after['301.ics'], 'LAST-MODIFIED'), 'LAST-MODIFIED:20261025T031300Z');
+  assert.equal(prop(before['301.ics'], 'SEQUENCE'), 'SEQUENCE:427200');
+  assert.equal(prop(after['301.ics'], 'SEQUENCE'), 'SEQUENCE:427873', 'the edit raised SEQUENCE');
+  assert.equal(prop(after['301.ics'], 'LOCATION'), 'LOCATION:Arroyo Church\\, 945 Concannon Blvd\\, Livermore\\, CA 94550');
+  assert.ok(after.feed.includes('DTSTAMP:20261025T031300Z') && after.feed.includes('DTSTAMP:20261024T160000Z'));
+});
+
+test('un-publishing an event deletes its file and drops it from the feed; other files are left alone', async () => {
+  const file = outPath();
+  await run({ env: ENV, fetchImpl: fakeFetch().impl, now: NOW, outFile: file, ...quiet });
+  writeFileSync(join(icsDirOf(file), 'README.txt'), 'not ours');
+  writeFileSync(join(icsDirOf(file), '999.ics'), 'a stale file from an old run');
+  const hidden = structuredClone(PAGE2);
+  hidden.included.find(e => e.type === 'Event' && e.id === '12').attributes.visible_in_church_center = false;
+  const r = await run({ env: ENV, fetchImpl: fakeFetch([PAGE1, hidden]).impl, now: NOW, outFile: file, ...quiet });
+  assert.deepEqual(r.calendars, { written: 1, removed: 2 }, 'the feed rewritten; 1201.ics and the stale 999.ics removed');
+  assert.ok(!icsFiles(file).includes('1201.ics') && !icsFiles(file).includes('999.ics'));
+  assert.ok(icsFiles(file).includes('README.txt'));
+  assert.ok(!readFileSync(feedOf(file), 'utf8').includes('Parents Night Out'));
+  // everything un-published: an empty (still valid-framed) feed and no event files
+  const r2 = await run({ env: ENV, fetchImpl: fakeFetch([NO_HELD], { held: [NO_HELD] }).impl, now: NOW, outFile: file, ...quiet });
+  assert.equal(r2.calendars.removed, EXPECTED.length - 1);
+  assert.deepEqual(icsFiles(file), ['README.txt']);
+  assert.ok(!readFileSync(feedOf(file), 'utf8').includes('BEGIN:VEVENT'));
+});
+
+test('an id that is not a safe file name gets no file and no ics path', async () => {
+  const page = { links: { next: null }, data: [inst('../../x', 1, { name: 'Odd id', starts_at: '2026-11-01T17:00:00Z' })], included: [EVENTS.baptisms] };
+  const file = outPath();
+  const r = await run({ env: ENV, fetchImpl: fakeFetch([page], { held: [NO_HELD] }).impl, now: NOW, outFile: file, ...quiet });
+  assert.equal(r.events.length, 1);
+  assert.equal(r.events[0].ics, null);
+  assert.deepEqual(icsFiles(file), []);
+  assert.ok(!readFileSync(feedOf(file), 'utf8').includes('Odd id'));
+  // writeCalendars on its own refuses it too, even with a forged ics path
+  const dir = join(tmp, 'forged');
+  writeCalendars([{ ...r.events[0], ics: 'data/events/ics/x.ics' }], { icsDir: join(dir, 'ics'), feedFile: join(dir, 'feed.ics'), now: NOW });
+  assert.deepEqual(readdirSync(join(dir, 'ics')), []);
 });
 
 // ---- run ----
