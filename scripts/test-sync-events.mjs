@@ -19,6 +19,7 @@ import {
 
 const NOW = new Date('2026-10-24T16:00:00Z');
 const CC = 'https://arroyo-church-434989.churchcenter.com';
+const EP = 'https://www.arroyochurch.com/events#event-';
 const ENV = { PC_EVENTS_APP_ID: 'app-id-123', PC_EVENTS_SECRET: 'sekrit-value-456' };
 const PRIVATE = ["Mom's Group", 'Team Arroyo Thanksgiving', 'Ramos Baby Shower', 'Connect Group Leader', 'Building closed', 'Visibility unknown', 'Fall Festival'];
 
@@ -648,7 +649,7 @@ test('event fields: UTC times, location, description, URL, all-day transparency'
   assert.deepEqual(l.slice(0, 7), ['BEGIN:VEVENT', 'UID:1201@arroyochurch.com', 'DTSTAMP:20261024T160000Z', 'LAST-MODIFIED:20261024T160000Z', 'SEQUENCE:427200', 'DTSTART:20270213T010000Z', 'DTEND:20270213T040000Z']);
   assert.ok(l.includes('SUMMARY:Parents Night Out'));
   assert.ok(l.includes('LOCATION:Arroyo Church\\, 945 Concannon Blvd\\, Livermore\\, CA 94550'), 'bare "Arroyo Church" expanded');
-  assert.ok(l.includes('DESCRIPTION:Drop the kids off for a night of games & pizza.\\n\\nAges 3–10.\\nFree — just RSVP.\\n\\n• Dinner at 5:30\\n• Movie at 7\\n\\nQuestions? Our kids page (https://www.arroyochurch.com/kids)\\n\\nDetails: ' + CC + '/calendar/event/1201\\nRegister: ' + CC + '/registrations/events/2850002'), 'the description, not the summary');
+  assert.ok(l.includes('DESCRIPTION:Drop the kids off for a night of games & pizza.\\n\\nAges 3–10.\\nFree — just RSVP.\\n\\n• Dinner at 5:30\\n• Movie at 7\\n\\nQuestions? Our kids page (https://www.arroyochurch.com/kids)\\n\\nDetails: ' + EP + '1201\\nRegister: ' + CC + '/registrations/events/2850002'), 'the description, not the summary');
   assert.ok(l.includes('URL:' + CC + '/registrations/events/2850002'), 'URL = the registration link');
   assert.ok(!l.includes('TRANSP:TRANSPARENT'));
   // a room name stays as PC has it; no location in PC = no LOCATION line
@@ -656,10 +657,12 @@ test('event fields: UTC times, location, description, URL, all-day transparency'
   const bap = icsEvent(EXPECTED[0], '20261024T160000Z');
   assert.ok(!bap.some(x => x.startsWith('LOCATION')), 'no invented location');
   assert.ok(bap.includes('DTSTART;VALUE=DATE:20261025') && bap.includes('DTEND;VALUE=DATE:20261026') && bap.includes('TRANSP:TRANSPARENT'));
-  assert.ok(bap.includes('DESCRIPTION:Details: ' + CC + '/calendar/event/101') && bap.includes('URL:' + CC + '/calendar/event/101'));
+  assert.ok(bap.includes('DESCRIPTION:Details: ' + EP + '101') && bap.includes('URL:' + EP + '101'));
   // no end in PC: no DTEND invented; no url either: no DESCRIPTION / URL
   const bare = icsEvent({ id: '9', name: 'Bare', starts: '2026-11-01T19:00:00Z', ends: null, allDay: false, location: null, summary: null, url: null, registerUrl: null }, 'x');
-  assert.deepEqual(bare.slice(4), ['SEQUENCE:0', 'DTSTART:20261101T190000Z', 'SUMMARY:Bare', 'END:VEVENT']);
+  assert.deepEqual(bare.slice(4), ['SEQUENCE:0', 'DTSTART:20261101T190000Z', 'SUMMARY:Bare', 'DESCRIPTION:Details: ' + EP + '9', 'URL:' + EP + '9', 'END:VEVENT']);
+  const none = icsEvent({ id: '../x', name: 'Bare', starts: '2026-11-01T19:00:00Z', ends: null, allDay: false, location: null, summary: null, url: null, registerUrl: null }, 'x');
+  assert.ok(!none.some(x => x.startsWith('DESCRIPTION') || x.startsWith('URL')), 'no usable id and no url: no DESCRIPTION / URL');
   // the whole file: CRLF only, folded, valid frame
   const text = calendarText(['BEGIN:VCALENDAR', 'VERSION:2.0'], [l]);
   assert.ok(!/[^\r]\n/.test(text) && text.endsWith('END:VCALENDAR\r\n'));
@@ -668,12 +671,14 @@ test('event fields: UTC times, location, description, URL, all-day transparency'
 
 test('DESCRIPTION: the description, else the summary, then the Details / Register lines', () => {
   const base = { id: '7', url: CC + '/calendar/event/7', registerUrl: null };
-  assert.equal(icsDescription({ ...base, summary: 'Short', description: 'Long one.\n\n• Item' }), 'Long one.\n\n• Item\n\nDetails: ' + CC + '/calendar/event/7');
-  assert.equal(icsDescription({ ...base, summary: 'Short', description: null }), 'Short\n\nDetails: ' + CC + '/calendar/event/7');
-  assert.equal(icsDescription({ ...base, summary: 'Short' }), 'Short\n\nDetails: ' + CC + '/calendar/event/7', 'a row from before the field existed');
-  assert.equal(icsDescription({ ...base, url: null, summary: null, description: null }), null);
+  assert.equal(icsDescription({ ...base, summary: 'Short', description: 'Long one.\n\n• Item' }), 'Long one.\n\n• Item\n\nDetails: ' + EP + '7');
+  assert.equal(icsDescription({ ...base, summary: 'Short', description: null }), 'Short\n\nDetails: ' + EP + '7');
+  assert.equal(icsDescription({ ...base, summary: 'Short' }), 'Short\n\nDetails: ' + EP + '7', 'a row from before the field existed');
+  assert.equal(icsDescription({ ...base, url: null, summary: null, description: null }), 'Details: ' + EP + '7');
+  assert.equal(icsDescription({ ...base, id: undefined, summary: 'Short' }), 'Short\n\nDetails: ' + CC + '/calendar/event/7', 'no usable id: Church Center fallback');
+  assert.equal(icsDescription({ ...base, id: undefined, url: null, summary: null, description: null }), null);
   const line = icsEvent({ ...base, name: 'X', starts: '2026-11-01T19:00:00Z', ends: null, allDay: false, location: null, summary: null, description: 'A, b; c\\d\n\nnext' }, 'x').find(x => x.startsWith('DESCRIPTION:'));
-  assert.equal(line, 'DESCRIPTION:A\\, b\\; c\\\\d\\n\\nnext\\n\\nDetails: ' + CC + '/calendar/event/7', 'escaped as TEXT');
+  assert.equal(line, 'DESCRIPTION:A\\, b\\; c\\\\d\\n\\nnext\\n\\nDetails: ' + EP + '7', 'escaped as TEXT');
 });
 
 test('SEQUENCE: the stamp in minutes since 2026-01-01, so a later stamp always gets a higher one', () => {

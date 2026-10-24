@@ -624,7 +624,7 @@ function readOld(file) {
 //             the last one (RFC 5545 makes it exclusive). The day logic is acEvNorm's in footer-injection.html, so the file
 //             and the card agree on the date: an all-day row stamped at UTC midnight is read in UTC.
 //   LOCATION  PC's own text, with a bare "Arroyo Church" expanded to the street address; left out when PC has none.
-//   DESCRIPTION  the description (else the summary), a blank line, then "Details: <Church Center page>" and "Register: <link>"
+//   DESCRIPTION  the description (else the summary), a blank line, then "Details: <our /events#event-<id> panel>" and "Register: <link>"
 //             when present. Both are plain text built here, so the same PC text always gives the same bytes.
 //   URL       the registration link, else the Church Center page.
 //   TRANSP    all-day rows are TRANSPARENT, so a day-long event does not mark someone busy all day.
@@ -699,8 +699,14 @@ export function allDayDates(row) {
 
 export const icsLocation = loc => (loc && /^arroyo church$/i.test(loc.trim()) ? CHURCH_ADDRESS : loc || null);
 
+// The event's own panel on our site (2026-10-24: Dakota found the Church Center page a dead end). A calendar entry's
+// "Details" link and URL go there; only a row without a usable id falls back to Church Center.
+export const EVENT_PAGE = 'https://www.arroyochurch.com/events#event-';
+export const eventPage = row => (typeof row.id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(row.id) ? EVENT_PAGE + row.id : row.url || null);
+
 export function icsDescription(row) {
-  const links = [row.url && 'Details: ' + row.url, row.registerUrl && 'Register: ' + row.registerUrl].filter(Boolean);
+  const page = eventPage(row);
+  const links = [page && 'Details: ' + page, row.registerUrl && 'Register: ' + row.registerUrl].filter(Boolean);
   return [row.description || row.summary, links.join('\n')].filter(Boolean).join('\n\n') || null;
 }
 
@@ -727,7 +733,7 @@ export function icsEvent(row, stamp) {
   if (loc) lines.push('LOCATION:' + icsText(loc));
   const desc = icsDescription(row);
   if (desc) lines.push('DESCRIPTION:' + icsText(desc));
-  const url = row.registerUrl || row.url;            // http(s), no whitespace (httpUrl): a URI value, never escaped
+  const url = row.registerUrl || eventPage(row);     // http(s), no whitespace: a URI value, never escaped
   if (url) lines.push('URL:' + url);
   if (row.allDay) lines.push('TRANSP:TRANSPARENT');
   lines.push('END:VEVENT');

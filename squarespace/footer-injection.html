@@ -2142,7 +2142,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
      long link can fail), the .ics file all of it. */
   function acEvCalData(e,name,s,en,all,last){
     try{
-      var loc=acEvText(e.location,200), url=acEvUrl(e.url), reg=acEvUrl(e.registerUrl), links=[];
+      /* "Details" = this event's own panel on our site, not the Church Center page (Dakota, 2026-10-24) */
+      var loc=acEvText(e.location,200), url=(typeof e.id==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(e.id))?'https://www.arroyochurch.com/events#event-'+e.id:acEvUrl(e.url), reg=acEvUrl(e.registerUrl), links=[];
       if(/^arroyo church$/i.test(loc)) loc=AC_ADDR;
       if(url) links.push('Details: '+url); if(reg) links.push('Register: '+reg);
       var c={title:name,loc:loc,all:all,desc:[acEvDesc(e.description,1000)||acEvLines(e.summary,600),links.join('\n')].filter(Boolean).join('\n\n'),
