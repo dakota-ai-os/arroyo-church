@@ -45,5 +45,10 @@ jobs:
             echo "No new draft this run."
           else
             git commit -m "Add weekly sermon blog draft"
-            git push
+            # the events sync commits to main every 30 min too; rebase onto whatever landed meanwhile
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && exit 0
+              sleep 5
+            done
+            exit 1
           fi

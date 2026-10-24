@@ -302,6 +302,68 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 #ac-events .ev-body{display:grid;gap:1.6rem;max-width:960px;margin:0 auto}
 @media(min-width:880px){#ac-events .ev-body{grid-template-columns:1.15fr .85fr;align-items:start}}
 #ac-events .ev-meta{display:flex;flex-direction:column;gap:1.2rem;padding-top:.3rem}
+/* EVENTS LIST (2026-10-24): /events "Upcoming at Arroyo" + the home "Coming up" strip, both built from data/events.json
+   (a GitHub Action writes it from Planning Center Calendar). Cards must look finished with only a title + date, so every
+   other line (location, summary, image, recurrence, button) is simply left out when it's missing. */
+#ac-events .evl{max-width:960px;margin:0 auto}
+#ac-events .evl .ev-head{margin-bottom:clamp(1.8rem,4vw,2.6rem)}
+#ac-events .evl-jump{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-weight:700;font-size:.95rem;color:#1f6b7c;text-decoration:underline;text-underline-offset:3px}
+#ac-events .evl-jump:hover{color:#0d2530}
+#ac-events .ev-invite{max-width:960px;margin:clamp(3.5rem,8vw,5.5rem) auto 0;padding-top:clamp(3rem,7vw,4.5rem);border-top:1px solid rgba(22,36,43,.1)}
+#ac-events.ev-fallback .ev-invite{margin-top:0;padding-top:0;border-top:0} /* feed failed: the old hand-pasted list sits above, so the invite starts the section */
+#ac-events .ev-body .visit-form{margin-top:0} /* line the form up with the facts beside it (the base .visit-form margin pushed it 2.6rem lower) */
+.evl-month{margin:0 0 clamp(1.9rem,4vw,2.5rem)}
+.evl-month:last-child{margin-bottom:0}
+.evl-mh{display:flex;align-items:center;gap:.8rem;font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:800;line-height:1.3;letter-spacing:.2em;text-transform:uppercase;color:#7d6228;margin:0 0 .95rem;padding:0}
+.evl-mh::after{content:"";flex:1;height:1px;background:rgba(22,36,43,.12)}
+/* minmax(0,…) not 1fr, so a long event name can never widen the page on a phone (the 2026-09-28 overflow rule) */
+.evl-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;align-items:start} /* cards keep their own height: a title-only card beside a photo card stays short */
+@media(min-width:820px){.evl-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem}}
+.evl-grid>li{display:flex;min-width:0;margin:0;padding:0;list-style:none}
+.evl-grid>li::before{content:none}
+/* entrance uses fill-mode BACKWARDS only (like .gr-card): these cards arrive after the scroll-reveal observer is set up */
+.evl-card{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid rgba(22,36,43,.08);border-radius:18px;overflow:hidden;box-shadow:0 8px 20px -14px rgba(22,36,43,.2);animation:acRise .6s cubic-bezier(.16,1,.3,1) backwards;animation-delay:var(--d,0s)}
+.evl-card.is-featured{border-color:rgba(200,154,62,.6);box-shadow:0 0 0 1px rgba(200,154,62,.3),0 14px 30px -18px rgba(125,98,40,.45)}
+.evl-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#ece4da}
+.evl-row{flex:1;display:flex;gap:1rem;align-items:flex-start;padding:1.15rem 1.2rem 1.25rem}
+.evl-date{flex:0 0 58px;min-height:62px;box-sizing:border-box;border-radius:14px;padding:.45rem .2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#11303d,#0d2530);color:#fff}
+.evl-mo{font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;line-height:1;color:#e3bd6a}
+.evl-day{font-family:'Fraunces',Georgia,serif;font-size:1.55rem;font-weight:460;line-height:1.05;margin-top:.22rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.evl-day.is-range{font-size:1rem;letter-spacing:-.01em}
+.evl-body{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:.32rem}
+.evl-name{font-family:'Fraunces',Georgia,serif;font-weight:520;font-size:1.18rem;line-height:1.25;letter-spacing:0;text-transform:none;margin:0;padding:0;color:#16242b;overflow-wrap:anywhere}
+.evl-rec{display:inline-block;margin-left:.15rem;padding:.16rem .5rem;border-radius:999px;background:rgba(46,143,163,.11);color:#1f6b7c;font-family:'Manrope',sans-serif;font-size:.64rem;font-weight:800;line-height:1.3;letter-spacing:.12em;text-transform:uppercase;vertical-align:.18em;white-space:nowrap}
+.evl-when,.evl-loc,.evl-more{margin:0;font-size:.92rem;line-height:1.45;overflow-wrap:anywhere}
+.evl-when{font-weight:700;color:#1f6b7c}
+.evl-loc{display:flex;gap:.4rem;align-items:flex-start;color:rgba(22,36,43,.72)}
+.evl-loc svg{flex:0 0 15px;width:15px;height:15px;margin-top:.17rem;color:#2e8fa3}
+.evl-sum{margin:.12rem 0 0;font-size:.93rem;line-height:1.6;color:rgba(22,36,43,.68);overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.evl-more{font-size:.84rem;color:rgba(22,36,43,.62)}
+.evl-more strong{font-weight:800;color:rgba(22,36,43,.74)}
+.ac-sec .btn.evl-cta{margin-top:.55rem;padding:.6rem 1.2rem;font-size:.88rem}
+.evl-tl{display:inline-flex;align-items:center;gap:.3rem;margin-top:.3rem;font-size:.9rem;font-weight:800;color:#1f6b7c;text-decoration:none}
+.evl-tl:hover{color:#0d2530;text-decoration:underline;text-underline-offset:3px}
+.evl-empty{display:flex;gap:1rem;align-items:center;max-width:560px;margin:0 auto;padding:1.3rem 1.5rem;box-sizing:border-box;background:#fff;border:1px solid rgba(22,36,43,.08);border-radius:18px;box-shadow:0 8px 20px -14px rgba(22,36,43,.2);font-size:1.02rem;line-height:1.6;color:rgba(22,36,43,.78)}
+.evl-empty svg{flex:0 0 44px;width:44px;height:44px;padding:11px;box-sizing:border-box;border-radius:13px;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.14));color:#2e8fa3}
+/* loading placeholders: invisible for the first .3s, so a normal (fast) load never flashes them */
+.evl-skel{height:104px;border-radius:18px;opacity:0;background:linear-gradient(90deg,rgba(255,255,255,.5),rgba(255,255,255,.95),rgba(255,255,255,.5));background-size:200% 100%;animation:evlIn .3s .3s forwards,evlShim 1.4s linear infinite}
+@keyframes evlIn{to{opacity:1}}
+@keyframes evlShim{to{background-position:-200% 0}}
+/* HOME "Coming up": a light band between "What to expect" (page beige) and the dark Sermons section; buildComingUp
+   only inserts it when there is something upcoming, so there is never an empty band */
+.ac-upnext{background:#f6f1e6;color:#16242b;padding:clamp(3rem,7vh,4.75rem) 0;border-top:1px solid rgba(22,36,43,.07)}
+.ac-upnext .up-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:.9rem 1.5rem;margin-bottom:1.6rem}
+.ac-upnext .eyebrow{color:#1f6b7c;margin-bottom:.75rem}
+.ac-upnext .up-h{font-family:'Fraunces',Georgia,serif;font-weight:360;letter-spacing:-.01em;font-size:clamp(1.75rem,3.6vw,2.6rem);line-height:1.1;margin:0;color:#16242b}
+.ac-upnext .up-h em{font-style:italic;color:#2e8fa3}
+.ac-upnext .up-all{display:inline-flex;align-items:center;gap:.4rem;font-weight:800;font-size:.95rem;color:#1f6b7c;text-decoration:none;border-bottom:1.5px solid rgba(31,107,124,.35);padding-bottom:2px;white-space:nowrap}
+.ac-upnext .up-all:hover{color:#0d2530;border-color:#0d2530}
+@media(min-width:760px){.ac-upnext .evl-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}}
+.ac-upnext .evl-row{padding:1rem 1.05rem 1.1rem}
+.ac-upnext .evl-name{font-size:1.1rem}
+@media(max-width:767px){.ac-upnext{padding:2.6rem 0}.ac-upnext .up-head{margin-bottom:1.25rem}}
+@media(max-width:560px){.evl-empty{flex-direction:column;text-align:center}}
+@media (prefers-reduced-motion:reduce){.evl-card,.evl-skel{animation:none}.evl-skel{opacity:1}}
 /* TEAM */
 #ac-team{background:#faf7f0;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
 #ac-team .eyebrow{color:#1f6b7c}
@@ -782,7 +844,8 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
        without them they fell through to 'form_submit' and the ad click went uncounted. */
     var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',visit_page:'plan_visit_submit',events_rsvp:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit',ebook_blog:'ebook_signup'};
     var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
-    try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); if(name==='plan_visit_submit'||name==='join_group_submit'){ window.gtag('event','conversion',{send_to:AC_AW_LEAD,value:1.0,currency:'USD'}); } } else { (window.dataLayer=window.dataLayer||[]).push({event:name,form_source:params.form_source,page:params.page}); } }catch(e){}
+    if(extra&&extra.label) params.event_label=String(extra.label).slice(0,100); /* e.g. which event card was clicked */
+    try{ if(typeof window.gtag==='function'){ window.gtag('event',name,params); if(name==='plan_visit_submit'||name==='join_group_submit'){ window.gtag('event','conversion',{send_to:AC_AW_LEAD,value:1.0,currency:'USD'}); } } else { (window.dataLayer=window.dataLayer||[]).push(Object.assign({event:name},params)); } }catch(e){}
   }
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a'):null; if(!a) return; var h=a.getAttribute('href')||'';
@@ -1819,7 +1882,166 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     sec.innerHTML='<div class="wrap"><div class="gp-head"><p class="eyebrow">Generosity</p><h2>Ways to <em>give</em>.</h2><p class="gp-lead">We give because He gave. Your generosity fuels everything God is doing through Arroyo &mdash; here in Livermore and beyond. Thank you for giving cheerfully.</p></div><div class="gp-grid">'+primary+secondary+'</div><p class="gp-monthly"><strong>Make it monthly.</strong> Recurring gifts give us a steady foundation to plan, serve, and reach more people all year long.</p></div>';
     host.insertBefore(sec, host.firstChild);
   }
-  /* ---- generic /events landing page (QR from invite cards → Plan-a-Visit form) ---- */
+  /* ---- EVENTS from Planning Center Calendar (2026-10-24) ----
+     data/events.json is written by a GitHub Action from PC Calendar. The token belongs to an admin, so the SYNC filters:
+     only events staff set to Church Center visibility Published or Featured get in (Mom's Group, internal and private
+     events stay Unpublished). The repo is public, so the JSON only ever holds public events. Contract:
+       { updated, events:[{id,eventId,name,summary,starts,ends,allDay,location,image,url,registerUrl,featured,recurrence}] }
+     starts/ends = ISO timestamps (PC sends UTC "…Z") or a plain YYYY-MM-DD for an all-day event (then `ends` is the
+     LAST day, inclusive); everything is shown in America/Los_Angeles. All of it is staff-typed, so text is escaped and
+     only http(s) links/images are used. Instances of one event (same name + same time of day) fold into ONE card with
+     "More dates", so a monthly class doesn't fill the page. Two surfaces: the /events list (buildEventsPage) and the
+     home "Coming up" strip (buildComingUp). If the fetch fails, the strip hides and /events falls back to the old
+     hand-pasted list while it's still on the page (see buildEventsPage), else says new events are coming. */
+  var AC_EVENTS_URL='https://dakota-ai-os.github.io/arroyo-church/data/events.json', acEventsP=null;
+  var AC_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var AC_MONTH=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var AC_WDAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  /* events with an on-site signup form, used when PC has no registration link (the old hand-made /events list sent
+     Connect Class to the site's own form too). [name pattern, link, button label] */
+  var AC_EV_LOCAL=[[/^connect class\b/i,'/#ac-connect-class','Save my spot']];
+  var acEvIcPin='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+  var acEvIcRep='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 014-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 01-4 4H4"/></svg>';
+  var acEvIcCal='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>';
+  /* fetched at most once per page view; the cache-bust changes every 10 minutes (the sync runs about every 30) */
+  function acLoadEvents(){
+    if(!acEventsP) acEventsP=fetch(AC_EVENTS_URL+'?cb='+Math.floor(Date.now()/6e5))
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ return (d&&Array.isArray(d.events))?acEvFold(d.events):null; }) /* null = failed; [] = nothing upcoming */
+      .catch(function(){ return null; });
+    return acEventsP;
+  }
+  var acLaFmt=null;
+  function acEvDay(y,m,d,h,mi){ return {y:y,m:m,d:d,h:h||0,mi:mi||0,wd:AC_WDAY[new Date(Date.UTC(y,m-1,d)).getUTCDay()],key:y*10000+m*100+d}; }
+  /* Los Angeles wall-clock date + time of a UTC instant */
+  function acLa(t){
+    if(!acLaFmt) acLaFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false});
+    var o={}; acLaFmt.formatToParts(new Date(t)).forEach(function(p){ o[p.type]=p.value; });
+    return acEvDay(+o.year,+o.month,+o.day,(+o.hour)%24,+o.minute);
+  }
+  function acUtcDay(t){ var d=new Date(t); return acEvDay(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()); }
+  function acUtcMid(v){ return /T(00:00|23:59)(:\d\d(\.\d+)?)?(Z|[+-]00:?00)$/.test(v||''); }
+  function acEvTime(v){
+    if(typeof v!=='string'||!v) return null;
+    var m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(m) return {t:Date.UTC(+m[1],+m[2]-1,+m[3],8),dateOnly:true,day:acEvDay(+m[1],+m[2],+m[3])}; /* 08:00Z ≈ midnight Pacific; only used for sorting */
+    var t=Date.parse(v); return isNaN(t)?null:{t:t,dateOnly:false,day:acLa(t)};
+  }
+  /* plain text from a staff field (strips tags if PC ever sends rich text; DOMParser documents are inert), length-capped */
+  function acEvText(v,max){
+    if(typeof v!=='string') return ''; var s=v;
+    if(/<[a-z\/!]/i.test(s)){ try{ s=new DOMParser().parseFromString(s,'text/html').body.textContent||''; }catch(e){ s=s.replace(/<\/?[a-z][^>]*>/gi,' '); } }
+    s=s.replace(/\s+/g,' ').trim(); return s.length>max?s.slice(0,max-1).replace(/\s+\S*$/,'')+'…':s;
+  }
+  function acEvUrl(v){ v=typeof v==='string'?v.trim():''; return /^https?:\/\/[^\s"'<>]+$/i.test(v)?v:''; } /* http(s) only: never javascript:/data: */
+  /* recurrence = PC's own description ("Monthly on the 4th Sunday"): shown in full on /events; the home card's chip
+     uses just its frequency word ("Monthly"), or nothing when it doesn't start with one */
+  function acEvRec(v){ v=acEvText(v,90); return (!v||/^(none|null|false|no|never|once|custom|does not repeat)$/i.test(v))?'':v.charAt(0).toUpperCase()+v.slice(1); }
+  function acEvRecWord(r){ var m=/^(daily|weekly|biweekly|monthly|quarterly|yearly|annually)\b/i.exec(r||''); return m?m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase():''; }
+  function acHm(p){ return (p.h%12||12)+(p.mi?':'+(p.mi<10?'0':'')+p.mi:''); }
+  function acMer(p){ return p.h<12?'am':'pm'; }
+  /* "6–8pm", "11:30am–1pm", "5pm" (the same style as the group schedules) */
+  function acTimeRange(a,b){
+    if(!b||(a.h===b.h&&a.mi===b.mi)) return acHm(a)+acMer(a);
+    return acMer(a)===acMer(b)?acHm(a)+'&ndash;'+acHm(b)+acMer(b):acHm(a)+acMer(a)+'&ndash;'+acHm(b)+acMer(b);
+  }
+  function acShortDay(p){ return p.wd.slice(0,3)+', '+AC_MON[p.m-1]+' '+p.d; }
+  /* one PC instance -> a display record, or null when it's unusable or already over */
+  function acEvNorm(e,now){
+    if(!e) return null;
+    var name=acEvText(e.name,120), s=acEvTime(e.starts); if(!name||!s) return null;
+    var en=acEvTime(e.ends); if(en&&en.t<s.t) en=null;
+    var all=e.allDay===true||s.dateOnly, last;
+    if(all){
+      /* an all-day day stamped at UTC midnight (never Pacific midnight) is a calendar date: read it in UTC, not LA */
+      var utc=!s.dateOnly&&acUtcMid(e.starts), dayOf=utc?acUtcDay:acLa;
+      if(utc) s.day=acUtcDay(s.t);
+      last=(en&&en.dateOnly)?en.day:((en&&en.t>s.t)?dayOf(en.t-1000):s.day); if(last.key<s.day.key) last=s.day; /* an all-day end is midnight or 23:59:59: step back 1s for its last day */
+    }
+    else{
+      last=en?en.day:s.day;
+      /* an evening that runs to midnight (or a little past, up to 3am) is still one evening: "Friday · 5pm–12am",
+         not a two-day "12–13" range */
+      if(en&&last.key!==s.day.key&&en.t-s.t<864e5&&last.h*60+last.mi<=180) last=s.day;
+    }
+    var over=all?Date.UTC(last.y,last.m-1,last.d+1,8):(en?en.t:s.t+2*36e5); /* all-day: gone after its last day (Pacific); no end time = 2h */
+    if(over<=now) return null;
+    var multi=last.key!==s.day.key, tod=all?'All day':acTimeRange(s.day,en&&!multi?en.day:null), when;
+    if(all) when=multi?acShortDay(s.day)+' &ndash; '+acShortDay(last):s.day.wd+' &middot; All day';
+    else if(multi) when=acShortDay(s.day)+', '+acHm(s.day)+acMer(s.day)+' &ndash; '+acShortDay(last)+(en?', '+acHm(en.day)+acMer(en.day):'');
+    else when=s.day.wd+' &middot; '+tod;
+    return {name:name,sum:acEvText(e.summary,400),loc:acEvText(e.location,120),img:acEvUrl(e.image),url:acEvUrl(e.url),reg:acEvUrl(e.registerUrl),
+      featured:e.featured===true,rec:acEvRec(e.recurrence),all:all,multi:multi,s:s,last:last,tod:tod,when:when,
+      iso:s.dateOnly?e.starts:new Date(s.t).toISOString(),more:[]};
+  }
+  /* upcoming only, soonest first; same name + same time of day = one card (the next one) with its later dates in .more */
+  function acEvFold(list){
+    var now=Date.now(), byKey={}, out=[];
+    list.map(function(e){ try{ return acEvNorm(e,now); }catch(x){ return null; } }).filter(Boolean).sort(function(a,b){ return a.s.t-b.s.t; }).forEach(function(ev){
+      var k=ev.name.toLowerCase()+'|'+ev.tod+'|'+(ev.multi?'m':''), g=byKey[k];
+      if(!g){ byKey[k]=ev; out.push(ev); return; }
+      g.more.push(ev); if(ev.featured) g.featured=true;
+      ['sum','loc','img','url','reg','rec'].forEach(function(f){ if(!g[f]&&ev[f]) g[f]=ev[f]; });
+    });
+    return out;
+  }
+  function acEvCta(ev){
+    if(ev.reg) return {href:ev.reg,label:'Register',ext:true,kind:'register'};
+    for(var i=0;i<AC_EV_LOCAL.length;i++){ if(AC_EV_LOCAL[i][0].test(ev.name)) return {href:AC_EV_LOCAL[i][1],label:AC_EV_LOCAL[i][2],ext:false,kind:'signup'}; }
+    if(ev.url) return {href:ev.url,label:'Details',ext:true,kind:'details'};
+    return null;
+  }
+  /* one card; compact = the home strip (no image, summary or extra dates; a text link instead of a button) */
+  function acEvCard(ev,i,compact){
+    var s=ev.s.day, range=ev.multi&&ev.last.m===s.m&&ev.last.y===s.y, cta=acEvCta(ev), more='', btn='';
+    if(!compact&&ev.more.length){
+      more='<p class="evl-more"><strong>More dates:</strong> '+ev.more.slice(0,3).map(function(x){ return AC_MON[x.s.day.m-1]+' '+x.s.day.d; }).join(' &middot; ')
+        +(ev.more.length>3&&!ev.rec?' &middot; +'+(ev.more.length-3)+' more':'')+'</p>';
+    }
+    if(cta){
+      var attrs=' href="'+acEsc(cta.href)+'"'+(cta.ext?' target="_blank" rel="noopener"':'')+' data-ev-cta="'+cta.kind+'" data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc(cta.label+': '+ev.name)+(cta.ext?' (opens in a new tab)':'')+'"';
+      btn=compact?'<a class="evl-tl"'+attrs+'>'+cta.label+' <span aria-hidden="true">&rarr;</span></a>'
+        :'<a class="btn '+(cta.kind==='details'?'btn-ghost-dark':'btn-gold')+' evl-cta"'+attrs+'>'+cta.label+'</a>';
+    }
+    return '<li><article class="evl-card'+(ev.featured?' is-featured':'')+'" style="--d:'+(Math.min(i,8)*0.05).toFixed(2)+'s">'
+      +(!compact&&ev.img?'<img class="evl-img" src="'+acEsc(ev.img)+'" alt="" loading="lazy" decoding="async" onerror="this.remove()">':'')
+      +'<div class="evl-row"><div class="evl-date" aria-hidden="true"><span class="evl-mo">'+AC_MON[s.m-1]+'</span><span class="evl-day'+(range?' is-range':'')+'">'+s.d+(range?'&ndash;'+ev.last.d:'')+'</span></div>'
+      +'<div class="evl-body"><h3 class="evl-name">'+acEsc(ev.name)+(compact&&acEvRecWord(ev.rec)?' <span class="evl-rec">'+acEsc(acEvRecWord(ev.rec))+'</span>':'')+'</h3>'
+      +'<p class="evl-when"><time datetime="'+acEsc(ev.iso)+'">'+(ev.multi?'':'<span class="ac-sronly">'+AC_MONTH[s.m-1]+' '+s.d+', </span>')+ev.when+'</time></p>'
+      +(!compact&&ev.rec?'<p class="evl-loc evl-repeat">'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></p>':'')
+      +(ev.loc?'<p class="evl-loc">'+acEvIcPin+'<span>'+acEsc(ev.loc)+'</span></p>':'')
+      +(!compact&&ev.sum?'<p class="evl-sum">'+acEsc(ev.sum)+'</p>':'')
+      +more+btn+'</div></div></article></li>';
+  }
+  /* GA4 for the card buttons (event_register_click / event_signup_click / event_details_click, event_label = the event's
+     name) and the home "See all events" link; an on-site link on the home page jumps instantly (smooth-scroll is !important) */
+  function acEvWireClicks(sec,src){
+    sec.addEventListener('click',function(e){
+      var all=e.target.closest&&e.target.closest('a[data-ev-all]'); if(all){ acTrack(src,{event_name:'events_see_all_click'}); return; }
+      var a=e.target.closest&&e.target.closest('a[data-ev-cta]'); if(!a) return;
+      acTrack(src,{event_name:'event_'+a.getAttribute('data-ev-cta')+'_click',label:a.getAttribute('data-ev-name')});
+      var h=a.getAttribute('href')||''; if(h.indexOf('/#')===0&&HOME()){ var el=document.getElementById(h.slice(2)); if(el){ e.preventDefault(); acJumpTo(el); } }
+    });
+  }
+  /* ---- HOME "Coming up": up to 3 events (Featured first, then soonest) between "What to expect" and Sermons, with a
+     link to /events. Built only once the data says something is upcoming: on an empty list or a failed fetch the
+     section never exists. Independent of the hand-set EV promo above (that one can show the same event; that's fine). ---- */
+  function buildComingUp(){
+    if(!HOME()||document.getElementById('ac-upnext')) return;
+    acLoadEvents().then(function(evs){
+      if(!evs||!evs.length||document.getElementById('ac-upnext')) return;
+      var anchor=document.getElementById('ac-expect')||document.getElementById('ac-cd'); if(!anchor||!anchor.parentNode) return;
+      var pick=evs.slice().sort(function(a,b){ return (b.featured-a.featured)||(a.s.t-b.s.t); }).slice(0,3);
+      var sec=document.createElement('section'); sec.className='ac-sec ac-upnext'; sec.id='ac-upnext'; sec.setAttribute('aria-labelledby','ac-upnext-h');
+      sec.innerHTML='<div class="wrap"><div class="up-head"><div><p class="eyebrow">Coming up</p><h2 class="up-h" id="ac-upnext-h">What&rsquo;s happening <em>at Arroyo.</em></h2></div>'
+        +'<a class="up-all" href="/events" data-ev-all>See all events <span aria-hidden="true">&rarr;</span></a></div>'
+        +'<ul class="evl-grid">'+pick.map(function(ev,i){ return acEvCard(ev,i,true); }).join('')+'</ul></div>';
+      anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+      acEvWireClicks(sec,'home_coming_up');
+    });
+  }
+  /* ---- /events: "Upcoming at Arroyo" (the live list above) + the Plan-a-Visit invite below it. Reached from the
+     invite-card QR codes, Josh's emails, the Google Ads "Upcoming Events" sitelink and (later) the menu. ---- */
   function buildEventsPage(){
     if(!pageIs('/events')) return;
     if(document.getElementById('ac-events')) return;
@@ -1830,12 +2052,54 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
     var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p><a href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">945 Concannon Blvd, Livermore, CA 94550</a><br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Sundays</h3><p>10:00 AM worship &middot; about 70 minutes</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Questions?</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
     var form='<div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll be ready to welcome you</h3><p class="vf-sub">Whether it&rsquo;s an upcoming event or your first Sunday, drop your info below and we&rsquo;ll be looking for you &mdash; takes about 20 seconds.</p></div><form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Which event, how many coming, or anything we should know?</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Count me in</button></div></form></div>';
+    /* `?from=qr` is the house QR tag (the stage sermon-notes QR uses it). Today's invite cards carry no tag, so everyone
+       gets the general line; a future card printed with /events?from=qr gets the warmer one. */
+    var qr=/(?:^|[?&])from=qr(?:&|$)/.test(location.search.slice(1));
+    var lead=qr?'Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.'
+      :'Thinking about coming to Arroyo? We&rsquo;d love to have you. Drop your info below and someone from our team will reach out to help you plan your visit.';
     var sec=document.createElement('section'); sec.className='ac-sec ac-events'; sec.id='ac-events';
-    sec.innerHTML='<div class="wrap"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">We&rsquo;d love to <em>have you.</em></h2><p class="lead ac-rev">Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>';
+    sec.innerHTML='<div class="wrap">'
+      +'<div class="evl"><div class="ev-head"><p class="eyebrow ac-rev">What&rsquo;s coming up</p><h1 class="h2 ac-rev">Upcoming at <em>Arroyo.</em></h1><p class="lead ac-rev">Here&rsquo;s what&rsquo;s on the calendar. Everyone is welcome, and we gather every Sunday at 10:00 AM.</p><a class="evl-jump ac-rev" href="#ac-ev-visit">New here? Plan your first visit <span aria-hidden="true">&darr;</span></a></div>'
+      +'<div class="evl-list" aria-busy="true"><div class="evl-grid" aria-hidden="true"><div class="evl-skel"></div><div class="evl-skel"></div></div></div></div>'
+      +'<div class="ev-invite" id="ac-ev-visit"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">Plan your <em>first visit.</em></h2><p class="lead ac-rev">'+lead+'</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>'
+      +'</div>';
     host.appendChild(sec);
     wireVisitForm(sec,'events_rsvp');
-    /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live; desktop + mobile header heights differ) */
-    function evTop(){ var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
+    /* The page also holds a hand-pasted Squarespace Code Block list (#ac-upcoming, copied from Google Calendar on
+       2026-10-06; it lists Moms Group, which isn't public). The feed's list replaces it, so it's hidden while the feed
+       loads (its whole section when the block is alone in it). If the feed is missing or fails (a 404 before the first
+       sync, GitHub down), the old block comes back instead of a "coming soon" line, minus Moms Group, so deploying this
+       before the sync has run leaves /events as it was. A feed that loads with nothing upcoming is trusted: the old
+       block stays hidden. Delete that block in Squarespace once the feed is live; then a failed fetch shows the line. */
+    var nat=document.getElementById('ac-upcoming'), natBox=null, fallback=false;
+    if(nat){ var ns=nat.closest('.page-section'); natBox=(ns&&ns.querySelectorAll('.sqs-block').length===1)?ns:(nat.closest('.fe-block')||nat.closest('.sqs-block')||nat); natBox.style.display='none'; }
+    sec.querySelector('.evl-jump').addEventListener('click',function(e){ e.preventDefault(); acJumpTo(document.getElementById('ac-ev-visit')); });
+    acEvWireClicks(sec,'events_page');
+    acLoadEvents().then(function(evs){
+      var box=sec.querySelector('.evl-list'); if(!box) return; box.removeAttribute('aria-busy');
+      if(evs===null&&natBox){
+        fallback=true; sec.classList.add('ev-fallback');
+        var l=sec.querySelector('.evl'); if(l) l.parentNode.removeChild(l);
+        /* Dakota (2026-10-24): Mom's Group is a connect group, not a public event. Then re-hide emptied months, the way
+           the block's own script hides past dates */
+        [].forEach.call(nat.querySelectorAll('.ev-item'),function(li){ var h=li.querySelector('h3'); if(h&&/^mom['’]?s?\s+group\b/i.test(h.textContent.trim())) li.hidden=true; });
+        [].forEach.call(nat.querySelectorAll('[data-month]'),function(m){ if(!m.querySelector('.ev-item:not([hidden])')) m.hidden=true; });
+        if(!nat.querySelector('.ev-item:not([hidden])')){ var em=nat.querySelector('.ev-empty'); if(em) em.hidden=false; }
+        natBox.style.display=''; evTop();
+        /* the block sizes itself to the page width on resize; it measured 0 while hidden */
+        try{ dispatchEvent(new Event('resize')); }catch(x){}
+        return;
+      }
+      if(!evs||!evs.length){ box.innerHTML='<p class="evl-empty">'+acEvIcCal+'<span>New events are coming soon. Sundays are at 10am &mdash; we&rsquo;d love to see you.</span></p>'; return; }
+      var yr=acLa(Date.now()).y, cur=null, html='';
+      evs.forEach(function(ev,i){ var d=ev.s.day, k=d.y*100+d.m;
+        if(k!==cur){ html+=(cur===null?'':'</ul></div>')+'<div class="evl-month"><h2 class="evl-mh">'+AC_MONTH[d.m-1]+(d.y!==yr?' '+d.y:'')+'</h2><ul class="evl-grid">'; cur=k; }
+        html+=acEvCard(ev,i,false); });
+      box.innerHTML=html+'</ul></div>';
+    });
+    /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live;
+       desktop + mobile header heights differ). In the fallback the old block sits above it, so it keeps its normal padding. */
+    function evTop(){ if(fallback){ sec.style.paddingTop=''; return; } var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
     evTop(); addEventListener('resize',evTop); setTimeout(evTop,400); setTimeout(evTop,1200);
   }
   /* ---- Time-boxed event promo (2026-09-28): Pumpkin Patch Party, Sun Oct 4 2026. People who saw the
@@ -2038,7 +2302,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       });
     });
   }
-  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGroupDirectory(); buildGive(); buildVisit(); buildCTA(); buildFooter(); buildEventCard(); buildEventBar(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
+  function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildComingUp(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGroupDirectory(); buildGive(); buildVisit(); buildCTA(); buildFooter(); buildEventCard(); buildEventBar(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   /* Squarespace renders the native form block late on some loads; retry so the swap still lands (both are idempotent) */
   setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },600); setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },1800);

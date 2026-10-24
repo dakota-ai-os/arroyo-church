@@ -1,0 +1,62 @@
+name: Sync events from Planning Center
+
+on:
+  schedule:
+    # Every 30 minutes, so an event published in PC Calendar (Church Center visibility = Published)
+    # reaches arroyochurch.com/events and the home page's "Coming up" strip within ~30 min.
+    # Minutes 13 and 43 rather than */30: GitHub delays, and under load drops, scheduled runs at the
+    # top of the hour. Cron is UTC; at a fixed interval that does not matter here.
+    - cron: '13,43 * * * *'
+  workflow_dispatch:            # allow manual runs from the Actions tab
+
+permissions:
+  contents: write              # needed to commit a refreshed data/events.json
+
+concurrency:
+  group: sync-events
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # The repo is public, so data/events.json is public. Never sync with a broken public filter.
+      - name: Test the public-events filter
+        run: node scripts/test-sync-events.mjs
+
+      # No secrets yet = the script logs it and exits 0 without touching the file.
+      # PC down or busy (network, 5xx, rate limit) = a warning, exit 0, last-good file kept.
+      # Anything a human must fix (bad or revoked token, a changed response) = exit 1, last-good file kept.
+      - name: Fetch public events
+        env:
+          PC_EVENTS_APP_ID: ${{ secrets.PC_EVENTS_APP_ID }}
+          PC_EVENTS_SECRET: ${{ secrets.PC_EVENTS_SECRET }}
+        run: node scripts/sync-events.mjs
+
+      - name: Commit if changed
+        run: |
+          if [ ! -f data/events.json ]; then
+            echo "No data/events.json yet — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/events.json
+          if git diff --staged --quiet; then
+            echo "No changes — events already current."
+          else
+            git commit -m "Auto-sync events from Planning Center"
+            # the YouTube sync commits to main too; rebase onto whatever landed meanwhile
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && exit 0
+              sleep 5
+            done
+            exit 1
+          fi
