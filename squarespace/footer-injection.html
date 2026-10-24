@@ -70,6 +70,10 @@ body.header--menu-open .header .burger-inner .bottom-bun{background-color:#0d253
 html.ac-hero-on .header .header-title-logo img{filter:brightness(0) invert(1)}
 html.ac-hero-on.ac-scrolled .header{background:transparent!important;box-shadow:0 1px 0 rgba(255,255,255,.06)}
 html.ac-hero-on .header-background-solid{background:transparent!important}
+/* Desktop menu on narrower screens (2026-10-23): renaming Connect -> "Connect Groups" made Squarespace wrap "Give"
+   onto a second line at ~1024px. Keep the menu on one line and tighten spacing/size between the ☰ breakpoint and 1200px.
+   Checked live: fits at 800, 900, 1024px. If Events is added, take Team out of the menu (Dakota OK'd) or re-check 800px. */
+@media (min-width:768px) and (max-width:1199px){.header-nav-list{flex-wrap:nowrap!important}.header-nav-item{margin-left:clamp(.55rem,1.25vw,1.1rem)!important;white-space:nowrap}.header-nav-item>a{font-size:clamp(13.5px,1.45vw,16px)!important}}
 html.ac-hero-on.ac-scrolled .header-background-solid{background:rgba(13,37,48,.58)!important;-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6)}
 /* ── NAV match-prototype (global): centered links, Manrope, gradient hover-underline ── */
 @media(min-width:768px){.header .header-nav{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%);margin:0}}
