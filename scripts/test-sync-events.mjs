@@ -12,8 +12,8 @@ import { mkdtempSync, mkdirSync, rmSync, readFileSync, writeFileSync, existsSync
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import {
-  run, buildEvents, plainText, isPublic, firstPageUrl, urlExpiry, publicTimes, utcTime, imageRefreshDue,
-  icsText, icsFold, icsEvent, icsSequence, allDayDates, calendarText, writeCalendars,
+  run, buildEvents, plainText, descriptionText, isPublic, firstPageUrl, urlExpiry, publicTimes, utcTime, imageRefreshDue,
+  icsText, icsFold, icsEvent, icsDescription, icsSequence, allDayDates, calendarText, writeCalendars,
   API, API_VERSION, WINDOW_DAYS, SERIES_ROWS, HELD_BACK_SCOPE,
 } from './sync-events.mjs';
 
@@ -74,7 +74,7 @@ const EVENTS = {
   foundations: ev(3, { name: 'Foundations class', registration_url: 'arroyo-church-434989.churchcenter.com/registrations/events/2840001' }),
   mens: ev(4, { name: "Men's Event", registration_url: 'javascript:alert(1)' }),
   worship: ev(5, { name: 'Worship Night', summary: '  An evening of   worship and prayer.  ' }),
-  moms: ev(6, { name: "Mom's Group", visible_in_church_center: false }),
+  moms: ev(6, { name: "Mom's Group", visible_in_church_center: false, description: '<p>Our secret plans</p>' }),
   thanksgiving: ev(7, { name: 'Team Arroyo Thanksgiving', visible_in_church_center: false }),
   shower: ev(8, { name: 'Ramos Baby Shower', link_only: true }),                 // published, but link-only
   blockout: ev(9, { name: 'Building closed' }),                                    // its instance is a blockout
@@ -83,7 +83,8 @@ const EVENTS = {
   pno: ev(12, {
     name: 'Parents Night Out', featured: true, image_url: PNO_IMG,
     registration_url: `${CC}/registrations/events/2850002`,
-    description: '<p>Drop the kids off for a night of games &amp; pizza.</p><p>Ages 3&ndash;10.<br>Free &#8212; just RSVP.</p><script>alert(1)</script>',
+    description: '<p>Drop the kids off for a night of games &amp; pizza.</p><p>Ages 3&ndash;10.<br>Free &#8212; just RSVP.</p>'
+      + '<ul><li>Dinner at 5:30</li><li>Movie at 7</li></ul><p>Questions? <a href="https://www.arroyochurch.com/kids">Our kids page</a></p><script>alert(1)</script>',
   }),
   unknown: ev(13, { name: 'Visibility unknown', visible_in_church_center: null }),
   festival: ev(14, { name: 'Fall Festival', approval_status: 'A' }),             // published, but its event request is pending
@@ -147,11 +148,14 @@ const HELD = {
 };
 const NO_HELD = { links: { next: null }, data: [], included: [], meta: { total_count: 0, count: 0 } };
 
-const row = r => ({ summary: null, ends: null, allDay: false, location: null, image: null, url: `${CC}/calendar/event/${r.id}`, registerUrl: null, featured: false, recurrence: null, ics: `data/events/ics/${r.id}.ics`, ...r });
-const KEYS = ['id', 'eventId', 'name', 'summary', 'starts', 'ends', 'allDay', 'location', 'image', 'url', 'registerUrl', 'featured', 'recurrence', 'ics'];
+const row = r => ({ summary: null, description: null, ends: null, allDay: false, location: null, image: null, url: `${CC}/calendar/event/${r.id}`, registerUrl: null, featured: false, recurrence: null, ics: `data/events/ics/${r.id}.ics`, ...r });
+const KEYS = ['id', 'eventId', 'name', 'summary', 'description', 'starts', 'ends', 'allDay', 'location', 'image', 'url', 'registerUrl', 'featured', 'recurrence', 'ics'];
 const ordered = r => Object.fromEntries(KEYS.map(k => [k, r[k]]));
 const CONNECT = { eventId: '2', name: 'Connect class', summary: 'New to Arroyo? Start here.', recurrence: 'Monthly on the 4th Sunday' };
 const FOUNDATIONS = { eventId: '3', name: 'Foundations class', registerUrl: 'https://arroyo-church-434989.churchcenter.com/registrations/events/2840001' };
+
+const PNO_SUMMARY = 'Drop the kids off for a night of games & pizza.\nAges 3–10.\nFree — just RSVP.\nDinner at 5:30\nMovie at 7\nQuestions? Our kids page';
+const PNO_DESCRIPTION = 'Drop the kids off for a night of games & pizza.\n\nAges 3–10.\nFree — just RSVP.\n\n• Dinner at 5:30\n• Movie at 7\n\nQuestions? Our kids page (https://www.arroyochurch.com/kids)';
 
 const EXPECTED = [
   row({ id: '101', eventId: '1', name: 'Baptisms', starts: '2026-10-25T07:00:00Z', ends: '2026-10-26T06:59:59Z', allDay: true }),
@@ -165,7 +169,7 @@ const EXPECTED = [
   row({ id: '1101', eventId: '11', name: "Women's Event", starts: '2026-12-09T08:00:00Z', ends: '2026-12-10T07:59:59Z', allDay: true }),
   row({ id: '203', ...CONNECT, starts: '2026-12-27T19:30:00Z', ends: '2026-12-27T20:45:00Z' }),
   row({ id: '204', ...CONNECT, starts: '2027-01-24T19:30:00Z', ends: '2027-01-24T20:45:00Z' }),
-  row({ id: '1201', eventId: '12', name: 'Parents Night Out', summary: 'Drop the kids off for a night of games & pizza.\nAges 3–10.\nFree — just RSVP.', starts: '2027-02-13T01:00:00Z', ends: '2027-02-13T04:00:00Z', location: 'Arroyo Church Kids Wing', image: PNO_IMG, registerUrl: `${CC}/registrations/events/2850002`, featured: true }),
+  row({ id: '1201', eventId: '12', name: 'Parents Night Out', summary: PNO_SUMMARY, description: PNO_DESCRIPTION, starts: '2027-02-13T01:00:00Z', ends: '2027-02-13T04:00:00Z', location: 'Arroyo Church Kids Wing', image: PNO_IMG, registerUrl: `${CC}/registrations/events/2850002`, featured: true }),
 ].map(ordered);
 
 // ---- a fake fetch that serves the fixture and records every request ----
@@ -222,7 +226,7 @@ test('public filter: exactly the published, standard, non-link-only, approved ev
 
 test('no private event name, place or id leaks into the output', () => {
   const json = JSON.stringify(buildEvents([...PAGE1_DATA, ...PAGE2_DATA], allIncluded(), NOW, { held: heldIds }));
-  for (const word of [...PRIVATE, 'Private Ln', 'Festival Field', '"601"', '"801"', '"901"', '"701"', '"1001"', '"1301"', '"1401"', '"1402"']) {
+  for (const word of [...PRIVATE, 'Private Ln', 'Festival Field', 'secret plans', '"601"', '"801"', '"901"', '"701"', '"1001"', '"1301"', '"1401"', '"1402"']) {
     assert.ok(!json.includes(word), 'leaked: ' + word);
   }
 });
@@ -292,6 +296,90 @@ test('plainText strips tags, scripts and entities', () => {
   assert.equal(plainText('<style>p{}</style><b>Bold</b> &#x1F64F; &rsquo;'), 'Bold 🙏 ’');
   assert.equal(plainText('<p> </p>'), null);
   assert.equal(plainText(null), null);
+});
+
+test('description: paragraphs, line breaks, list items, links as text (url), entities decoded once', () => {
+  assert.equal(descriptionText('<div>Join us for worship.<br><br>Bring a friend &amp; a chair.</div><ul><li>Kids welcome</li><li><p>Snacks</p></li></ul>'),
+    'Join us for worship.\n\nBring a friend & a chair.\n\n• Kids welcome\n• Snacks');
+  assert.equal(descriptionText('<p>Sign up <a href="https://x.churchcenter.com/registrations/events/1?a=1&amp;b=2">here</a>.</p>'),
+    'Sign up here (https://x.churchcenter.com/registrations/events/1?a=1&b=2).', 'href entities decoded');
+  assert.equal(descriptionText('<p>Visit <a href="https://www.arroyochurch.com/">www.arroyochurch.com</a></p>'), 'Visit https://www.arroyochurch.com/', 'text = the URL: once');
+  assert.equal(descriptionText("<p><a href='http://example.com/a' title=\"x\"><b>Bold</b> link</a></p>"), 'Bold link (http://example.com/a)', 'single quotes, http, inner tags');
+  // only http(s) links survive as URLs; anything else keeps its text and nothing else
+  assert.equal(descriptionText('<p>Email <a href="mailto:josh@arroyochurch.com">Josh</a>, call <a href="tel:+19256940426">us</a>, <a href="javascript:alert(1)">click</a>, <a href="/plan-your-visit">plan</a>, <a data-href="https://evil.example/">x</a></p>'),
+    'Email Josh, call us, click, plan, x');
+  assert.equal(descriptionText('<p>&lt;script&gt;alert(1)&lt;/script&gt; &amp;lt;b&amp;gt; &#x1F64F; &rsquo;&nbsp;&nbsp;end</p>'), '<script>alert(1)</script> &lt;b&gt; 🙏 ’ end', 'decoded exactly once, as text');
+  assert.equal(descriptionText('<p>Ages 3 < 5 &amp; up</p>'), 'Ages 3 < 5 & up', 'a lone < is text, not a tag');
+  assert.equal(descriptionText('<h2>Schedule</h2><ol><li>Dinner</li><li>Games</li></ol><table><tr><td>Fri</td><td>6pm</td></tr></table><hr><blockquote>Quote</blockquote>'),
+    'Schedule\n\n• Dinner\n• Games\n\nFri 6pm\n\nQuote');
+  assert.equal(descriptionText('<ul><li>One<ul><li>Sub</li></ul></li><li>Two</li><li> </li></ul>'), '• One\n• Sub\n• Two', 'nested list stays one list; empty item dropped');
+  assert.equal(descriptionText('<p>Line\n   wrapped   in\tthe source</p>'), 'Line wrapped in the source', 'raw line breaks in markup are spaces');
+});
+
+test('description: scripts, styles, comments and other inert blocks go with their content', () => {
+  assert.equal(descriptionText('<p>Hi</p><script>alert("x")</script><style>p{color:red}</style><!-- note --><noscript>n</noscript><iframe src="https://x">f</iframe><svg><text>s</text></svg><p>there</p>'), 'Hi\n\nthere');
+  assert.equal(descriptionText('<p>Kept</p><SCRIPT type="text/javascript">never closed <p>gone'), 'Kept', 'an unclosed script drops the rest');
+  assert.equal(descriptionText('<p onclick="alert(1)" style="x">Text</p><img src=x onerror=alert(1)>'), 'Text');
+  // a stand-in character smuggled in (raw or as an entity) can never turn into a link or leak through
+  const pu = String.fromCharCode(0xE000) + '0' + String.fromCharCode(0xE001);
+  assert.equal(descriptionText('<p>' + pu + ' &#xE000;0&#xE001; <a href="https://ok.example/">ok</a></p>'), '0 0 ok (https://ok.example/)');
+  assert.equal(descriptionText('<p>zero' + String.fromCharCode(0x200B) + 'width' + String.fromCharCode(0xFEFF) + '</p>'), 'zerowidth');
+});
+
+test('description: list items, <pre>, <dl> and quoted ">" keep their shape', () => {
+  assert.equal(descriptionText('<ul><li>Dinner<br>at 5:30</li><li><p>Para one</p><p>Para two</p></li><li>B</li></ul>'),
+    '• Dinner at 5:30\n• Para one Para two\n• B', 'a break inside an item is a space: one list, no stray paragraph');
+  assert.equal(descriptionText('<p>Times:</p><pre>Fri 6pm\nSat 9am\n\nSun 10am</pre><p>after</p>'), 'Times:\n\nFri 6pm\nSat 9am\n\nSun 10am\n\nafter', '<pre> keeps its lines');
+  assert.equal(descriptionText('<dl><dt>When</dt><dd>Friday</dd><dt>Where<dd>Hall</dl>'), 'When\nFriday\nWhere\nHall', 'dt/dd on their own lines');
+  assert.equal(descriptionText('<p><a title="a > b" href="https://ok.example/">ok</a> after <span title="<b>">x</span></p>'), 'ok (https://ok.example/) after x', '">" inside a quoted value');
+  assert.equal(descriptionText('<p><a title="x href=https://evil.example/">no</a> <a data-href="https://evil.example/" HREF="https://good.example/">yes</a></p>'),
+    'no yes (https://good.example/)', 'only the href attribute itself counts');
+});
+
+test('description: named entities beyond the basics; text without tags is decoded too', () => {
+  assert.equal(descriptionText('<p>Caf&eacute; 50&deg; &frac12; &times;2 &laquo;q&raquo; &euro;5 &pound;3 &sect;1 &Eacute;&EACUTE; co&shy;op x&ensp;y&emsp;z&thinsp;w</p>'),
+    'Café 50° ½ ×2 «q» €5 £3 §1 Éé coop x y z w');
+  assert.equal(descriptionText('<p>&constructor; &toString; &bogus; &#xD800; &#0;</p>'), '&constructor; &toString; &bogus;', 'unknown names stay text; no prototype keys, no lone surrogate');
+  assert.equal(descriptionText('Games &amp; pizza &mdash; RSVP\n\nAges 5&ndash;10'), 'Games & pizza — RSVP\n\nAges 5–10');
+  assert.equal(descriptionText('Fish &amp;amp; chips'), 'Fish &amp; chips', 'still decoded exactly once');
+});
+
+test('description: broken markup stays fast and its leftovers stay text', () => {
+  const t0 = Date.now();
+  const runs = ['<p>' + 'a'.repeat(60000) + '>x', '<p title="a" '.repeat(5000), '<a x="'.repeat(3000), '<li>'.repeat(20000) + 'x'];
+  for (const html of runs) assert.ok(descriptionText(html).length <= 3001);
+  assert.ok(Date.now() - t0 < 2000, `took ${Date.now() - t0}ms`);
+  assert.equal(descriptionText('<p>Tail</p> 3 <b'), 'Tail\n\n3 <b', 'a "<" with no ">" after it is text');
+});
+
+test('description: plain text keeps its own breaks; empty is null; long is capped', () => {
+  assert.equal(descriptionText('Plain line one\r\nline two\n\n\n\nPara   two  '), 'Plain line one\nline two\n\nPara two');
+  for (const empty of ['', '   ', '<p> </p>', '<p><br></p><div>&nbsp;</div>', '<script>x</script>', null, undefined, 42, {}]) {
+    assert.equal(descriptionText(empty), null, JSON.stringify(empty));
+  }
+  const long = descriptionText('<p>' + 'word '.repeat(1000) + '</p><p>tail</p>');
+  assert.ok(long.length <= 3001 && long.endsWith('word…') && !long.includes('tail'), long.slice(-20));
+  const paras = descriptionText(Array.from({ length: 60 }, (_, k) => `<p>Paragraph ${k} ${'x'.repeat(40)}.</p>`).join(''));
+  assert.ok(paras.length <= 3001 && /\.\n\nParagraph \d+ x+…$|x+\.…$/.test(paras.slice(-80)) && paras.endsWith('…'), paras.slice(-60));
+  assert.ok(!/[\uD800-\uDBFF]…$/.test(descriptionText('🙏'.repeat(2000))), 'never ends on half an emoji');
+});
+
+test('description: the instance text, else the event text; null when neither has one', () => {
+  const included = new Map([
+    ['Event:1', ev(1, { name: 'A', description: '<p>Event text</p>' })],
+    ['Event:2', ev(2, { name: 'B', summary: 'Short summary' })],
+  ]);
+  const out = buildEvents([
+    inst(1, 1, { starts_at: '2026-11-01T17:00:00Z', description: '<p>Instance <b>text</b></p>' }),
+    inst(2, 1, { starts_at: '2026-11-02T17:00:00Z', description: '<p> </p>' }),
+    inst(3, 2, { starts_at: '2026-11-03T17:00:00Z' }),
+  ], included, NOW);
+  assert.deepEqual(out.map(r => [r.id, r.description, r.summary]), [
+    ['1', 'Instance text', 'Instance text'],
+    ['2', 'Event text', 'Event text'],
+    ['3', null, 'Short summary'],
+  ]);
+  assert.deepEqual(Object.keys(out[0]), KEYS, 'description sits right after summary');
 });
 
 test('long summaries are capped on a word boundary', () => {
@@ -560,7 +648,7 @@ test('event fields: UTC times, location, description, URL, all-day transparency'
   assert.deepEqual(l.slice(0, 7), ['BEGIN:VEVENT', 'UID:1201@arroyochurch.com', 'DTSTAMP:20261024T160000Z', 'LAST-MODIFIED:20261024T160000Z', 'SEQUENCE:427200', 'DTSTART:20270213T010000Z', 'DTEND:20270213T040000Z']);
   assert.ok(l.includes('SUMMARY:Parents Night Out'));
   assert.ok(l.includes('LOCATION:Arroyo Church\\, 945 Concannon Blvd\\, Livermore\\, CA 94550'), 'bare "Arroyo Church" expanded');
-  assert.ok(l.includes('DESCRIPTION:Drop the kids off for a night of games & pizza.\\nAges 3–10.\\nFree — just RSVP.\\n\\nDetails: ' + CC + '/calendar/event/1201\\nRegister: ' + CC + '/registrations/events/2850002'));
+  assert.ok(l.includes('DESCRIPTION:Drop the kids off for a night of games & pizza.\\n\\nAges 3–10.\\nFree — just RSVP.\\n\\n• Dinner at 5:30\\n• Movie at 7\\n\\nQuestions? Our kids page (https://www.arroyochurch.com/kids)\\n\\nDetails: ' + CC + '/calendar/event/1201\\nRegister: ' + CC + '/registrations/events/2850002'), 'the description, not the summary');
   assert.ok(l.includes('URL:' + CC + '/registrations/events/2850002'), 'URL = the registration link');
   assert.ok(!l.includes('TRANSP:TRANSPARENT'));
   // a room name stays as PC has it; no location in PC = no LOCATION line
@@ -576,6 +664,16 @@ test('event fields: UTC times, location, description, URL, all-day transparency'
   const text = calendarText(['BEGIN:VCALENDAR', 'VERSION:2.0'], [l]);
   assert.ok(!/[^\r]\n/.test(text) && text.endsWith('END:VCALENDAR\r\n'));
   assert.ok(text.split('\r\n').every(x => Buffer.byteLength(x) <= 75));
+});
+
+test('DESCRIPTION: the description, else the summary, then the Details / Register lines', () => {
+  const base = { id: '7', url: CC + '/calendar/event/7', registerUrl: null };
+  assert.equal(icsDescription({ ...base, summary: 'Short', description: 'Long one.\n\n• Item' }), 'Long one.\n\n• Item\n\nDetails: ' + CC + '/calendar/event/7');
+  assert.equal(icsDescription({ ...base, summary: 'Short', description: null }), 'Short\n\nDetails: ' + CC + '/calendar/event/7');
+  assert.equal(icsDescription({ ...base, summary: 'Short' }), 'Short\n\nDetails: ' + CC + '/calendar/event/7', 'a row from before the field existed');
+  assert.equal(icsDescription({ ...base, url: null, summary: null, description: null }), null);
+  const line = icsEvent({ ...base, name: 'X', starts: '2026-11-01T19:00:00Z', ends: null, allDay: false, location: null, summary: null, description: 'A, b; c\\d\n\nnext' }, 'x').find(x => x.startsWith('DESCRIPTION:'));
+  assert.equal(line, 'DESCRIPTION:A\\, b\\; c\\\\d\\n\\nnext\\n\\nDetails: ' + CC + '/calendar/event/7', 'escaped as TEXT');
 });
 
 test('SEQUENCE: the stamp in minutes since 2026-01-01, so a later stamp always gets a higher one', () => {
@@ -649,6 +747,29 @@ test('editing one event re-stamps only that file (and the feed); the others keep
   assert.equal(prop(after['301.ics'], 'SEQUENCE'), 'SEQUENCE:427873', 'the edit raised SEQUENCE');
   assert.equal(prop(after['301.ics'], 'LOCATION'), 'LOCATION:Arroyo Church\\, 945 Concannon Blvd\\, Livermore\\, CA 94550');
   assert.ok(after.feed.includes('DTSTAMP:20261025T031300Z') && after.feed.includes('DTSTAMP:20261024T160000Z'));
+});
+
+test('adding descriptions: events.json changes once; only an event WITH a description gets a new calendar file', async () => {
+  const file = outPath();
+  const first = await run({ env: ENV, fetchImpl: fakeFetch().impl, now: NOW, outFile: file, ...quiet });
+  // put the folder back the way the previous sync left it: no description key, calendar files built from the summary
+  const old = first.events.map(({ description, ...rest }) => rest);
+  writeFileSync(file, JSON.stringify({ updated: '2026-10-24T16:00:00Z', events: old }, null, 2) + '\n');
+  writeCalendars(old, { icsDir: icsDirOf(file), feedFile: feedOf(file), now: NOW });
+  const before = allSnapshot(file);
+  assert.ok(!unfold(before['1201.ics']).some(x => x.includes('• Dinner')), 'fixture sanity: the old file carries the summary');
+  const later = new Date('2026-10-25T03:13:00Z');
+  const r = await run({ env: ENV, fetchImpl: fakeFetch().impl, now: later, outFile: file, ...quiet });
+  assert.equal(r.status, 'written', 'the new field is a one-time change to events.json');
+  assert.deepEqual(r.calendars, { written: 2, removed: 0 }, 'Parents Night Out (the one with a description) + the feed');
+  const after = allSnapshot(file);
+  for (const f of Object.keys(before)) if (f !== '1201.ics' && f !== 'feed') assert.equal(after[f], before[f], f + ' keeps its bytes');
+  assert.ok(unfold(after['1201.ics']).some(x => x.startsWith('DESCRIPTION:') && x.includes('• Dinner at 5:30')));
+  // and from then on, quiet
+  const again = await run({ env: ENV, fetchImpl: fakeFetch().impl, now: new Date(later.getTime() + 1800000), outFile: file, ...quiet });
+  assert.equal(again.status, 'unchanged');
+  assert.deepEqual(again.calendars, { written: 0, removed: 0 });
+  assert.deepEqual(allSnapshot(file), after);
 });
 
 test('un-publishing an event deletes its file and drops it from the feed; other files are left alone', async () => {

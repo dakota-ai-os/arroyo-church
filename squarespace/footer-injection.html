@@ -310,7 +310,6 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 #ac-events .evl-jump{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-weight:700;font-size:.95rem;color:#1f6b7c;text-decoration:underline;text-underline-offset:3px}
 #ac-events .evl-jump:hover{color:#0d2530}
 #ac-events .ev-invite{max-width:960px;margin:clamp(3.5rem,8vw,5.5rem) auto 0;padding-top:clamp(3rem,7vw,4.5rem);border-top:1px solid rgba(22,36,43,.1)}
-#ac-events.ev-fallback .ev-invite{margin-top:0;padding-top:0;border-top:0} /* feed failed: the old hand-pasted list sits above, so the invite starts the section */
 #ac-events .ev-body .visit-form{margin-top:0} /* line the form up with the facts beside it (the base .visit-form margin pushed it 2.6rem lower) */
 .evl-month{margin:0 0 clamp(1.9rem,4vw,2.5rem)}
 .evl-month:last-child{margin-bottom:0}
@@ -345,8 +344,10 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
    row (not a popover: .evl-card clips with overflow:hidden), and the Subscribe line sits in the /events head */
 .evl-acts{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.55rem}
 .ac-sec .evl-acts .btn.evl-cta{margin-top:0}
-.ac-sec button.btn.evl-calbtn{background:transparent;font-family:inherit;line-height:1.2;text-transform:none;letter-spacing:.02em;margin:0;-webkit-appearance:none;appearance:none;gap:.4rem}
-.ac-sec .btn.evl-calbtn svg{width:16px;height:16px;flex:0 0 16px;color:#2e8fa3}
+.ac-sec button.btn.evl-calbtn,.ac-sec button.btn.evl-open,.ac-sec button.btn.evd-share{background:transparent;font-family:inherit;line-height:1.2;text-transform:none;letter-spacing:.02em;margin:0;-webkit-appearance:none;appearance:none;gap:.4rem}
+.ac-sec .btn.evl-calbtn svg,.ac-sec .btn.evd-share svg{width:16px;height:16px;flex:0 0 16px;color:#2e8fa3}
+.ac-sec .btn.evl-open:focus-visible,.ac-sec .btn.evd-share:focus-visible{outline:2px solid #2e8fa3;outline-offset:2px}
+.evl-card[data-ev-card] .evl-img,.evl-card[data-ev-card] .evl-name{cursor:pointer} /* a tap on the photo or title opens the panel too */
 .ac-sec .btn.evl-calbtn .evl-chev{width:14px;height:14px;flex-basis:14px;color:currentColor;transition:transform .25s}
 .ac-sec .btn.evl-calbtn[aria-expanded="true"]{border-color:#2e8fa3;background:rgba(46,143,163,.08);transform:none}
 .ac-sec .btn.evl-calbtn[aria-expanded="true"] .evl-chev{transform:rotate(180deg)}
@@ -375,8 +376,17 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 .evl-sub-links a:focus-visible{outline:2px solid #2e8fa3;outline-offset:2px}
 .evl-sub-note{margin:.6rem 0 0;font-size:.82rem;line-height:1.5;color:rgba(22,36,43,.58)}
 @media(max-width:560px){.ac-sec .evl-acts .btn{flex:1 1 auto;justify-content:center}.evl-cal{padding:.9rem 1rem 1rem}}
+/* a phone card keeps [Register / Save my spot] + [View details]: three full-width buttons per card buried the list, and
+   "Add to calendar" is one tap away inside the panel */
+@media(max-width:560px){.ac-sec .evl-acts .btn.evl-calbtn,.evl-card>.evl-cal{display:none!important}.evl-acts{align-self:stretch}}
 .evl-tl{display:inline-flex;align-items:center;gap:.3rem;margin-top:.3rem;font-size:.9rem;font-weight:800;color:#1f6b7c;text-decoration:none}
 .evl-tl:hover{color:#0d2530;text-decoration:underline;text-underline-offset:3px}
+.evl-tls{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem 1.1rem;margin-top:.3rem}
+.evl-tls .evl-tl{margin-top:0}
+.evl-card.is-link{position:relative;transition:border-color .25s,box-shadow .25s}
+.evl-card.is-link:hover{border-color:rgba(46,143,163,.35);box-shadow:0 16px 32px -20px rgba(22,36,43,.4)}
+.evl-tl-open::after{content:"";position:absolute;inset:0;border-radius:18px} /* stretched: a tap anywhere on the card */
+.evl-tl-2{position:relative;z-index:1}                                        /* the sign-up link stays its own target */
 .evl-empty{display:flex;gap:1rem;align-items:center;max-width:560px;margin:0 auto;padding:1.3rem 1.5rem;box-sizing:border-box;background:#fff;border:1px solid rgba(22,36,43,.08);border-radius:18px;box-shadow:0 8px 20px -14px rgba(22,36,43,.2);font-size:1.02rem;line-height:1.6;color:rgba(22,36,43,.78)}
 .evl-empty svg{flex:0 0 44px;width:44px;height:44px;padding:11px;box-sizing:border-box;border-radius:13px;background:linear-gradient(135deg,rgba(46,143,163,.14),rgba(200,154,62,.14));color:#2e8fa3}
 /* loading placeholders: invisible for the first .3s, so a normal (fast) load never flashes them */
@@ -398,6 +408,74 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 @media(max-width:767px){.ac-upnext{padding:2.6rem 0}.ac-upnext .up-head{margin-bottom:1.25rem}}
 @media(max-width:560px){.evl-empty{flex-direction:column;text-align:center}}
 @media (prefers-reduced-motion:reduce){.evl-card,.evl-skel{animation:none}.evl-skel{opacity:1}}
+/* EVENT DETAILS PANEL (2026-10-24): "View details" opens this on /events instead of sending people to Church Center. One
+   native <dialog> (showModal = focus trap, Escape, ::backdrop): a centered card on a computer, a bottom sheet on a phone. It
+   sits in the top layer outside every .ac-sec, so its scroller carries .ac-sec for the shared button styles. Squarespace
+   styles bare p/ul/li/h2/a, so every text rule here sets its own size and margins. */
+.evd{box-sizing:border-box;width:min(640px,calc(100% - 32px));max-width:none;max-height:none;margin:auto;padding:0;border:0;border-radius:22px;background:#fff;color:#16242b;box-shadow:0 30px 80px -24px rgba(10,22,28,.55);overflow:hidden}
+.evd:not([open]){display:none}
+.evd::backdrop{background:rgba(10,22,28,.62)}
+.evd[open]{animation:evdIn .32s cubic-bezier(.16,1,.3,1)}
+.evd[open]::backdrop{animation:evdFade .25s ease}
+@keyframes evdIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes evdUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes evdFade{from{opacity:0}to{opacity:1}}
+/* no <dialog> support: the same panel, placed by hand over a plain backdrop */
+.evd.evd-fb{position:fixed;top:50%;left:50%;z-index:2147483000;display:block;transform:translate(-50%,-50%);margin:0;animation:none}
+.evd-fbbg{position:fixed;inset:0;z-index:2147482999;background:rgba(10,22,28,.62)}
+html.ac-evd-lock,html.ac-evd-lock body{overflow:hidden!important}
+html.ac-evd-lock #ac-cur-dot,html.ac-evd-lock #ac-cur-ring{opacity:0} /* the custom cursor can't sit above the top layer */
+.evd-scroll{max-height:min(88vh,920px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.evd-x{position:absolute;top:12px;right:12px;z-index:6;box-sizing:border-box;width:44px;height:44px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#16242b;box-shadow:0 4px 14px -4px rgba(10,22,28,.4);cursor:pointer;-webkit-appearance:none;appearance:none;transition:background .2s,color .2s}
+.evd-x svg{width:20px;height:20px}
+.evd-x:hover{background:#fff;color:#1f6b7c}
+.evd-x:focus-visible{outline:2px solid #2e8fa3;outline-offset:2px}
+.evd-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#ece4da}
+.evd-body{padding:1.6rem 1.75rem 1.75rem}
+.evd-h{font-family:'Fraunces',Georgia,serif;font-weight:420;font-size:clamp(1.5rem,4.2vw,1.95rem);line-height:1.15;letter-spacing:-.005em;text-transform:none;margin:0 3rem 1rem 0;padding:0;color:#16242b;overflow-wrap:anywhere}
+.evd.has-img .evd-h{margin-right:0} /* the close button sits over the photo, not the title */
+.evd-facts{list-style:none;margin:0 0 1.2rem;padding:0;display:grid;gap:.65rem}
+.evd-facts li{display:flex;gap:.65rem;align-items:flex-start;margin:0;padding:0;font-size:.95rem;line-height:1.5;color:rgba(22,36,43,.78);overflow-wrap:anywhere}
+.evd-facts li::before{content:none}
+.evd-facts li>span{min-width:0}
+.evd-facts svg{flex:0 0 18px;width:18px;height:18px;margin-top:.14rem;color:#2e8fa3}
+.evd-facts strong{font-weight:800;color:#1f6b7c}
+.evd-facts small{display:block;margin-top:.12rem;font-size:.86rem;line-height:1.5;color:rgba(22,36,43,.62)}
+.evd-dir{display:inline-flex;align-items:center;gap:.3rem;margin-top:.3rem;font-size:.9rem;font-weight:800;color:#1f6b7c;text-decoration:none}
+.evd-dir:hover{color:#0d2530;text-decoration:underline;text-underline-offset:3px}
+.evd-desc{margin:0 0 1.35rem;color:rgba(22,36,43,.86);overflow-wrap:anywhere}
+.evd-desc:empty{display:none}
+.evd-desc p,.evd-desc li{font-size:1rem;line-height:1.7}
+.evd-desc p{margin:0 0 .85em;padding:0}
+.evd-desc ul{list-style:disc;margin:0 0 .85em;padding:0 0 0 1.3em}
+.evd-desc li{margin:.15em 0;padding:0}
+.evd-desc li::before{content:none}
+.evd-desc>:last-child{margin-bottom:0}
+.evd-desc p.evd-lead{margin-bottom:.35em;font-weight:800;color:#16242b}
+.evd-desc a{color:#1f6b7c;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.evd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;padding-top:1.25rem;border-top:1px solid rgba(22,36,43,.08)}
+.ac-sec .evd-acts .btn.evl-cta{margin:0;padding:.72rem 1.3rem;font-size:.92rem}
+.evd .evl-cal{margin-top:.8rem;border:1px solid rgba(22,36,43,.1);border-radius:14px}
+.evd .evl-cal-note a{color:#1f6b7c;font-weight:800;text-decoration:none;white-space:nowrap}
+.evd .evl-cal-note a:hover{text-decoration:underline}
+.evd-status{margin:.65rem 0 0;padding:0;font-size:.88rem;font-weight:700;line-height:1.5;color:#1f6b7c;overflow-wrap:anywhere}
+.evd-status:empty{margin:0}
+.evd-new{margin-top:1.3rem;padding:1rem 1.1rem;border-radius:14px;background:#f6f1e6}
+.evd-new p{margin:0;padding:0;font-size:.9rem;line-height:1.55;color:rgba(22,36,43,.75)}
+.evd-new p+p{margin-top:.3rem}
+.evd-new strong{font-weight:800;color:#16242b}
+.evd-new a{color:#1f6b7c;font-weight:800;text-decoration:none;white-space:nowrap}
+.evd-new a:hover{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:600px){
+  .evd{width:100%;margin:auto 0 0;border-radius:22px 22px 0 0;box-shadow:0 -18px 50px -20px rgba(10,22,28,.5)}
+  .evd[open]{animation:evdUp .38s cubic-bezier(.16,1,.3,1)}
+  .evd.evd-fb{top:auto;bottom:0;left:0;transform:none}
+  .evd-scroll{max-height:92vh;max-height:92dvh}
+  .evd-body{padding:1.35rem 1.15rem calc(1.5rem + env(safe-area-inset-bottom,0px))}
+  .evd-acts .btn{flex:1 1 auto;justify-content:center}
+  .evd-acts .evd-primary{flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){.evd[open],.evd[open]::backdrop{animation:none}}
 /* TEAM */
 #ac-team{background:#faf7f0;color:#16242b;padding:clamp(5rem,11vh,9rem) 0}
 #ac-team .eyebrow{color:#1f6b7c}
@@ -1920,14 +1998,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
      data/events.json is written by a GitHub Action from PC Calendar. The token belongs to an admin, so the SYNC filters:
      only events staff set to Church Center visibility Published or Featured get in (Mom's Group, internal and private
      events stay Unpublished). The repo is public, so the JSON only ever holds public events. Contract:
-       { updated, events:[{id,eventId,name,summary,starts,ends,allDay,location,image,url,registerUrl,featured,recurrence,ics}] }
-     (ics = "data/events/ics/<id>.ics", that row's calendar file; see "Add to calendar" below)
+       { updated, events:[{id,eventId,name,summary,description,starts,ends,allDay,location,image,url,registerUrl,featured,recurrence,ics}] }
+     (ics = "data/events/ics/<id>.ics", that row's calendar file; see "Add to calendar" below. description = the Church
+     Center description as plain text, shown in the event details panel; see "Event details panel" below)
      starts/ends = ISO timestamps (PC sends UTC "…Z") or a plain YYYY-MM-DD for an all-day event (then `ends` is the
      LAST day, inclusive); everything is shown in America/Los_Angeles. All of it is staff-typed, so text is escaped and
      only http(s) links/images are used. Instances of one event (same name + same time of day) fold into ONE card with
      "More dates", so a monthly class doesn't fill the page. Two surfaces: the /events list (buildEventsPage) and the
-     home "Coming up" strip (buildComingUp). If the fetch fails, the strip hides and /events falls back to the old
-     hand-pasted list while it's still on the page (see buildEventsPage), else says new events are coming. */
+     home "Coming up" strip (buildComingUp). If the fetch fails, the strip hides and /events says new events are coming. */
   var AC_EVENTS_URL='https://dakota-ai-os.github.io/arroyo-church/data/events.json', acEventsP=null;
   var AC_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var AC_MONTH=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2011,7 +2089,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(all) when=multi?acShortDay(s.day)+' &ndash; '+acShortDay(last):s.day.wd+' &middot; All day';
     else if(multi) when=acShortDay(s.day)+', '+acHm(s.day)+acMer(s.day)+' &ndash; '+acShortDay(last)+(en?', '+acHm(en.day)+acMer(en.day):'');
     else when=s.day.wd+' &middot; '+tod;
-    return {name:name,sum:acEvText(e.summary,400),loc:acEvText(e.location,120),img:acEvUrl(e.image),url:acEvUrl(e.url),reg:acEvUrl(e.registerUrl),
+    var id=(typeof e.id==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(e.id))?e.id:''; /* the panel's link: /events#event-<id> */
+    return {id:id,ids:id?[id]:[],name:name,sum:acEvText(e.summary,400),sumFull:acEvDesc(e.summary,1200),desc:acEvDesc(e.description,4000),
+      loc:acEvText(e.location,120),img:acEvUrl(e.image),url:acEvUrl(e.url),reg:acEvUrl(e.registerUrl),
       featured:e.featured===true,rec:acEvRec(e.recurrence),all:all,multi:multi,s:s,last:last,tod:tod,when:when,
       iso:s.dateOnly?e.starts:new Date(s.t).toISOString(),more:[],cal:acEvCalData(e,name,s,en,all,last)};
   }
@@ -2027,8 +2107,10 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
      feed holds upcoming events only. Apple + Other (and the Subscribe line) need the row's `ics` path, so a card from a
      sync that predates the files just shows Google + Outlook.
      AC_FEED lives on in every subscriber's calendar: keep that URL working for good (a repo or account rename breaks
-     every subscription silently). */
-  var AC_PAGES='https://dakota-ai-os.github.io/arroyo-church/', AC_FEED='dakota-ai-os.github.io/arroyo-church/data/events.ics';
+     every subscription silently). Since 2026-10-24 it is the church's own address, www.arroyochurch.com/calendar.ics: a
+     Squarespace URL Mapping 302s it to the GitHub Pages feed, so a repo or account move only means editing that mapping.
+     Keep the GitHub Pages feed itself working too: people who subscribed before then hold that URL. */
+  var AC_PAGES='https://dakota-ai-os.github.io/arroyo-church/', AC_FEED='www.arroyochurch.com/calendar.ics';
   var AC_ADDR='Arroyo Church, 945 Concannon Blvd, Livermore, CA 94550', acPlatC=null;
   var acEvIcDl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
   var acEvIcWeb='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>';
@@ -2043,17 +2125,27 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(/<[a-z\/!]/i.test(s)){ try{ s=new DOMParser().parseFromString(s.replace(/<br\s*\/?>|<\/(p|div|li)>/gi,'\n'),'text/html').body.textContent||''; }catch(e){ s=s.replace(/<\/?[a-z][^>]*>/gi,' '); } }
     return s.split(/\r\n|\r|\n/).map(function(l){ return l.replace(/\s+/g,' ').trim(); }).filter(Boolean).join('\n').slice(0,max);
   }
+  /* the Church Center description: the sync already sends plain text (paragraphs split by a blank line, list items
+     starting "• ", links as "text (https://…)"), so it is NOT read as markup again: a "<" in it is text ("Email Josh
+     <josh@…>"), and it only ever reaches the page as textContent (or URL-encoded into a calendar link). Capped. */
+  function acEvDesc(v,max){
+    if(typeof v!=='string') return ''; var s=v;
+    s=s.replace(/\r\n?/g,'\n').split('\n').map(function(l){ return l.replace(/[^\S\n]+/g,' ').trim(); }).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+    return s.length>max?s.slice(0,max-1).replace(/\s+\S*$/,'')+'…':s;
+  }
   function acPad(n){ return (n<10?'0':'')+n; }
   function acYmd(p,dash){ var j=dash?'-':''; return p.y+j+acPad(p.m)+j+acPad(p.d); }
   function acZ(t,compact){ var v=new Date(t).toISOString().replace(/\.\d{3}Z$/,'Z'); return compact?v.replace(/[-:]/g,''):v; }
   /* one instance -> its calendar fields, the same ones the sync writes into the .ics (icsEvent in scripts/sync-events.mjs):
-     a bare "Arroyo Church" location becomes the street address, no location stays none, no end time stays none */
+     a bare "Arroyo Church" location becomes the street address, no location stays none, no end time stays none. The
+     description (else the summary) goes in the notes; the Google / Outlook links carry its first ~1000 characters (a very
+     long link can fail), the .ics file all of it. */
   function acEvCalData(e,name,s,en,all,last){
     try{
       var loc=acEvText(e.location,200), url=acEvUrl(e.url), reg=acEvUrl(e.registerUrl), links=[];
       if(/^arroyo church$/i.test(loc)) loc=AC_ADDR;
       if(url) links.push('Details: '+url); if(reg) links.push('Register: '+reg);
-      var c={title:name,loc:loc,all:all,desc:[acEvLines(e.summary,600),links.join('\n')].filter(Boolean).join('\n\n'),
+      var c={title:name,loc:loc,all:all,desc:[acEvDesc(e.description,1000)||acEvLines(e.summary,600),links.join('\n')].filter(Boolean).join('\n\n'),
         ics:(typeof e.ics==='string'&&/^data\/events\/ics\/[A-Za-z0-9_-]{1,64}\.ics$/.test(e.ics))?AC_PAGES+e.ics:''};
       if(all){ c.d0=s.day; c.dl=last; c.d1=acUtcDay(Date.UTC(last.y,last.m-1,last.d+1)); } /* d1 = the day after the last (exclusive) */
       else{ c.t0=s.t; c.t1=en?en.t:s.t; }
@@ -2079,18 +2171,19 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     };
     return (p.apple?['apple','google','outlook','ics']:['google','outlook','apple','ics']).map(function(k){ return all[k]; }).filter(Boolean);
   }
-  function acEvCalBtn(ev,i){
-    return ev.cal?'<button type="button" class="btn btn-ghost-dark evl-cta evl-calbtn" aria-expanded="false" aria-controls="evl-cal-'+i+'" data-ev-calbtn data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc('Add to calendar: '+ev.name)+'">'+acEvIcCal+'Add to calendar'+acEvIcChev+'</button>':'';
+  function acEvCalBtn(ev,id){
+    return ev.cal?'<button type="button" class="btn btn-ghost-dark evl-cta evl-calbtn" aria-expanded="false" aria-controls="'+id+'" data-ev-calbtn data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc('Add to calendar: '+ev.name)+'">'+acEvIcCal+'Add to calendar'+acEvIcChev+'</button>':'';
   }
-  function acEvCalMenu(ev,i){
+  function acEvCalMenu(ev,id,panel){
     var c=ev.cal; if(!c) return '';
     var items=acCalLinks(c).map(function(o){
       return '<li><a class="evl-calopt" href="'+acEsc(o.href)+'"'+(o.ext?' target="_blank" rel="noopener"':'')+' data-ev-cal="'+o.k+'">'+o.ic
         +'<span>'+o.label+'<small>'+o.hint+(o.ext?'<span class="ac-sronly"> (opens in a new tab)</span>':'')+'</small></span></a></li>';
     }).join('');
-    /* a folded card adds its next date only; say so, and point at the feed for the rest */
-    var note=ev.more.length?'<p class="evl-cal-note">This adds '+acShortDay(ev.s.day)+'.'+(c.ics?' For every date, subscribe to our calendar at the top of this page.':'')+'</p>':'';
-    return '<div class="evl-cal" id="evl-cal-'+i+'" hidden><p class="evl-cal-h">Add to your calendar</p><ul>'+items+'</ul>'+note+'</div>';
+    /* a folded card adds its next date only; say so, and point at the feed for the rest (the panel covers the Subscribe
+       line, so it carries the links themselves) */
+    var note=ev.more.length?'<p class="evl-cal-note">This adds '+acShortDay(ev.s.day)+'.'+(c.ics?(panel?' For every date, subscribe to our calendar: '+acEvSubLinks().join(' &middot; ')+'.':' For every date, subscribe to our calendar at the top of this page.'):'')+'</p>':'';
+    return '<div class="evl-cal" id="'+id+'" hidden><p class="evl-cal-h">Add to your calendar</p><ul>'+items+'</ul>'+note+'</div>';
   }
   function acCalSet(btn,open){
     var p=document.getElementById(btn.getAttribute('aria-controls')); if(!p) return;
@@ -2107,14 +2200,20 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       acCalSet(b,false); b.focus();
     });
   }
-  /* the /events "Subscribe" line: webcal:// opens Apple Calendar's subscribe sheet; Google and Outlook.com add a feed by URL */
-  function acEvSubLine(){
+  /* the feed's subscribe links, in this device's order: webcal:// opens Apple Calendar's subscribe sheet; Google and
+     Outlook.com add a feed by its https URL. Not yet tried on a real Google account (2026-10-24): if Google ever refuses
+     the https form, cid=webcal://www.arroyochurch.com/calendar.ics is the other form it accepts (same church address). */
+  function acEvSubLinks(){
     var E=encodeURIComponent, sr='<span class="ac-sronly"> (opens in a new tab)</span>';
     var l={apple:'<a href="webcal://'+AC_FEED+'" data-ev-sub="apple">Apple Calendar</a>',
-      google:'<a href="https://calendar.google.com/calendar/r?cid='+E('webcal://'+AC_FEED)+'" target="_blank" rel="noopener" data-ev-sub="google">Google Calendar'+sr+'</a>',
+      google:'<a href="https://calendar.google.com/calendar/r?cid='+E('https://'+AC_FEED)+'" target="_blank" rel="noopener" data-ev-sub="google">Google Calendar'+sr+'</a>',
       outlook:'<a href="https://outlook.live.com/calendar/0/addfromweb/?url='+E('https://'+AC_FEED)+'&amp;name='+E('Arroyo Church')+'" target="_blank" rel="noopener" data-ev-sub="outlook">Outlook.com'+sr+'</a>'};
+    return (acPlat().apple?['apple','google','outlook']:['google','apple','outlook']).map(function(k){ return l[k]; });
+  }
+  /* the /events "Subscribe" line */
+  function acEvSubLine(){
     return '<p class="evl-sub-line" id="evl-sub-h">'+acEvIcCal+'<span>Subscribe to our calendar</span></p><ul class="evl-sub-links" aria-labelledby="evl-sub-h">'
-      +(acPlat().apple?['apple','google','outlook']:['google','apple','outlook']).map(function(k){ return '<li>'+l[k]+'</li>'; }).join('')+'</ul>'
+      +acEvSubLinks().map(function(a){ return '<li>'+a+'</li>'; }).join('')+'</ul>'
       +'<p class="evl-sub-note">Subscribe once and our upcoming events, and any changes to them, show up in your calendar on their own.</p>';
   }
   /* upcoming only, soonest first; same name + same time of day = one card (the next one) with its later dates in .more */
@@ -2123,30 +2222,33 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     list.map(function(e){ try{ return acEvNorm(e,now); }catch(x){ return null; } }).filter(Boolean).sort(function(a,b){ return a.s.t-b.s.t; }).forEach(function(ev){
       var k=ev.name.toLowerCase()+'|'+ev.tod+'|'+(ev.multi?'m':''), g=byKey[k];
       if(!g){ byKey[k]=ev; out.push(ev); return; }
-      g.more.push(ev); if(ev.featured) g.featured=true;
-      ['sum','loc','img','url','reg','rec'].forEach(function(f){ if(!g[f]&&ev[f]) g[f]=ev[f]; });
+      g.more.push(ev); if(ev.featured) g.featured=true; if(ev.id) g.ids.push(ev.id); /* a link to any of its dates opens this card */
+      ['sum','sumFull','desc','loc','img','url','reg','rec'].forEach(function(f){ if(!g[f]&&ev[f]) g[f]=ev[f]; });
     });
     return out;
   }
   function acEvCta(ev){
     if(ev.reg) return {href:ev.reg,label:'Register',ext:true,kind:'register'};
     for(var i=0;i<AC_EV_LOCAL.length;i++){ if(AC_EV_LOCAL[i][0].test(ev.name)) return {href:AC_EV_LOCAL[i][1],label:AC_EV_LOCAL[i][2],ext:false,kind:'signup'}; }
-    if(ev.url) return {href:ev.url,label:'Details',ext:true,kind:'details'};
-    return null;
+    return null; /* no "Details" link to Church Center any more (Dakota, 2026-10-24): "View details" opens the on-site panel */
   }
-  /* one card; compact = the home strip (no image, summary or extra dates; a text link instead of a button) */
+  /* one card; compact = the home strip (no image, summary or extra dates; text links instead of buttons). An /events card:
+     [Register / Save my spot] [View details] [Add to calendar] (the last one hidden on a phone; it is in the panel too).
+     A home card is one big link to that event's panel on /events (/events#event-<id>), plus its sign-up link. */
   function acEvCard(ev,i,compact){
-    var s=ev.s.day, range=ev.multi&&ev.last.m===s.m&&ev.last.y===s.y, cta=acEvCta(ev), more='', btn='';
+    var s=ev.s.day, range=ev.multi&&ev.last.m===s.m&&ev.last.y===s.y, cta=acEvCta(ev), more='', btn='', acts;
     if(!compact&&ev.more.length){
       more='<p class="evl-more"><strong>More dates:</strong> '+ev.more.slice(0,3).map(function(x){ return AC_MON[x.s.day.m-1]+' '+x.s.day.d; }).join(' &middot; ')
         +(ev.more.length>3&&!ev.rec?' &middot; +'+(ev.more.length-3)+' more':'')+'</p>';
     }
     if(cta){
       var attrs=' href="'+acEsc(cta.href)+'"'+(cta.ext?' target="_blank" rel="noopener"':'')+' data-ev-cta="'+cta.kind+'" data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc(cta.label+': '+ev.name)+(cta.ext?' (opens in a new tab)':'')+'"';
-      btn=compact?'<a class="evl-tl"'+attrs+'>'+cta.label+' <span aria-hidden="true">&rarr;</span></a>'
-        :'<a class="btn '+(cta.kind==='details'?'btn-ghost-dark':'btn-gold')+' evl-cta"'+attrs+'>'+cta.label+'</a>';
+      btn=compact?'<a class="evl-tl evl-tl-2"'+attrs+'>'+cta.label+' <span aria-hidden="true">&rarr;</span></a>'
+        :'<a class="btn btn-gold evl-cta"'+attrs+'>'+cta.label+'</a>';
     }
-    return '<li><article class="evl-card'+(ev.featured?' is-featured':'')+'" style="--d:'+(Math.min(i,8)*0.05).toFixed(2)+'s">'
+    if(compact) acts='<div class="evl-tls"><a class="evl-tl evl-tl-open" href="/events'+(acEvLinkId(ev)?'#event-'+acEvLinkId(ev):'')+'" data-ev-cta="details" data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc('View details: '+ev.name)+'">View details <span aria-hidden="true">&rarr;</span></a>'+btn+'</div>';
+    else acts='<div class="evl-acts">'+btn+'<button type="button" class="btn btn-ghost-dark evl-cta evl-open" data-ev-open="'+i+'" aria-haspopup="dialog" aria-label="'+acEsc('View details: '+ev.name)+'">View details</button>'+acEvCalBtn(ev,'evl-cal-'+i)+'</div>';
+    return '<li><article class="evl-card'+(ev.featured?' is-featured':'')+(compact?' is-link':'')+'"'+(compact?'':' data-ev-card="'+i+'"')+' style="--d:'+(Math.min(i,8)*0.05).toFixed(2)+'s">'
       +(!compact&&ev.img?'<img class="evl-img" src="'+acEsc(ev.img)+'" alt="" loading="lazy" decoding="async" onerror="this.remove()">':'')
       +'<div class="evl-row"><div class="evl-date" aria-hidden="true"><span class="evl-mo">'+AC_MON[s.m-1]+'</span><span class="evl-day'+(range?' is-range':'')+'">'+s.d+(range?'&ndash;'+ev.last.d:'')+'</span></div>'
       +'<div class="evl-body"><h3 class="evl-name">'+acEsc(ev.name)+(compact&&acEvRecWord(ev.rec)?' <span class="evl-rec">'+acEsc(acEvRecWord(ev.rec))+'</span>':'')+'</h3>'
@@ -2154,11 +2256,12 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +(!compact&&ev.rec?'<p class="evl-loc evl-repeat">'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></p>':'')
       +(ev.loc?'<p class="evl-loc">'+acEvIcPin+'<span>'+acEsc(ev.loc)+'</span></p>':'')
       +(!compact&&ev.sum?'<p class="evl-sum">'+acEsc(ev.sum)+'</p>':'')
-      +more+(compact?btn:((btn||ev.cal)?'<div class="evl-acts">'+btn+acEvCalBtn(ev,i)+'</div>':''))+'</div></div>'
-      +(compact?'':acEvCalMenu(ev,i))+'</article></li>';
+      +more+acts+'</div></div>'
+      +(compact?'':acEvCalMenu(ev,'evl-cal-'+i))+'</article></li>';
   }
-  /* GA4 for the card buttons (event_register_click / event_signup_click / event_details_click, event_label = the event's
-     name) and the home "See all events" link; an on-site link on the home page jumps instantly (smooth-scroll is !important) */
+  /* GA4 for the card buttons (event_register_click / event_signup_click, event_label = the event's name; event_details_click
+     = a home card's link to its panel) and the home "See all events" link; an on-site link on the home page jumps instantly
+     (smooth-scroll is !important). "View details" (or a tap on a card's photo or title) opens the panel. */
   function acEvWireClicks(sec,src){
     sec.addEventListener('click',function(e){
       var all=e.target.closest&&e.target.closest('a[data-ev-all]'); if(all){ acTrack(src,{event_name:'events_see_all_click'}); return; }
@@ -2173,10 +2276,218 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         if(ob) setTimeout(function(){ acCalSet(ob,false); ob.focus(); },0); return; }
       var su=e.target.closest&&e.target.closest('a[data-ev-sub]');
       if(su){ acTrack(src,{event_name:'event_subscribe_calendar',label:su.getAttribute('data-ev-sub')}); return; }
+      var op=e.target.closest&&e.target.closest('[data-ev-open]');
+      if(op){ acEvdOpen(+op.getAttribute('data-ev-open'),op,false); return; }
+      var tap=e.target.closest&&e.target.closest('.evl-img,.evl-name'), card=tap&&tap.closest('[data-ev-card]'), cob=card&&card.querySelector('[data-ev-open]');
+      if(cob){ acEvdOpen(+cob.getAttribute('data-ev-open'),cob,false); return; }
       var a=e.target.closest&&e.target.closest('a[data-ev-cta]'); if(!a) return;
       acTrack(src,{event_name:'event_'+a.getAttribute('data-ev-cta')+'_click',label:a.getAttribute('data-ev-name')});
       var h=a.getAttribute('href')||''; if(h.indexOf('/#')===0&&HOME()){ var el=document.getElementById(h.slice(2)); if(el){ e.preventDefault(); acJumpTo(el); } }
     });
+  }
+  /* ---- Event details panel (2026-10-24) ----
+     Dakota: the card's "Details" link "just takes you to the Planning Center page with no value or directions on what to
+     do next". "View details" now opens this panel on /events: photo, title, date + time ("More dates" for a folded
+     series), place with Get directions, the Church Center description (data/events.json `description`, plain text from
+     the sync, rendered with textContent; bare http(s) URLs become links), then the next steps: Register / Save my spot,
+     Add to calendar (the same menu as the cards), Share, and a line for newcomers.
+     One <dialog> per page, refilled per event. showModal() brings the focus trap, Escape and ::backdrop; a browser without
+     it gets the same panel placed by hand (acEvdFallback) with its own Escape and Tab trap. A click on the backdrop closes
+     it, focus goes back to the button that opened it, and the page behind can't scroll while it's open.
+     Links: every panel has one, /events#event-<row id>. Loading /events with it opens that event once the list is in (the
+     home "Coming up" cards link there; a link to any date of a folded series opens its card); opening sets the hash
+     with history.replaceState (no history entries), closing clears it. A folded series' link (the one Share sends) names
+     its LAST known date, so a link shared for "Connect class" keeps working while the series runs instead of dying with
+     its next date. A link to an event that has passed opens nothing and the dead hash is cleared.
+     GA4: event_details_open (label = the event; form_source events_page, or event_link when a link opened it),
+     event_share, event_directions; the panel's own buttons report as form_source event_details. ---- */
+  var acEvList=[], acEvd=null, acEvdFb=null, acEvdOpener=null, acEvdCur=null, acEvdTimer=0;
+  var AC_EVD_HASH=/^#event-([A-Za-z0-9_-]{1,64})$/;
+  var acEvIcShare='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5M8 7.5l4-4 4 4"/><path d="M6 11.5H5.5A1.5 1.5 0 004 13v6.5A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5V13a1.5 1.5 0 00-1.5-1.5H18"/></svg>';
+  var acEvIcX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  /* "Sunday, October 25 · 11:30am–12:30pm" (the cards' pieces, with the date spelled out); a multi-day event as on the card */
+  /* the panel's link id: a folded series' last known date (it lives longest), else the event's own */
+  function acEvLinkId(ev){ return ev.ids.length?ev.ids[ev.ids.length-1]:ev.id; }
+  function acEvdWhen(ev){
+    if(ev.multi) return ev.when;
+    var s=ev.s.day; return s.wd+', '+AC_MONTH[s.m-1]+' '+s.d+(s.y!==acLa(Date.now()).y?', '+s.y:'')+' &middot; '+ev.tod;
+  }
+  /* PC's place text; a place at the church gets the street address under it. Directions only for a real place. */
+  function acEvdPlace(loc){
+    if(!loc) return null; var church=/^arroyo church\b/i.test(loc);
+    return {name:loc,addr:church?'945 Concannon Blvd, Livermore, CA 94550':'',q:church?AC_ADDR:loc,
+      dir:church||!/\b(online|zoom|virtual|live\s?stream|youtube|tbd|tba)\b|https?:\/\//i.test(loc)};
+  }
+  function acEvdMaps(q){ var E=encodeURIComponent; return acPlat().apple?'https://maps.apple.com/?q='+E(q):'https://www.google.com/maps/search/?api=1&query='+E(q); }
+  /* a URL in running text: trailing punctuation, and a ")" that closes the sentence's own "(", are not part of it */
+  function acEvTrimUrl(u){
+    for(;;){ var c=u.charAt(u.length-1);
+      if(/[.,;:!?'"’”]/.test(c)) u=u.slice(0,-1);
+      else if(c===')'&&u.split(')').length>u.split('(').length) u=u.slice(0,-1);
+      else return u; }
+  }
+  function acEvLinkify(el,text){
+    var re=/https?:\/\/[^\s<>"'`]+/gi, last=0, m;
+    while((m=re.exec(text))){
+      var u=acEvTrimUrl(m[0]); if(!/^https?:\/\/[^\/\s.?#]/i.test(u)){ continue; }
+      if(m.index>last) el.appendChild(document.createTextNode(text.slice(last,m.index)));
+      var a=document.createElement('a'), t=u.replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,''), h=t.split(/[\/?#]/)[0], sr=document.createElement('span');
+      /* shown short: "arroyochurch.com/plan-your-visit", or for a long one just its site, "churchcenter.com/…" */
+      if(t.length>34){ if(h.length>28) h=h.split('.').slice(-2).join('.'); t=h+(t.length>h.length?'/…':''); }
+      a.href=u; a.target='_blank'; a.rel='noopener'; a.textContent=t;
+      sr.className='ac-sronly'; sr.textContent=' (opens in a new tab)'; a.appendChild(sr);
+      el.appendChild(a); last=m.index+u.length; re.lastIndex=last;
+    }
+    if(last<text.length) el.appendChild(document.createTextNode(text.slice(last)));
+  }
+  /* description text -> paragraphs (blank line), line breaks, "• " lines as a list. DOM nodes + textContent only. */
+  function acEvDescNodes(box,text){
+    text.split(/\n{2,}/).forEach(function(par){
+      var ul=null, p=null;
+      par.split('\n').forEach(function(line){
+        var b=/^•\s*(.*)$/.exec(line);
+        if(b){ if(!ul){ ul=document.createElement('ul'); box.appendChild(ul); } p=null; var li=document.createElement('li'); acEvLinkify(li,b[1]); ul.appendChild(li); return; }
+        ul=null;
+        if(p) p.appendChild(document.createElement('br')); else{ p=document.createElement('p'); box.appendChild(p); }
+        acEvLinkify(p,line);
+      });
+    });
+    /* a short one-line paragraph right before a list ("What to expect", "Bring:") reads as its heading (PC's bold is
+       plain text by now) */
+    [].forEach.call(box.querySelectorAll('p'),function(q){
+      var n=q.nextElementSibling, t=q.textContent;
+      if(n&&n.tagName==='UL'&&!q.querySelector('br')&&t.length<=60&&!/[.!?…;,)]$/.test(t)) q.className='evd-lead';
+    });
+  }
+  function acEvdHtml(ev){
+    var cta=acEvCta(ev), pl=acEvdPlace(ev.loc), sr='<span class="ac-sronly"> (opens in a new tab)</span>';
+    var more=ev.more.length?'<small>More dates: '+ev.more.map(function(x){ return acShortDay(x.s.day); }).join(' &middot; ')+'</small>':'';
+    return (ev.img?'<img class="evd-img" src="'+acEsc(ev.img)+'" alt="" decoding="async" onerror="var d=this.closest&amp;&amp;this.closest(\'.evd\');if(d)d.classList.remove(\'has-img\');this.remove()">':'')
+      +'<div class="evd-body"><h2 class="evd-h" id="evd-h">'+acEsc(ev.name)+'</h2><ul class="evd-facts">'
+      +'<li>'+acEvIcCal+'<span><strong id="evd-when"><time datetime="'+acEsc(ev.iso)+'">'+acEvdWhen(ev)+'</time></strong>'+more+'</span></li>'
+      +(ev.rec?'<li>'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></li>':'')
+      +(pl?'<li>'+acEvIcPin+'<span>'+acEsc(pl.name)+(pl.addr?'<small>'+pl.addr+'</small>':'')
+        +(pl.dir?'<a class="evd-dir" href="'+acEsc(acEvdMaps(pl.q))+'" target="_blank" rel="noopener" data-evd-dir>Get directions <span aria-hidden="true">&rarr;</span>'+sr+'</a>':'')+'</span></li>':'')
+      +'</ul><div class="evd-desc" id="evd-desc"></div><div class="evd-acts">'
+      +(cta?'<a class="btn btn-gold evl-cta evd-primary" href="'+acEsc(cta.href)+'"'+(cta.ext?' target="_blank" rel="noopener"':'')+' data-ev-cta="'+cta.kind+'" data-ev-name="'+acEsc(ev.name)+'">'+cta.label+(cta.ext?sr:'')+'</a>':'')
+      +acEvCalBtn(ev,'evd-cal')
+      +'<button type="button" class="btn btn-ghost-dark evl-cta evd-share" data-evd-share>'+acEvIcShare+'Share</button></div>'
+      +acEvCalMenu(ev,'evd-cal',true)
+      +'<p class="evd-status" role="status" aria-live="polite"></p>'
+      +'<div class="evd-new"><p><strong>New to Arroyo?</strong> <a href="/plan-your-visit">Plan your visit <span aria-hidden="true">&rarr;</span></a></p>'
+      +'<p>Questions? <a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a> &middot; <a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
+  }
+  function acEvdEl(){
+    if(acEvd) return acEvd;
+    var d=document.createElement('dialog'), down=false; d.className='evd'; d.id='ac-evd';
+    d.setAttribute('aria-labelledby','evd-h'); d.setAttribute('aria-describedby','evd-when');
+    if(typeof d.showModal!=='function'){ d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); }
+    d.innerHTML='<button type="button" class="evd-x" aria-label="Close">'+acEvIcX+'</button><div class="evd-scroll ac-sec"></div>';
+    document.body.appendChild(d);
+    /* the backdrop is the dialog box itself (the scroller fills it): close only when the press also started there */
+    d.addEventListener('pointerdown',function(e){ down=e.target===d; });
+    d.addEventListener('click',function(e){
+      var bg=e.target===d&&down; down=false;
+      if(bg||(e.target.closest&&e.target.closest('.evd-x'))){ acEvdClose(); return; }
+      var sh=e.target.closest&&e.target.closest('[data-evd-share]'); if(sh){ acEvdShare(sh); return; }
+      if(e.target.closest&&e.target.closest('[data-evd-dir]')&&acEvdCur) acTrack('event_details',{event_name:'event_directions',label:acEvdCur.name});
+    });
+    /* Escape closes an open Add-to-calendar list first, then the panel */
+    d.addEventListener('keydown',function(e){
+      if(e.key==='Escape'||e.key==='Esc'){
+        var b=d.querySelector('[data-ev-calbtn][aria-expanded="true"]');
+        if(b){ e.preventDefault(); e.stopPropagation(); acCalSet(b,false); b.focus(); return; }
+        if(acEvdFb){ e.preventDefault(); acEvdClose(); }
+      }
+      else if(e.key==='Tab'&&acEvdFb) acEvdTrap(e);
+    });
+    d.addEventListener('cancel',function(e){ var b=d.querySelector('[data-ev-calbtn][aria-expanded="true"]'); if(b){ e.preventDefault(); acCalSet(b,false); b.focus(); } });
+    d.addEventListener('close',acEvdClosed);
+    acEvWireClicks(d,'event_details'); acCalWireDoc();
+    return (acEvd=d);
+  }
+  function acEvdOpen(i,opener,fromLink){
+    var ev=acEvList[i]; if(!ev) return;
+    var d=acEvdEl(), box=d.querySelector('.evd-scroll'), text=ev.desc||ev.sumFull;
+    acCalCloseAll(); clearTimeout(acEvdTimer);
+    acEvdCur=ev; acEvdOpener=opener||null;
+    box.innerHTML=acEvdHtml(ev);
+    if(text) acEvDescNodes(box.querySelector('.evd-desc'),text);
+    d.className='evd'+(ev.img?' has-img':'')+(acEvdFb?' evd-fb':'');
+    if(!d.open&&!acEvdFb){
+      acEvdLock(true);
+      if(typeof d.showModal==='function'){ try{ d.showModal(); }catch(x){ acEvdFallback(d); } } else acEvdFallback(d);
+    }
+    box.scrollTop=0;
+    var x=d.querySelector('.evd-x'); try{ x.focus({preventScroll:true}); }catch(e){ x.focus(); }
+    if(acEvLinkId(ev)) acEvdHash('#event-'+acEvLinkId(ev));
+    acTrack(fromLink?'event_link':'events_page',{event_name:'event_details_open',label:ev.name});
+  }
+  function acEvdClose(){
+    var d=acEvd; if(!d) return;
+    if(acEvdFb){ d.classList.remove('evd-fb'); d.removeAttribute('open'); if(acEvdFb.parentNode) acEvdFb.parentNode.removeChild(acEvdFb); acEvdFb=null; acEvdClosed(); return; }
+    if(d.open) d.close(); /* -> the close event -> acEvdClosed */
+  }
+  function acEvdClosed(){
+    acEvdLock(false); acCalCloseAll(); clearTimeout(acEvdTimer);
+    if(AC_EVD_HASH.test(location.hash)) acEvdHash('');
+    var o=acEvdOpener; acEvdOpener=null; acEvdCur=null;
+    if(o&&document.documentElement.contains(o)){ try{ o.focus({preventScroll:true}); }catch(e){ o.focus(); } }
+  }
+  function acEvdHash(h){ try{ history.replaceState(history.state,'',location.pathname+location.search+h); }catch(e){} }
+  /* the page behind stays put; on a computer with a classic scrollbar, its width is padded back so nothing jumps */
+  function acEvdLock(on){
+    var de=document.documentElement, b=document.body;
+    if(on){ var w=innerWidth-de.clientWidth; de.classList.add('ac-evd-lock'); if(w>0) b.style.paddingRight=w+'px'; }
+    else{ de.classList.remove('ac-evd-lock'); b.style.paddingRight=''; }
+  }
+  function acEvdFallback(d){
+    d.classList.add('evd-fb'); d.setAttribute('open','');
+    acEvdFb=document.createElement('div'); acEvdFb.className='evd-fbbg'; acEvdFb.addEventListener('click',acEvdClose);
+    d.parentNode.insertBefore(acEvdFb,d);
+  }
+  function acEvdTrap(e){
+    var f=[].filter.call(acEvd.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])'),function(el){ return el.offsetWidth>0||el.offsetHeight>0; });
+    if(!f.length) return; var first=f[0], last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+  /* Share: the phone's share sheet with the panel's own link; else copy the link and say so */
+  function acEvdShare(btn){
+    var ev=acEvdCur; if(!ev) return;
+    var url=location.origin+'/events'+(acEvLinkId(ev)?'#event-'+acEvLinkId(ev):''), w=acEvd.querySelector('#evd-when');
+    acTrack('event_details',{event_name:'event_share',label:ev.name});
+    if(navigator.share){
+      navigator.share({title:ev.name+' at Arroyo Church',text:ev.name+(w?' — '+w.textContent:''),url:url})
+        .catch(function(err){ if(!err||err.name!=='AbortError') acEvdCopy(url,btn); });
+      return;
+    }
+    acEvdCopy(url,btn);
+  }
+  function acEvdCopy(url,btn){
+    var done=function(ok){ acEvdSay(ok?'Link copied. Paste it anywhere to share this event.':'Copy this link to share it: '+url); try{ btn.focus({preventScroll:true}); }catch(e){} };
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function(){ done(true); },function(){ done(acEvdCopyOld(url)); });
+    else done(acEvdCopyOld(url));
+  }
+  function acEvdCopyOld(url){ /* inside the dialog: everything outside a modal dialog is inert */
+    var t=document.createElement('textarea'), ok=false; t.value=url; t.setAttribute('readonly',''); t.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+    acEvd.appendChild(t); t.select(); try{ ok=document.execCommand('copy'); }catch(e){} acEvd.removeChild(t); return ok;
+  }
+  function acEvdSay(msg){
+    var st=acEvd&&acEvd.querySelector('.evd-status'); if(!st) return;
+    st.textContent=msg; clearTimeout(acEvdTimer); acEvdTimer=setTimeout(function(){ st.textContent=''; },6000);
+  }
+  /* /events#event-<id>: bring that card up behind the panel (closing lands there), then open it. No upcoming event has
+     that id (it has passed): clear the hash, so the address bar doesn't keep a link that opens nothing. */
+  function acEvdFromHash(sec){
+    var m=AC_EVD_HASH.exec(location.hash||''); if(!m) return;
+    for(var i=0;i<acEvList.length;i++){
+      if(acEvList[i].ids.indexOf(m[1])<0) continue;
+      var card=sec.querySelector('[data-ev-card="'+i+'"]');
+      if(card) acJumpTo(card);
+      acEvdOpen(i,card&&card.querySelector('[data-ev-open]'),true); return;
+    }
+    if(!acEvd||!acEvd.hasAttribute('open')) acEvdHash('');
   }
   /* ---- HOME "Coming up": up to 3 events (Featured first, then soonest) between "What to expect" and Sermons, with a
      link to /events. Built only once the data says something is upcoming: on an empty list or a failed fetch the
@@ -2220,32 +2531,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'</div>';
     host.appendChild(sec);
     wireVisitForm(sec,'events_rsvp');
-    /* The page also holds a hand-pasted Squarespace Code Block list (#ac-upcoming, copied from Google Calendar on
-       2026-10-06; it lists Moms Group, which isn't public). The feed's list replaces it, so it's hidden while the feed
-       loads (its whole section when the block is alone in it). If the feed is missing or fails (a 404 before the first
-       sync, GitHub down), the old block comes back instead of a "coming soon" line, minus Moms Group, so deploying this
-       before the sync has run leaves /events as it was. A feed that loads with nothing upcoming is trusted: the old
-       block stays hidden. Delete that block in Squarespace once the feed is live; then a failed fetch shows the line. */
-    var nat=document.getElementById('ac-upcoming'), natBox=null, fallback=false;
-    if(nat){ var ns=nat.closest('.page-section'); natBox=(ns&&ns.querySelectorAll('.sqs-block').length===1)?ns:(nat.closest('.fe-block')||nat.closest('.sqs-block')||nat); natBox.style.display='none'; }
+    /* (the old hand-pasted list, #ac-upcoming, was deleted from /events on 2026-10-24, and its fallback code with it: a
+       failed or empty feed now shows the "coming soon" line) */
     sec.querySelector('.evl-jump').addEventListener('click',function(e){ e.preventDefault(); acJumpTo(document.getElementById('ac-ev-visit')); });
     acEvWireClicks(sec,'events_page'); acCalWireDoc();
     acLoadEvents().then(function(evs){
       var box=sec.querySelector('.evl-list'); if(!box) return; box.removeAttribute('aria-busy');
-      if(evs===null&&natBox){
-        fallback=true; sec.classList.add('ev-fallback');
-        var l=sec.querySelector('.evl'); if(l) l.parentNode.removeChild(l);
-        /* Dakota (2026-10-24): Mom's Group is a connect group, not a public event. Then re-hide emptied months, the way
-           the block's own script hides past dates */
-        [].forEach.call(nat.querySelectorAll('.ev-item'),function(li){ var h=li.querySelector('h3'); if(h&&/^mom['’]?s?\s+group\b/i.test(h.textContent.trim())) li.hidden=true; });
-        [].forEach.call(nat.querySelectorAll('[data-month]'),function(m){ if(!m.querySelector('.ev-item:not([hidden])')) m.hidden=true; });
-        if(!nat.querySelector('.ev-item:not([hidden])')){ var em=nat.querySelector('.ev-empty'); if(em) em.hidden=false; }
-        natBox.style.display=''; evTop();
-        /* the block sizes itself to the page width on resize; it measured 0 while hidden */
-        try{ dispatchEvent(new Event('resize')); }catch(x){}
-        return;
-      }
-      if(!evs||!evs.length){ box.innerHTML='<p class="evl-empty">'+acEvIcCal+'<span>New events are coming soon. Sundays are at 10am &mdash; we&rsquo;d love to see you.</span></p>'; return; }
+      if(!evs||!evs.length){ box.innerHTML='<p class="evl-empty">'+acEvIcCal+'<span>New events are coming soon. Sundays are at 10am &mdash; we&rsquo;d love to see you.</span></p>';
+        if(AC_EVD_HASH.test(location.hash)) acEvdHash(''); return; }
       var yr=acLa(Date.now()).y, cur=null, html='';
       evs.forEach(function(ev,i){ var d=ev.s.day, k=d.y*100+d.m;
         if(k!==cur){ html+=(cur===null?'':'</ul></div>')+'<div class="evl-month"><h2 class="evl-mh">'+AC_MONTH[d.m-1]+(d.y!==yr?' '+d.y:'')+'</h2><ul class="evl-grid">'; cur=k; }
@@ -2255,10 +2548,13 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
          arrives after the reveal observer ran */
       var sub=sec.querySelector('.evl-sub');
       if(sub&&evs.some(function(ev){ return ev.cal&&ev.cal.ics; })){ sub.innerHTML=acEvSubLine(); sub.hidden=false; }
+      /* the details panel reads the same list; a /events#event-<id> link opens its event now, and on a later hash change */
+      acEvList=evs; acEvdFromHash(sec);
+      addEventListener('hashchange',function(){ acEvdFromHash(sec); });
     });
     /* this section is the FIRST content on /events, so pad it below the fixed/absolute Squarespace header (measured live;
-       desktop + mobile header heights differ). In the fallback the old block sits above it, so it keeps its normal padding. */
-    function evTop(){ if(fallback){ sec.style.paddingTop=''; return; } var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
+       desktop + mobile header heights differ) */
+    function evTop(){ var h=document.querySelector('#header')||document.querySelector('.header'); var hh=h?h.offsetHeight:0; if(hh>0&&hh<260) sec.style.paddingTop=(hh+48)+'px'; }
     evTop(); addEventListener('resize',evTop); setTimeout(evTop,400); setTimeout(evTop,1200);
   }
   /* ---- Time-boxed event promo (2026-09-28): Pumpkin Patch Party, Sun Oct 4 2026. People who saw the

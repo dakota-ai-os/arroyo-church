@@ -46,8 +46,8 @@
 // scope is the one that matches Church Center.
 //
 // Output, sorted by start (times are ISO UTC; format them in America/Los_Angeles):
-//   { updated, events: [ { id, eventId, name, summary, starts, ends, allDay, location, image, url,
-//                          registerUrl, featured, recurrence, ics } ] }
+//   { updated, events: [ { id, eventId, name, summary, description, starts, ends, allDay, location, image,
+//                          url, registerUrl, featured, recurrence, ics } ] }
 //   One row per INSTANCE (id = instance id; instances of one event share eventId). The site folds rows
 //   with the same name + time of day into one card with "More dates" (acEvFold in footer-injection.html).
 //   A recurring series keeps only its next SERIES_ROWS instances (the next one + 3 more dates, all the
@@ -58,6 +58,12 @@
 //               widget-visible EventTimes, else starts_at/ends_at. ends is null when missing or equal
 //   summary     plain text (Event.summary, else the rich description with the HTML stripped), capped
 //               at ~600 chars, or null. It is TEXT: render it with textContent, never innerHTML.
+//   description the Church Center description in full, as plain TEXT (see descriptionText): the instance's
+//               `description`, else the event's — both documented as "A rich text public-facing summary of the
+//               event" (the instance one "Only available when requested with the ?fields param", so it is in
+//               INSTANCE_FIELDS). Paragraphs are separated by a blank line, list items start "• ", a link keeps
+//               its text plus "(https://…)" (http/https only), capped at ~3000 chars, or null. The site's
+//               event details panel renders it with textContent (footer-injection.html, acEvDescNodes).
 //   location    the instance's own location text, or null
 //   image/url/registerUrl  http(s) URLs only, else null. url = the Church Center event page
 //   recurrence  the API's recurrence description ("Monthly on the 4th Sunday"), or null
@@ -96,6 +102,7 @@ const HOUR = 3600000;
 const PER_PAGE = 100;            // the documented maximum
 const MAX_PAGES = 25;            // 2,500 instances; far past anything real, stops a runaway loop
 const SUMMARY_MAX = 600;
+const DESCRIPTION_MAX = 3000;
 const SLACK = 60000;             // rounding allowance when checking public times against the schedule
 const REFRESH_BEFORE = 12 * HOUR; // a stored signed image URL this close to expiring may be replaced...
 const REFRESH_GAIN = HOUR;       // ...but only by one that lasts at least this much longer
@@ -329,18 +336,33 @@ function httpUrl(u) {
   return null;
 }
 
-const ENTITIES = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', ndash: '–', mdash: '—', hellip: '…',
-  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', bull: '•', middot: '·', copy: '©', reg: '®', trade: '™',
-};
+// The named entities a rich-text editor writes: all of Latin-1 (U+00A0-U+00FF, in code-point order: &eacute; &deg;
+// &frac12; &laquo; ...) plus the common typography and symbols. Case matters (&Eacute; vs &eacute;); a name that only
+// matches in lower case falls back to it (&AMP;). No prototype, so "&constructor;" stays text. Anything else stays as typed.
+const LATIN1 = ('nbsp iexcl cent pound curren yen brvbar sect uml copy ordf laquo not shy reg macr deg plusmn sup2 sup3 acute '
+  + 'micro para middot cedil sup1 ordm raquo frac14 frac12 frac34 iquest Agrave Aacute Acirc Atilde Auml Aring AElig Ccedil '
+  + 'Egrave Eacute Ecirc Euml Igrave Iacute Icirc Iuml ETH Ntilde Ograve Oacute Ocirc Otilde Ouml times Oslash Ugrave Uacute '
+  + 'Ucirc Uuml Yacute THORN szlig agrave aacute acirc atilde auml aring aelig ccedil egrave eacute ecirc euml igrave iacute '
+  + 'icirc iuml eth ntilde ograve oacute ocirc otilde ouml divide oslash ugrave uacute ucirc uuml yacute thorn yuml').split(' ');
+const ENTITIES = Object.assign(Object.create(null), Object.fromEntries(LATIN1.map((k, i) => [k, String.fromCharCode(0xA0 + i)])), {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', shy: '',
+  ndash: '–', mdash: '—', hellip: '…', lsquo: '‘', rsquo: '’', sbquo: '‚', ldquo: '“',
+  rdquo: '”', bdquo: '„', lsaquo: '‹', rsaquo: '›', bull: '•', prime: '′', Prime: '″',
+  dagger: '†', Dagger: '‡', permil: '‰', frasl: '⁄', euro: '€', trade: '™',
+  ensp: '\u2002', emsp: '\u2003', thinsp: '\u2009', zwnj: '\u200C', zwj: '\u200D', lrm: '\u200E', rlm: '\u200F',
+  OElig: 'Œ', oelig: 'œ', Scaron: 'Š', scaron: 'š', Yuml: 'Ÿ', fnof: 'ƒ', circ: 'ˆ',
+  tilde: '˜', minus: '−', le: '≤', ge: '≥', ne: '≠', asymp: '≈', infin: '∞',
+  larr: '←', rarr: '→', uarr: '↑', darr: '↓', harr: '↔', hearts: '♥', star: '☆',
+  check: '✓', cross: '✗', starf: '★',
+});
 
 function decodeEntities(s) {
-  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, k) => {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]*);/gi, (m, k) => {
     if (k[0] === '#') {
       const n = k[1] === 'x' || k[1] === 'X' ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10);
-      return n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : '';
+      return n > 0 && n <= 0x10ffff && (n < 0xD800 || n > 0xDFFF) ? String.fromCodePoint(n) : ''; // no lone surrogate
     }
-    return ENTITIES[k.toLowerCase()] ?? m;
+    return ENTITIES[k] ?? ENTITIES[k.toLowerCase()] ?? m;
   });
 }
 
@@ -364,6 +386,101 @@ function cap(s, n) {
   const cut = s.slice(0, n);
   const at = cut.lastIndexOf(' ');
   return (at > n * 0.6 ? cut.slice(0, at) : cut).replace(/[\s,;:.–—-]+$/, '') + '…';
+}
+
+// The Church Center description (rich text = HTML) -> plain text the site renders with textContent and a calendar file can
+// carry. Only the markup's text and shape survive:
+//   - script / style / template / noscript / iframe / object / svg / math / head / title / textarea / select are dropped
+//     WITH their content (an unclosed one drops everything after it), and so are comments; every other tag is removed and
+//     its text kept
+//   - <p>, <div>, headings, <blockquote>, <ul>/<ol>, <dl>, <pre>, <table>, <hr>, ... = a paragraph break (one blank line);
+//     <br>, <dt>/<dd> and the end of a table row = a line break (two <br>s in a row = a blank line, the way Trix-style
+//     editors write a paragraph); a <pre> keeps its own line breaks
+//   - <li> = a line starting "• "; a break or paragraph inside one item is a space, so the item stays one line
+//   - <a href="https://…">text</a> = "text (https://…)", or just the URL when the text is the URL; a link to anything but
+//     http(s) (mailto:, tel:, javascript:, a relative path) keeps its text only
+//   - a ">" or "<" inside a quoted attribute value (title="a > b") is not the end of the tag
+//   - entities decoded exactly once ("&amp;lt;" stays the text "&lt;"), spaces collapsed, zero-width spaces dropped
+//   - capped at DESCRIPTION_MAX on a line or word boundary ("…"); null when nothing is left
+// A string with no markup at all keeps its own line breaks; its entities are decoded too (PC stores rich text, so a
+// typed "&" arrives as "&amp;" with or without tags around it).
+const DROPPED = 'script|style|template|noscript|iframe|object|svg|math|head|title|textarea|select';
+const DROP_BLOCK = new RegExp('<(' + DROPPED + ')\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>', 'gi');
+const DROP_REST = new RegExp('<(' + DROPPED + ')\\b[\\s\\S]*$', 'i');
+// a tag with its quoted values whole; one way to match, and bounded so a run of broken tags stays fast
+const QUOTED_TAG = /<[a-z](?:[^>"']|"[^"]{0,8192}"|'[^']{0,8192}'){0,1024}>/gi;
+const LINK = /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi;
+const ATTR = /([^\s"'>\/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;  // name[=value], one at a time
+const TAG = /<\/?[a-z][^>]*>|<![^>]*>|<\?[^>]*>/gi;                      // a lone "<" in text ("ages 3 < 5") is not a tag
+const BLOCK = /<\/?(p|div|h[1-6]|blockquote|ul|ol|dl|pre|table|thead|tbody|tfoot|caption|section|article|header|footer|aside|nav|main|address|details|summary|figure|figcaption|fieldset|center|hr)\b[^>]*>/gi;
+const IN_ITEM = /<li\b[^>]*>[\s\S]*?(?=<\/li\s*>|<li\b|<\/?(?:ul|ol)\b|$)/gi;      // one list item's own content
+const MARK = /[\uE000\uE001]/g;                                           // private-use: stand-ins for links while tags go
+const CONTROL = /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g;
+
+const oneLine = s => s.replace(/\s+/g, ' ').trim();
+const bareUrl = u => u.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '');
+
+// the href attribute itself (not data-href, not "href=" inside another attribute's quoted value)
+function linkHref(attrs) {
+  const m = [...attrs.matchAll(ATTR)].find(a => a[1].toLowerCase() === 'href');
+  if (!m) return null;
+  const u = decodeEntities(m[2] ?? m[3] ?? m[4] ?? '').trim();
+  return /^https?:\/\/[^\s<>"'`]+$/i.test(u) && !/[\x00-\x1f\x7f]/.test(u) ? u : null;
+}
+
+// Cuts at the last line break (else word break) before n, never inside a surrogate pair, and adds "…".
+function capText(s, n) {
+  if (s.length <= n) return s;
+  let cut = s.slice(0, n);
+  if (/[\uD800-\uDBFF]$/.test(cut)) cut = cut.slice(0, -1);
+  const line = cut.lastIndexOf('\n');
+  const word = cut.search(/\s\S*$/);
+  const at = line > n * 0.8 ? line : word > n * 0.6 ? word : -1;
+  return (at > 0 ? cut.slice(0, at) : cut).replace(/[\s,;:.\u2013\u2014\u2022-]+$/, '') + '\u2026';
+}
+
+export function descriptionText(html) {
+  if (typeof html !== 'string') return null;
+  let s = html.replace(MARK, '');
+  if (/<[a-z!?/]/i.test(s)) {
+    const links = [];
+    s = s.replace(/<pre\b[^>]*>[\s\S]*?<\/pre\s*>/gi, pre => pre.replace(/\r\n?|\n/g, '<br>'))
+      .replace(/\s+/g, ' ')                        // in markup, a raw line break is only a space
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(QUOTED_TAG, tag => tag.replace(/"[^"]*"|'[^']*'/g, q => q.replace(/[<>]/g, ' ')))
+      .replace(DROP_BLOCK, ' ')
+      .replace(DROP_REST, ' ');
+    const gt = s.lastIndexOf('>') + 1;                       // a "<" with no ">" after it is text (and the scans stay linear)
+    s = (s.slice(0, gt) + s.slice(gt).replace(/</g, '&lt;'))
+      .replace(LINK, (m, attrs, inner) => {
+        const url = linkHref(attrs);
+        if (!url) return inner;
+        const text = oneLine(decodeEntities(inner.replace(TAG, ' ')));
+        links.push(!text || bareUrl(text) === bareUrl(url) ? url : text + ' (' + url + ')');
+        return '\uE000' + (links.length - 1) + '\uE001';
+      })
+      .replace(IN_ITEM, li => li.replace(/<br\b[^>]*>|<\/?(?:p|div|h[1-6]|blockquote|pre)\b[^>]*>/gi, ' '))
+      .replace(/<br\b[^>]*>/gi, '\n')
+      .replace(/<li\b[^>]*>/gi, '\n\u2022 ')
+      .replace(/<\/(?:li|tr)\s*>|<(?:dt|dd)\b[^>]*>/gi, '\n')
+      .replace(/<\/t[dh]\s*>/gi, ' ')                  // table cells side by side
+      .replace(BLOCK, '\n\n')
+      .replace(TAG, '');
+    // decode the text between the link stand-ins only: a link's text was decoded once already, and an entity that
+    // decodes to a stand-in character can never pose as one
+    s = s.split(/\uE000(\d+)\uE001/).map((part, k) => (k % 2 ? links[+part] : decodeEntities(part))).join('');
+  } else s = decodeEntities(s);
+  const text = s.replace(/\r\n?/g, '\n')
+    .replace(/[\u200B\uFEFF\uE000\uE001]/g, '')
+    .replace(CONTROL, '')
+    .split('\n')
+    .map(line => line.replace(/[^\S\n]+/g, ' ').trim())
+    .filter(line => line !== '\u2022')               // an empty list item
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/(\u2022 [^\n]*)\n\n(?=\u2022 )/g, '$1\n')   // a nested list's breaks: its items stay one list
+    .trim();
+  return text ? capText(text, DESCRIPTION_MAX) : null;
 }
 
 // PC sets `recurrence` only on a recurring instance; recurrence_description is the long human text.
@@ -392,6 +509,7 @@ function toRow(instance, event, included) {
       eventId: String(event.id),
       name,
       summary: cap(plainText(e.summary) || plainText(a.description) || plainText(e.description), SUMMARY_MAX),
+      description: descriptionText(a.description) || descriptionText(e.description),
       starts: iso(times.starts),
       ends: times.ends === null ? null : iso(times.ends),
       allDay: a.all_day_event === true,
@@ -506,7 +624,8 @@ function readOld(file) {
 //             the last one (RFC 5545 makes it exclusive). The day logic is acEvNorm's in footer-injection.html, so the file
 //             and the card agree on the date: an all-day row stamped at UTC midnight is read in UTC.
 //   LOCATION  PC's own text, with a bare "Arroyo Church" expanded to the street address; left out when PC has none.
-//   DESCRIPTION  the summary, a blank line, then "Details: <Church Center page>" and "Register: <link>" when present.
+//   DESCRIPTION  the description (else the summary), a blank line, then "Details: <Church Center page>" and "Register: <link>"
+//             when present. Both are plain text built here, so the same PC text always gives the same bytes.
 //   URL       the registration link, else the Church Center page.
 //   TRANSP    all-day rows are TRANSPARENT, so a day-long event does not mark someone busy all day.
 //   DTSTAMP / LAST-MODIFIED  when this sync first wrote the event as it now stands: read back from the existing file and
@@ -582,7 +701,7 @@ export const icsLocation = loc => (loc && /^arroyo church$/i.test(loc.trim()) ? 
 
 export function icsDescription(row) {
   const links = [row.url && 'Details: ' + row.url, row.registerUrl && 'Register: ' + row.registerUrl].filter(Boolean);
-  return [row.summary, links.join('\n')].filter(Boolean).join('\n\n') || null;
+  return [row.description || row.summary, links.join('\n')].filter(Boolean).join('\n\n') || null;
 }
 
 // A stamp (YYYYMMDDTHHMMSSZ) -> its SEQUENCE: whole minutes since SEQ_EPOCH, never below 0 (0 for an unreadable stamp).
