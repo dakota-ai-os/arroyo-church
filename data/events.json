@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24T16:33:22.180Z",
+  "updated": "2026-10-24T18:05:42.123Z",
   "events": [
     {
       "id": "240733611",
@@ -14,7 +14,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733611",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733611.ics"
     },
     {
       "id": "240733615",
@@ -29,7 +30,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733615",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733615.ics"
     },
     {
       "id": "240733610",
@@ -44,7 +46,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733610",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733610.ics"
     },
     {
       "id": "240733613",
@@ -59,7 +62,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733613",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733613.ics"
     },
     {
       "id": "240733648",
@@ -74,7 +78,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733648",
       "registerUrl": null,
       "featured": false,
-      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026"
+      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
+      "ics": "data/events/ics/240733648.ics"
     },
     {
       "id": "240733616",
@@ -89,7 +94,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733616",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733616.ics"
     },
     {
       "id": "240733612",
@@ -104,7 +110,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733612",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733612.ics"
     },
     {
       "id": "240733618",
@@ -119,7 +126,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733618",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733618.ics"
     },
     {
       "id": "240733621",
@@ -134,7 +142,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733621",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733621.ics"
     },
     {
       "id": "240733649",
@@ -149,7 +158,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733649",
       "registerUrl": null,
       "featured": false,
-      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026"
+      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
+      "ics": "data/events/ics/240733649.ics"
     },
     {
       "id": "240733650",
@@ -164,7 +174,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733650",
       "registerUrl": null,
       "featured": false,
-      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026"
+      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
+      "ics": "data/events/ics/240733650.ics"
     },
     {
       "id": "240733622",
@@ -179,7 +190,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733622",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733622.ics"
     },
     {
       "id": "240733651",
@@ -194,7 +206,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733651",
       "registerUrl": null,
       "featured": false,
-      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026"
+      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
+      "ics": "data/events/ics/240733651.ics"
     },
     {
       "id": "240733619",
@@ -209,7 +222,8 @@
       "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733619",
       "registerUrl": null,
       "featured": false,
-      "recurrence": null
+      "recurrence": null,
+      "ics": "data/events/ics/240733619.ics"
     }
   ]
 }
