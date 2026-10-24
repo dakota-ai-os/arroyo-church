@@ -1936,8 +1936,14 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   function acEvUrl(v){ v=typeof v==='string'?v.trim():''; return /^https?:\/\/[^\s"'<>]+$/i.test(v)?v:''; } /* http(s) only: never javascript:/data: */
   /* recurrence = PC's own description ("Monthly on the 4th Sunday"): shown in full on /events; the home card's chip
      uses just its frequency word ("Monthly"), or nothing when it doesn't start with one */
-  function acEvRec(v){ v=acEvText(v,90); return (!v||/^(none|null|false|no|never|once|custom|does not repeat)$/i.test(v))?'':v.charAt(0).toUpperCase()+v.slice(1); }
-  function acEvRecWord(r){ var m=/^(daily|weekly|biweekly|monthly|quarterly|yearly|annually)\b/i.exec(r||''); return m?m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase():''; }
+  /* PC's real text repeats the card's time and start date ("The second Sunday of every month from 11:30am to 12:30pm
+     beginning 11/08/2026", seen 2026-10-24): both are cut, leaving "The second Sunday of every month" */
+  function acEvRec(v){ v=acEvText(v,140); if(!v||/^(none|null|false|no|never|once|custom|does not repeat)$/i.test(v)) return '';
+    v=v.replace(/\s+from\s+\d{1,2}(:\d{2})?\s*[ap]\.?m\.?\s+(to|until|-|\u2013)\s+\d{1,2}(:\d{2})?\s*[ap]\.?m\.?/i,'')
+       .replace(/,?\s+(beginning|starting|until|ending|through)\s+\d{1,2}\/\d{1,2}\/\d{2,4}.*$/i,'').trim();
+    return v?v.charAt(0).toUpperCase()+v.slice(1):''; }
+  function acEvRecWord(r){ var m=/^(daily|weekly|biweekly|monthly|quarterly|yearly|annually)\b/i.exec(r||''); if(m) return m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase();
+    m=/\bevery\s+(other\s+week|day|week|month|year)\b/i.exec(r||''); return m?({'day':'Daily','week':'Weekly','other week':'Every other week','month':'Monthly','year':'Yearly'})[m[1].toLowerCase().replace(/\s+/g,' ')]:''; }
   function acHm(p){ return (p.h%12||12)+(p.mi?':'+(p.mi<10?'0':'')+p.mi:''); }
   function acMer(p){ return p.h<12?'am':'pm'; }
   /* "6–8pm", "11:30am–1pm", "5pm" (the same style as the group schedules) */
