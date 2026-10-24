@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24T18:05:42.123Z",
+  "updated": "2026-10-24T19:02:14.483Z",
   "events": [
     {
       "id": "240733611",
@@ -224,6 +224,22 @@
       "featured": false,
       "recurrence": null,
       "ics": "data/events/ics/240733619.ics"
+    },
+    {
+      "id": "240733623",
+      "eventId": "23155244",
+      "name": "Connect class",
+      "summary": null,
+      "starts": "2027-04-25T18:30:00Z",
+      "ends": "2027-04-25T19:30:00Z",
+      "allDay": false,
+      "location": null,
+      "image": null,
+      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733623",
+      "registerUrl": null,
+      "featured": false,
+      "recurrence": null,
+      "ics": "data/events/ics/240733623.ics"
     }
   ]
 }
