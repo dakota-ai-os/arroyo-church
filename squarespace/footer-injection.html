@@ -1522,6 +1522,22 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     function closeForm(){ wrap.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
     toggle.addEventListener('click',function(){ wrap.classList.contains('open')?closeForm():openForm(); });
     var cancel=card.querySelector('#ac-cc-cancel'); if(cancel) cancel.addEventListener('click',closeForm);
+    /* /#ac-cc-signup (an event's "Save my spot") lands on this form already open, no second click. Instant jumps (smooth
+       scroll is !important site-wide), repeated while the async sections above it (sermons, coming-up) settle, until the
+       visitor scrolls or types. Then the hash becomes #ac-connect-class, so the same link fires hashchange next time
+       (not sooner: wireNav reads the hash at load and would scroll to the section top first). */
+    function openFromLink(){
+      if(location.hash!=='#ac-cc-signup') return;
+      if(!wrap.classList.contains('open')){ wrap.classList.add('open'); toggle.setAttribute('aria-expanded','true'); renderTs(); }
+      var moved=false, stop=function(){ moved=true; };
+      ['wheel','touchstart','keydown','mousedown'].forEach(function(t){ addEventListener(t,stop,{once:true,passive:true,capture:true}); });
+      [650,1300,2400].forEach(function(ms,i){ setTimeout(function(){
+        if(!i){ try{ history.replaceState(history.state,'',location.pathname+location.search+'#ac-connect-class'); }catch(e){} }
+        if(moved) return; acJumpTo(card);
+        if(!i){ var f=card.querySelector('input[name=first]'); if(f) try{ f.focus({preventScroll:true}); }catch(e){} }
+      },ms); });
+    }
+    openFromLink(); addEventListener('hashchange',openFromLink);
     function doSubmit(token){
       clearTimeout(tsWaitTimer);
       var err=form.querySelector('.vf-err'); if(err){ err.textContent=''; err.style.color=''; }
@@ -2012,7 +2028,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   var AC_WDAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   /* events with an on-site signup form, used when PC has no registration link (the old hand-made /events list sent
      Connect Class to the site's own form too). [name pattern, link, button label] */
-  var AC_EV_LOCAL=[[/^connect class\b/i,'/#ac-connect-class','Save my spot']];
+  var AC_EV_LOCAL=[[/^connect class\b/i,'/#ac-cc-signup','Save my spot']]; /* #ac-cc-signup opens the form on arrival (wireConnectClassForm) */
   var acEvIcPin='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
   var acEvIcRep='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 014-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 01-4 4H4"/></svg>';
   var acEvIcCal='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>';
