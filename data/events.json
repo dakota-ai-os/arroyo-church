@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25T03:30:31.532Z",
+  "updated": "2026-10-25T19:59:22.713Z",
   "events": [
     {
       "id": "240733611",
@@ -17,23 +17,6 @@
       "featured": false,
       "recurrence": null,
       "ics": "data/events/ics/240733611.ics"
-    },
-    {
-      "id": "240733615",
-      "eventId": "23155236",
-      "name": "Connect class",
-      "summary": "The best place to start at Arroyo. In one class we'll help you connect to God, others, and your gifts.",
-      "description": "The best place to start at Arroyo. You'll hear our mission and beliefs, learn about baptism and Connect Groups, discover how God has wired you to serve, and find out how to become a member of the family.\nIn one class:\n\n• Connect to God: the good news of Jesus, baptism, our mission, and what we believe.\n• Connect to others: find real community and get into a weeknight Connect Group.\n• Connect to your gifts: discover your God-given S.H.A.P.E. and where you can serve.",
-      "starts": "2026-10-25T18:30:00Z",
-      "ends": "2026-10-25T19:30:00Z",
-      "allDay": false,
-      "location": "Arroyo Church",
-      "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733615",
-      "registerUrl": null,
-      "featured": false,
-      "recurrence": null,
-      "ics": "data/events/ics/240733615.ics"
     },
     {
       "id": "240733610",
