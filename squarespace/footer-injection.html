@@ -299,18 +299,11 @@ body.homepage [data-section-id="6853420a6e3e3715dbe5285d"]{display:none!importan
 #ac-events .h2{color:#16242b}
 #ac-events .h2 em{color:#2e8fa3}
 #ac-events .lead{color:rgba(22,36,43,.72);margin:1.1rem auto 0;max-width:54ch}
-#ac-events .ev-body{display:grid;gap:1.6rem;max-width:960px;margin:0 auto}
-@media(min-width:880px){#ac-events .ev-body{grid-template-columns:1.15fr .85fr;align-items:start}}
-#ac-events .ev-meta{display:flex;flex-direction:column;gap:1.2rem;padding-top:.3rem}
 /* EVENTS LIST (2026-10-24): /events "Upcoming at Arroyo" + the home "Coming up" strip, both built from data/events.json
    (a GitHub Action writes it from Planning Center Calendar). Cards must look finished with only a title + date, so every
    other line (location, summary, image, recurrence, button) is simply left out when it's missing. */
 #ac-events .evl{max-width:960px;margin:0 auto}
 #ac-events .evl .ev-head{margin-bottom:clamp(1.8rem,4vw,2.6rem)}
-#ac-events .evl-jump{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-weight:700;font-size:.95rem;color:#1f6b7c;text-decoration:underline;text-underline-offset:3px}
-#ac-events .evl-jump:hover{color:#0d2530}
-#ac-events .ev-invite{max-width:960px;margin:clamp(3.5rem,8vw,5.5rem) auto 0;padding-top:clamp(3rem,7vw,4.5rem);border-top:1px solid rgba(22,36,43,.1)}
-#ac-events .ev-body .visit-form{margin-top:0} /* line the form up with the facts beside it (the base .visit-form margin pushed it 2.6rem lower) */
 .evl-month{margin:0 0 clamp(1.9rem,4vw,2.5rem)}
 .evl-month:last-child{margin-bottom:0}
 .evl-mh{display:flex;align-items:center;gap:.8rem;font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:800;line-height:1.3;letter-spacing:.2em;text-transform:uppercase;color:#7d6228;margin:0 0 .95rem;padding:0}
@@ -964,7 +957,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   function acTrack(src, extra){
     /* Every Plan-a-Visit surface must map to plan_visit_submit — that's the event that fires the
        Google Ads conversion below. visit_page (/plan-your-visit, the paid-ads landing page) and
-       events_rsvp (/events) post the same form via wireVisitForm, so they belong here too;
+       events_rsvp (/events, until 2026-10-25) posted the same form via wireVisitForm, so they belong here too;
        without them they fell through to 'form_submit' and the ad click went uncounted. */
     var map={home_visit:'plan_visit_submit',visit:'plan_visit_submit',plan_visit:'plan_visit_submit',visit_page:'plan_visit_submit',events_rsvp:'plan_visit_submit',join_group:'join_group_submit',connect_group:'join_group_submit',connect_class:'connect_class_submit',prayer:'prayer_request_submit',connect_tag:'connect_tag_submit',ebook_blog:'ebook_signup'};
     var name=(extra&&extra.event_name)||map[src]||'form_submit', params={form_source:src||'unknown',page:location.pathname};
@@ -2437,8 +2430,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'<button type="button" class="btn btn-ghost-dark evl-cta evd-share" data-evd-share>'+acEvIcShare+'Share</button></div>'
       +acEvCalMenu(ev,'evd-cal',true)
       +'<p class="evd-status" role="status" aria-live="polite"></p>'
-      +'<div class="evd-new"><p><strong>New to Arroyo?</strong> <a href="/plan-your-visit">Plan your visit <span aria-hidden="true">&rarr;</span></a></p>'
-      +'<p>Questions? <a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a> &middot; <a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
+      +'<div class="evd-new"><p>Questions? <a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a> &middot; <a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
   }
   function acEvdEl(){
     if(acEvd) return acEvd;
@@ -2576,31 +2568,20 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(document.getElementById('ac-events')) return;
     var host=document.querySelector('#sections')||document.querySelector('main')||document.querySelector('#page');
     if(!host) return;
-    var pin='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-5.6-7-11a7 7 0 1114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
-    var clock='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>';
-    var mail='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>';
-    var meta='<div class="vm ac-rev"><div class="ic">'+pin+'</div><div><h3>Location</h3><p><a href="https://www.google.com/maps/dir/?api=1&destination=945+Concannon+Blvd,+Livermore,+CA+94550" target="_blank" rel="noopener">945 Concannon Blvd, Livermore, CA 94550</a><br><span style="font-weight:500;color:rgba(22,36,43,.66);font-size:.9rem">The worship center is the round building.</span></p></div></div><div class="vm ac-rev"><div class="ic">'+clock+'</div><div><h3>Sundays</h3><p>10:00 AM worship &middot; about 70 minutes</p></div></div><div class="vm ac-rev"><div class="ic">'+mail+'</div><div><h3>Questions?</h3><p><a href="mailto:josh@arroyochurch.com">josh@arroyochurch.com</a><br><a href="tel:+19256940426">(925) 694-0426</a></p></div></div>';
-    var form='<div class="visit-form ac-rev" id="ac-visit-form"><div class="vf-head"><p class="eyebrow">Let us know you&rsquo;re coming</p><h3>We&rsquo;ll be ready to welcome you</h3><p class="vf-sub">Whether it&rsquo;s an upcoming event or your first Sunday, drop your info below and we&rsquo;ll be looking for you &mdash; takes about 20 seconds.</p></div><form novalidate><input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none"><div class="vf-grid"><label class="vf-field"><span>Your name *</span><input type="text" name="name" required autocomplete="name"></label><label class="vf-field"><span>Email *</span><input type="email" name="email" required autocomplete="email"></label><label class="vf-field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel"></label><label class="vf-field vf-full"><span>Which event, how many coming, or anything we should know?</span><textarea name="message" rows="3"></textarea></label></div><div class="vf-err" role="alert" aria-live="polite"></div><div class="vf-actions"><button type="submit" class="btn btn-gold">Count me in</button></div></form></div>';
-    /* `?from=qr` is the house QR tag (the stage sermon-notes QR uses it). Today's invite cards carry no tag, so everyone
-       gets the general line; a future card printed with /events?from=qr gets the warmer one. */
-    var qr=/(?:^|[?&])from=qr(?:&|$)/.test(location.search.slice(1));
-    var lead=qr?'Thanks for scanning &mdash; we&rsquo;re so glad you&rsquo;re thinking about joining us. Drop your info below and someone from our team will reach out to help you plan your visit.'
-      :'Thinking about coming to Arroyo? We&rsquo;d love to have you. Drop your info below and someone from our team will reach out to help you plan your visit.';
+    /* the people scanning the stage QR (/events?from=qr) are already here on a Sunday, so this page is for the church
+       family: no plan-a-visit form or "new here?" pitch (Dakota, 2026-10-25; ?from=qr is still read by GA4) */
     var sec=document.createElement('section'); sec.className='ac-sec ac-events'; sec.id='ac-events';
     sec.innerHTML='<div class="wrap">'
-      +'<div class="evl"><div class="ev-head"><p class="eyebrow ac-rev">What&rsquo;s coming up</p><h1 class="h2 ac-rev">Upcoming at <em>Arroyo.</em></h1><p class="lead ac-rev">Here&rsquo;s what&rsquo;s on the calendar. Everyone is welcome, and we gather every Sunday at 10:00 AM.</p><a class="evl-jump ac-rev" href="#ac-ev-visit">New here? Plan your first visit <span aria-hidden="true">&darr;</span></a><div class="evl-sub" hidden></div></div>'
+      +'<div class="evl"><div class="ev-head"><p class="eyebrow ac-rev">What&rsquo;s coming up</p><h1 class="h2 ac-rev">Upcoming at <em>Arroyo.</em></h1><p class="lead ac-rev">Here&rsquo;s what&rsquo;s on the calendar: classes, baptisms, worship nights and more. Save your spot, or add an event to your calendar.</p><div class="evl-sub" hidden></div></div>'
       +'<div class="evl-list" aria-busy="true"><div class="evl-grid" aria-hidden="true"><div class="evl-skel"></div><div class="evl-skel"></div></div></div></div>'
-      +'<div class="ev-invite" id="ac-ev-visit"><div class="ev-head"><p class="eyebrow ac-rev">You&rsquo;re invited</p><h2 class="h2 ac-rev">Plan your <em>first visit.</em></h2><p class="lead ac-rev">'+lead+'</p></div><div class="ev-body">'+form+'<div class="visit-meta ev-meta">'+meta+'</div></div></div>'
       +'</div>';
     host.appendChild(sec);
-    wireVisitForm(sec,'events_rsvp');
     /* (the old hand-pasted list, #ac-upcoming, was deleted from /events on 2026-10-24, and its fallback code with it: a
        failed or empty feed now shows the "coming soon" line) */
-    sec.querySelector('.evl-jump').addEventListener('click',function(e){ e.preventDefault(); acJumpTo(document.getElementById('ac-ev-visit')); });
     acEvWireClicks(sec,'events_page'); acCalWireDoc();
     acLoadEvents().then(function(evs){
       var box=sec.querySelector('.evl-list'); if(!box) return; box.removeAttribute('aria-busy');
-      if(!evs||!evs.length){ box.innerHTML='<p class="evl-empty">'+acEvIcCal+'<span>New events are coming soon. Sundays are at 10am &mdash; we&rsquo;d love to see you.</span></p>';
+      if(!evs||!evs.length){ box.innerHTML='<p class="evl-empty">'+acEvIcCal+'<span>New events are coming soon. Check back here for what&rsquo;s next.</span></p>';
         if(AC_EVD_HASH.test(location.hash)) acEvdHash(''); return; }
       var yr=acLa(Date.now()).y, cur=null, html='';
       evs.forEach(function(ev,i){ var d=ev.s.day, k=d.y*100+d.m;
