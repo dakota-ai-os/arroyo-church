@@ -5,13 +5,21 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:240733615@arroyochurch.com
-DTSTAMP:20261024T191219Z
-LAST-MODIFIED:20261024T191219Z
-SEQUENCE:427392
+DTSTAMP:20261025T032630Z
+LAST-MODIFIED:20261025T032630Z
+SEQUENCE:427886
 DTSTART:20261025T183000Z
 DTEND:20261025T193000Z
 SUMMARY:Connect class
-DESCRIPTION:Details: https://www.arroyochurch.com/events#event-240733615
+LOCATION:Arroyo Church - 945 Concannon Blvd.\, Livermore\, CA 94550
+DESCRIPTION:The best place to start at Arroyo. You'll hear our mission and 
+ beliefs\, learn about baptism and Connect Groups\, discover how God has wi
+ red you to serve\, and find out how to become a member of the family.\nIn 
+ one class:\n\n• Connect to God: the good news of Jesus\, baptism\, our m
+ ission\, and what we believe.\n• Connect to others: find real community 
+ and get into a weeknight Connect Group.\n• Connect to your gifts: discov
+ er your God-given S.H.A.P.E. and where you can serve.\n\nDetails: https://
+ www.arroyochurch.com/events#event-240733615
 URL:https://www.arroyochurch.com/events#event-240733615
 END:VEVENT
 END:VCALENDAR
