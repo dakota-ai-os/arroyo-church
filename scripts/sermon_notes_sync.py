@@ -865,13 +865,21 @@ def ordinal(n):
 SCRIPTURE_REF = re.compile(r"[-\u2013]\s*(?:[1-3]\s*)?[A-Z][a-z]+\s+\d+:\d")
 
 
+SENTENCE_BREAK = re.compile(r"[.?!][\"\u201d']?\s+[\"\u201c]?[A-Z]")   # "...be shared? The Savior is..." = two sentences
+
+
 def _is_subheading(text):
     """A flush-left line that is NOT scripture -- e.g. '3 Ways to Communicate Like Christ'.
-    Scripture is flush-left too, but it opens with a quote and carries a -Book c:v citation."""
+    Scripture is flush-left too, but it opens with a quote and carries a -Book c:v citation.
+    Nor is an item ('#2 ...', '- ...') or a line of two sentences: those are body text under the
+    heading. (10/25: '#2 Why should the Savior be shared? The Savior is boundless in riches' came
+    out as a gold heading, and '#1 ...' only escaped it by being 89 characters long.)"""
     t = text.strip()
     return (len(t) < 80
             and not t[:1] in '"\u201c\u2018\''
-            and not SCRIPTURE_REF.search(t))
+            and not SCRIPTURE_REF.search(t)
+            and not SUB_MARK.match(t)
+            and not SENTENCE_BREAK.search(t))
 
 
 def parse_structure(body):
@@ -1011,7 +1019,7 @@ def parse_unnumbered(body):
             main(t)
         elif len(t) < 90 and in_list:
             sub(t)
-        elif len(t) < 90:
+        elif len(t) < 90 and not SENTENCE_BREAK.search(t):    # two sentences = body text, not a heading
             out.append(("subhead", t))
             m = LIST_COUNT.match(t)
             in_list = True
@@ -1451,8 +1459,8 @@ def update_note(note_id, outline):
                 parts.append(NOTE_PROMPT)
             seen_main = True
             parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
-        elif kind == "subhead":
-            parts.append(f"<div><h2>{esc(val)}</h2></div><div><br></div>")
+        elif kind == "subhead":              # Notes' Subheading (main points are Heading, h2)
+            parts.append(f"<div><h3>{esc(val)}</h3></div><div><br></div>")
         elif kind == "quote":
             # Scripture: indent it so quotes read as distinct from Josh's teaching. Notes
             # only honours indentation it can model as a list (<blockquote> is silently

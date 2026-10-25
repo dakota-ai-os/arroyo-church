@@ -309,6 +309,24 @@ check("a 3-item sub-list followed by main point 3 is not swapped with it",
                                      ("sub", "Third sub"), ("main", "3. Point three"),
                                      ("subhead", "3 Ways to Communicate Like Christ")])
 
+# 10/25: a counted heading with "#1"/"#2" questions under it. "#2 ..." was 69 characters, so the old
+# length-only test made it a gold subhead while the 89-character "#1 ..." stayed body text.
+OCT25 = ("   1.\n\n   Grace get you to go even if it means suffering\n\n\u201cVerse one\u201d -Ephesians 3:1-3, 13\n\n"
+         "   2.\n\n   Grace gets the worst sinners to go share the Savior\n\n\u201cVerse two\u201d -Ephesians 3:4-9\n\n"
+         "2 Questions About Sinners Sharing the Savior Answered\n\n"
+         "#1 Why can the worst sinners share the Savior? Grace is about His love not your worthiness\n\n"
+         "#2 Why should the Savior be shared? The Savior is boundless in riches\n\n"
+         "   3.\n\n   By grace you can go to God freely and confidently\n\n\u201cVerse three\u201d -Ephesians 3:12\n")
+check("10/25: the counted heading is a subhead; its '#1'/'#2' questions are body text, not headings",
+      [k for k, _ in s.parse_structure(OCT25)] == ["main", "text", "main", "text", "subhead", "text", "text", "main", "text"])
+check("a two-sentence line or a '#N'/'-' item is never a subheading",
+      not s._is_subheading("#2 Why should the Savior be shared? The Savior is boundless in riches")
+      and not s._is_subheading("Grace is free. It is not cheap") and not s._is_subheading("- a bullet")
+      and s._is_subheading("2 Questions About Sinners Sharing the Savior Answered")
+      and s._is_subheading("3 Ways to Communicate Like Christ"))
+check("unnumbered: a short two-sentence line is body text, not a subhead",
+      ("text", "Why go? Because grace sends us") in s.parse_unnumbered("Why go? Because grace sends us\n\nGo boldly\n\n\u201cVerse\u201d -Acts 1:8"))
+
 print("parse_slides: a guest's slide deck (shape of Cristian Ayquipa, 2026-09-06)")
 SLIDES = ("1. Title- STAYING CONNECTED\n2. THE TRUE VINE\n“I am the true vine, and my Father\nis the gardener.”\n"
           "John 15:1\n3. JESUS IS THE SOURCE.\nWE ARE THE BRANCHES.\n4. Point 1- PRUNING IS PART OF\nSTAYING CONNECTED\n"
