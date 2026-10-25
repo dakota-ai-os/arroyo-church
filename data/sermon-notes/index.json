@@ -1,6 +1,13 @@
 {
-  "updated": "2026-10-23T15:34:46-07:00",
+  "updated": "2026-10-24T20:00:13-07:00",
   "weeks": [
+    {
+      "service": "2026-10-25",
+      "title": "How Grace Gets You to GO",
+      "speaker": "Pastor Josh Smith",
+      "release_at": "2026-10-25T06:45:00-07:00",
+      "file": "2026-10-25.json"
+    },
     {
       "service": "2026-10-18",
       "title": "How God Reconciles Broken Relationships",
