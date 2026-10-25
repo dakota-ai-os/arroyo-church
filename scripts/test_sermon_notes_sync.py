@@ -452,12 +452,13 @@ check("...and a 3-tuple still works (sender None)",
 def render_note(outline):
     """What update_note() would paste (header, body), with Notes fully stubbed out."""
     got, keep = {}, {n: getattr(s, n) for n in ("run_osascript", "attachment_count", "_focus_note",
-                                                "replace_around_image")}
+                                                "replace_around_image", "_apply_heading_styles")}
     prev = '<div><img src="data:image/png;base64,AAAA"></div><div><i>*To save and edit this note</i></div>'
     s.run_osascript = lambda script, timeout=90: prev if "return body" in script else ""
     s.attachment_count = lambda nid: 1
     s._focus_note = lambda nid: None
     s.replace_around_image = lambda nid, h, b, skip: got.update(header=h, body=b)
+    s._apply_heading_styles = lambda nid, blocks, focus=False: got.update(styled=list(blocks))   # never the real GUI
     sleep, s.time.sleep = s.time.sleep, (lambda x: None)
     try:
         s.update_note("x-coredata://test", outline)
@@ -467,6 +468,128 @@ def render_note(outline):
             setattr(s, n, f)
     return got
 
+
+print("Notes paragraph styles: main points = Heading, sub points = Subheading (2026-10-25)")
+check("update_note styles the headings after the paste, from the outline's own blocks",
+      render_note(o).get("styled") == [tuple(b) for b in o["blocks"]] or render_note(o).get("styled") == o["blocks"])
+check("UTF-16 length: an em dash is 1 unit, an emoji 2", s._u16("a\u2014b") == 3 and s._u16("\U0001F64F") == 2)
+
+def run_styles(paras, blocks, answer=lambda script: "OK", after=None):
+    """style_headings() against a fake editor: returns (result, AppleScripts sent, log lines).
+    `after` = what the editor reads once styling is done (default: unchanged)."""
+    sent, logged, keep = [], [], (s._note_paragraphs, s._ui, s.log)
+    reads = [list(paras), list(after if after is not None else paras)]
+    s._note_paragraphs = lambda: reads.pop(0) if len(reads) > 1 else reads[0]
+    s._ui = lambda script, timeout=120: (sent.append(script), answer(script))[1]
+    s.log = lambda m: logged.append(m)
+    try:
+        return s.style_headings(blocks), sent, logged
+    finally:
+        s._note_paragraphs, s._ui, s.log = keep
+
+P = ["1. Grace", "Pastor Josh Smith \U0001F64F | October 25th", "\ufffc", "*To save and edit this note", "",
+     "KEY TAKEAWAY: grace \u2014 sends", "", "1. Grace", "", "\"Verse\" -Ephesians 3:1", "",
+     "2 Questions About It", "", "#1 Why? Because"]
+B = [("main", "1. Grace"), ("quote", '"Verse" -Ephesians 3:1'), ("subhead", "2 Questions About It"),
+     ("para", "#1 Why? Because"), ("main", "9. Not in the note")]
+res, sent, logged = run_styles(P, B)
+def start_of(paras, k): return sum(s._u16(p) + 1 for p in paras[:k])
+check("each heading: Cmd-Down, Option-Up back to the START of its paragraph, caret checked first (UTF-16, emoji = 2)",
+      "key code 125 using {command down}" in sent[0] and "repeat 7 times" in sent[0]
+      and f"is not {start_of(P, 7) + 1} then" in sent[0]
+      and "repeat 3 times" in sent[1] and f"is not {start_of(P, 11) + 1} then" in sent[1])
+check("walking UP from the end: no Option-Down, so the caret never stops beside the graphic or the notice",
+      all("option down" in x and "key code 125 using {option down}" not in x for x in sent))
+check("a note that ends in an empty paragraph: that blank line costs no extra press (the caret starts at a paragraph start)",
+      "repeat 7 times" in run_styles(P + [""], B)[1][0])
+check("the search starts below the graphic: a title that matches a heading is never restyled",
+      len(sent) == 2 and f"is not {start_of(P, 0) + 1} then" not in "".join(sent))
+check("main -> Heading, subhead -> Subheading; quotes and body text are never touched",
+      'menu item "Heading"' in sent[0] and 'menu item "Subheading"' in sent[1])
+check("a heading missing from the note is counted as wanted, warned about, and skipped",
+      res == (2, 3) and any("not found in the note" in m for m in logged))
+check("only the FIRST heading brings Notes to the front; every script refuses unless the note body has focus",
+      "set frontmost to true" in sent[0] and "set frontmost to true" not in sent[1]
+      and all('"AXFocused" of ta' in x for x in sent))
+res, sent, logged = run_styles(P, B, answer=lambda script: "MISS 40")
+check("a caret that lands anywhere else styles nothing and says so",
+      res == (0, 3) and sum("landed at 40" in m for m in logged) == 2)
+res, sent, logged = run_styles(P, B, answer=lambda script: "AWAY")
+check("someone switched away from Notes: styling stops at once instead of pulling Notes back",
+      res == (0, 3) and len(sent) == 1 and any("no longer in front" in m for m in logged))
+NG = ["Title", "Pastor Josh Smith | October 25th", "2 Questions About It", "", "2 Questions About It"]
+res, sent, logged = run_styles(NG, [("subhead", "2 Questions About It")])
+check("no graphic: the search starts after the title and byline", f"is not {start_of(NG, 2) + 1} then" in sent[0])
+DUP = ["T", "B", "\ufffc", "1. Go", "", "Grace sends", "", "Grace sends"]
+res, sent, logged = run_styles(DUP, [("main", "1. Go"), ("para", "Grace sends"), ("subhead", "Grace sends")])
+check("headings are matched in step with the body: a body line with the same words is skipped, not styled",
+      f"is not {start_of(DUP, 7) + 1} then" in sent[1])
+try:
+    run_styles(P, B, after=P[:-1] + ["#1 Why? Becausex"])
+    changed = False
+except s.NoteChangedWhileStyling:
+    changed = True
+check("the note's text changing during styling (someone typing) fails loudly instead of logging success", changed)
+
+NOTE_HTML = ('<div><b><h1>Title</h1></b></div><div><b><h2>1. Grace</h2></b><h2><br></h2></div>'
+             '<div><h3>2 Questions About &quotIt&quot</h3></div><div>#1 Why? Because</div><div><b>2. Plain bold</b></div>')
+keep = s.run_osascript
+s.run_osascript = lambda script, timeout=90: NOTE_HTML
+try:
+    got = s.styled_heading_count("x-coredata://test", [("main", "1. Grace"), ("subhead", '2 Questions About "It"'),
+                                                       ("para", "#1 Why? Because"), ("main", "2. Plain bold")])
+finally:
+    s.run_osascript = keep
+check("read-back: <h2> = Heading, <h3> = Subheading, Notes' &quot without a semicolon; bold body text is not a heading",
+      got == (2, 3))
+keep = (s.style_headings, s.log)
+logged = []
+s.style_headings = lambda blocks: (_ for _ in ()).throw(RuntimeError("Notes is not frontmost"))
+s.log = lambda m: logged.append(m)
+try:
+    s._apply_heading_styles("x-coredata://test", B)
+    ok = True
+except Exception:
+    ok = False
+finally:
+    s.style_headings, s.log = keep
+check("a styling failure never fails the run: it logs a WARNING and the outline stays written",
+      ok and any("could not style the headings" in m for m in logged))
+keep = s.style_headings
+s.style_headings = lambda blocks: (_ for _ in ()).throw(s.NoteChangedWhileStyling("typed into"))
+try:
+    s._apply_heading_styles("x-coredata://test", B)
+    reraised = False
+except s.NoteChangedWhileStyling:
+    reraised = True
+finally:
+    s.style_headings = keep
+check("...but a CHANGED note is re-raised, so the run fails and a later attempt rewrites it", reraised)
+
+def render_note_counts(counts):
+    """update_note() with attachment_count() answering `counts` in turn; returns the error, if any."""
+    keep = {n: getattr(s, n) for n in ("run_osascript", "attachment_count", "_focus_note", "replace_around_image",
+                                        "_apply_heading_styles")}
+    seq = list(counts)
+    prev = '<div><img src="data:image/png;base64,AAAA"></div><div><i>*To save and edit this note</i></div>'
+    s.run_osascript = lambda script, timeout=90: prev if "return body" in script else ""
+    s.attachment_count = lambda nid: seq.pop(0) if seq else 1
+    s._focus_note = lambda nid: None
+    s.replace_around_image = lambda nid, h, b, skip: None
+    s._apply_heading_styles = lambda nid, blocks, focus=False: None
+    sleep, s.time.sleep = s.time.sleep, (lambda x: None)
+    try:
+        s.update_note("x-coredata://test", o)
+        return None
+    except RuntimeError as e:
+        return str(e)
+    finally:
+        s.time.sleep = sleep
+        for n, f in keep.items():
+            setattr(s, n, f)
+check("the graphic is counted again AFTER styling: losing it then fails the run",
+      "while the headings were styled" in (render_note_counts([1, 1, 0]) or "")
+      and render_note_counts([1, 1, 1]) is None)
 
 print("the Note's byline")
 check("no speaker -> Pastor Josh Smith, as before",

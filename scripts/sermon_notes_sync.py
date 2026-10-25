@@ -1289,6 +1289,140 @@ def replace_around_image(note_id, header_html, body_html, skip_lines):
     _keys(['keystroke "v" using {command down}', "delay 1.2"])
 
 
+# Main points take Notes' Heading style and sub points ("2 Questions About ...") Subheading;
+# scripture and everything else stays Body (Dakota, 2026-10-25).
+NOTE_STYLES = {"main": "Heading", "subhead": "Subheading"}
+
+
+def _u16(s):
+    """Length in UTF-16 units: the unit of the editor's caret positions."""
+    return len(s.encode("utf-16-le")) // 2
+
+
+def _note_paragraphs():
+    """The open note's text exactly as the editor holds it (the body text area's AXValue),
+    one entry per paragraph. The graphic is a single U+FFFC character. The text area is reached
+    by its path (splitter group > scroll area > text area, as in _focus_note): asking System
+    Events for AXFocusedUIElement takes ~22 s in Notes, the path ~0.4 s."""
+    r = subprocess.run(
+        ["osascript", "-l", "JavaScript", "-e",
+         'let f = null;\n'
+         'for (const sa of Application("System Events").processes.byName("Notes").windows[0]'
+         '.splitterGroups[0].scrollAreas()) { if (sa.textAreas().length) { f = sa.textAreas[0]; break; } }\n'
+         'if (!f || !f.focused()) throw new Error("keyboard focus is not in the note body");\n'
+         'String(f.value())'],
+        capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip()[:200])
+    out = r.stdout[:-1] if r.stdout.endswith("\n") else r.stdout   # osascript adds one newline
+    return out.split("\n")
+
+
+class NoteChangedWhileStyling(RuntimeError):
+    """The note's text changed during style_headings() (someone typing on the Mac): unlike a
+    missed heading this is not cosmetic, so it fails the run and a later attempt rewrites it."""
+
+
+def style_headings(blocks):
+    """Give the pasted main points and sub points their real Notes paragraph styles.
+
+    The body goes in by paste (replace_around_image), and a paste keeps each line's existing
+    paragraph style, so <h2>/<h3> arrive as plain bold text -- main points and sub points
+    looked the same. So, per heading: Cmd-Down to the end of the note, Option-Up back to the
+    START of its paragraph (paragraph moves; plain arrows count WRAPPED visual lines, which long
+    verses break), confirm from the caret position that it landed there, and only then
+    Format > Heading / Subheading. Walking UP from the end means the caret only ever stops on
+    body lines below the heading -- never next to the graphic or the purple notice, where a
+    stray keypress from someone at the Mac could do damage (review, 2026-10-25). Only the caret
+    moves; nothing is typed or pasted, so a miss leaves a bold line, never a damaged note.
+    Only the first heading brings Notes to the front: if someone has switched away by the next
+    one, styling stops. Returns (styled, wanted); raises NoteChangedWhileStyling if the text
+    changed meanwhile."""
+    paras = _note_paragraphs()
+    n = len(paras)
+    # Never the title, byline, graphic or notice: start below the graphic, or after the two
+    # header lines when the note has none (the plain set-body branch writes exactly those two).
+    g = next((j for j, p in enumerate(paras) if "\ufffc" in p), None)
+    i = 2 if g is None else max(g + 1, 2)
+    wanted, targets = 0, []
+    for kind, val in blocks:
+        want = val.strip()
+        k = next((j for j in range(i, n) if paras[j].strip() == want), None)
+        if kind in ("quote", "para"):
+            # keep in step with the body, so a heading is never matched to an earlier body line
+            # that happens to carry the same words
+            if k is not None:
+                i = k + 1
+            continue
+        if kind not in NOTE_STYLES:
+            continue
+        wanted += 1
+        if k is None:
+            log(f'WARNING: heading "{want[:60]}" not found in the note -- left as bold text')
+            continue
+        targets.append((k, NOTE_STYLES[kind]))
+        i = k + 1
+    start = lambda k: sum(_u16(p) + 1 for p in paras[:k])
+    # From the end, the first Option-Up goes to the start of the last paragraph -- or, when the
+    # note ends in an empty paragraph (the caret is already at a paragraph start), to the one
+    # before it; every press after that goes back one paragraph.
+    extra = 0 if paras[-1] == "" else 1
+    styled = 0
+    for idx, (k, style) in enumerate(targets):
+        front = ('  tell process "Notes" to set frontmost to true\n  delay 0.4\n' if idx == 0 else '')
+        res = _ui('tell application "System Events"\n'
+                  + front +
+                  '  if (name of (first process whose frontmost is true)) is not "Notes" then return "AWAY"\n'
+                  '  tell process "Notes"\n'
+                  '    set ta to missing value\n'
+                  '    repeat with sa in (scroll areas of splitter group 1 of window 1)\n'
+                  '      if (count of text areas of sa) > 0 then\n'
+                  '        set ta to text area 1 of sa\n'
+                  '        exit repeat\n'
+                  '      end if\n'
+                  '    end repeat\n'
+                  '    if ta is missing value or (value of attribute "AXFocused" of ta) is not true then '
+                  'error "keyboard focus is not in the note body -- refusing to send keystrokes"\n'
+                  '    key code 125 using {command down}\n'
+                  '    delay 0.2\n'
+                  f'    repeat {n - 1 - k + extra} times\n'
+                  '      key code 126 using {option down}\n'
+                  '      delay 0.05\n'
+                  '    end repeat\n'
+                  '    delay 0.2\n'
+                  '    set r to value of attribute "AXSelectedTextRange" of ta\n'
+                  # System Events reports a caret at position p as {p + 1, p}
+                  f'    if (item 1 of r) is not {start(k) + 1} then return "MISS " & (item 1 of r)\n'
+                  f'    click menu item "{style}" of menu 1 of menu bar item "Format" of menu bar 1\n'
+                  '    return "OK"\n'
+                  '  end tell\n'
+                  'end tell\n', timeout=90)
+        if res == "OK":
+            styled += 1
+        elif res == "AWAY":
+            log(f"WARNING: Notes is no longer in front (someone is using the Mac) -- stopped styling "
+                f"after {styled} heading(s); the rest stay bold text")
+            break
+        else:
+            log(f"WARNING: the caret for paragraph {k} landed at {res.split()[-1]}, not {start(k) + 1} "
+                f"-- left it as bold text")
+    if _note_paragraphs() != paras:
+        raise NoteChangedWhileStyling("the note's text changed while its headings were styled "
+                                      "(someone typing on the Mac?) -- it needs rewriting")
+    return styled, wanted
+
+
+def styled_heading_count(note_id, blocks):
+    """(main points in Heading, sub points in Subheading, wanted) read back from the note's
+    HTML: Notes writes Heading as <h2> and Subheading as <h3>."""
+    body = run_osascript(f'tell application "Notes" to return body of note id "{note_id}"', timeout=240)
+    norm = lambda x: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", x)).replace("&quot", '"')).strip()
+    h2 = {norm(x) for x in re.findall(r"<h2>(.*?)</h2>", body, re.S)}
+    h3 = {norm(x) for x in re.findall(r"<h3>(.*?)</h3>", body, re.S)}
+    got = sum(1 for k, v in blocks if (k == "main" and norm(v) in h2) or (k == "subhead" and norm(v) in h3))
+    return got, sum(1 for k, _ in blocks if k in NOTE_STYLES)
+
+
 def strip_markdown_emphasis(text):
     """Drop the asterisks Josh uses for bold, so they don't reach the shared note.
 
@@ -1495,6 +1629,11 @@ def update_note(note_id, outline):
             log("WARNING: could not count attachments -- graphic NOT verified, check by hand")
         else:
             log(f"graphic intact ({after} attachment) and verified")
+        _apply_heading_styles(note_id, blocks)
+        # the styling pass puts Notes in front again, so check the graphic once more after it
+        again = attachment_count(note_id)
+        if before is not None and again is not None and again < before:
+            raise RuntimeError(f"the graphic was lost while the headings were styled ({before} -> {again} attachments)")
     elif not read_ok:
         # 2026-08-30: Notes was unresponsive at 07:00, so the read above timed out and prev
         # stayed "". protected_blocks() was never consulted, skip fell to None, and control
@@ -1513,7 +1652,25 @@ def update_note(note_id, outline):
             'set theHTML to (read (POSIX file "' + str(tmp) + '") as «class utf8»)\n'
             'tell application "Notes" to set body of note id "' + quoted + '" to theHTML',
             timeout=240)
+        _apply_heading_styles(note_id, blocks, focus=True)
     return title
+
+
+def _apply_heading_styles(note_id, blocks, focus=False):
+    """style_headings() plus a read-back, never fatal: the outline is already written and
+    right, so a failure here costs the heading sizes (bold text instead), not the Sunday."""
+    try:
+        if focus:
+            _focus_note(note_id)
+        styled, wanted = style_headings(blocks)
+        if wanted:
+            got, _ = styled_heading_count(note_id, blocks)
+            log(f"{'WARNING: ' if got < wanted else ''}headings styled: {got}/{wanted} "
+                f"(main points = Heading, sub points = Subheading)")
+    except NoteChangedWhileStyling:
+        raise                                  # not cosmetic: fail the run, a later attempt rewrites it
+    except Exception as e:
+        log(f"WARNING: could not style the headings ({e}) -- they stay bold text; the outline itself is written")
 
 
 def attachment_count(note_id):
