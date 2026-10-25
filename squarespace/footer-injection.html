@@ -608,6 +608,18 @@ html.ac-evd-lock #ac-cur-dot,html.ac-evd-lock #ac-cur-ring{opacity:0} /* the cus
 #ac-groups .eyebrow{color:#1f6b7c}
 #ac-groups .gr-head{max-width:62ch;margin:0 0 2.6rem}
 #ac-groups .gr-head .lead{color:rgba(22,36,43,.66);margin:1.1rem 0 0}
+/* the top of /connect: the native intro is hidden (by id too, so it never paints first) except while staff edit in
+   Squarespace; --gr-hdr = the floating header's height (buildGroupDirectory measures it; 84px until it does) */
+body:not(.sqs-edit-mode-active):not(.sqs-is-page-editing) .ac-gr-native,
+body:not(.sqs-edit-mode-active):not(.sqs-is-page-editing) section[data-section-id="68a4f6703fdf866a9a4f73af"]{display:none!important}
+body:not(.sqs-edit-mode-active):not(.sqs-is-page-editing) #ac-groups.gr-first{padding-top:calc(var(--gr-hdr,84px) + clamp(2rem,6vh,4.5rem))}
+/* the eyebrow is the page's H1 here: !important beats the interior-page H1 size rule (STANDALONE PAGE POLISH) */
+#ac-groups h1.eyebrow{font-family:'Manrope',sans-serif;font-size:.8rem!important;font-weight:800;font-style:normal;line-height:1.4!important;letter-spacing:.28em;text-transform:uppercase;white-space:normal}
+.gr-top{display:grid;grid-template-columns:minmax(0,1fr);gap:1.8rem;align-items:center;margin:0 0 2.8rem}
+#ac-groups .gr-top .gr-head{margin:0}
+.gr-hero{margin:0;border-radius:22px;overflow:hidden;aspect-ratio:4/3;background:#e8dfcd;box-shadow:0 24px 48px -28px rgba(22,36,43,.4)}
+.gr-hero img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+@media (min-width:900px){.gr-top{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(2.4rem,5vw,4.5rem)}.gr-hero{aspect-ratio:5/4}}
 /* minmax(0,…) not 1fr, so a long word or schedule can never widen the page on a phone (see the 2026-09-28 overflow fix) */
 .gr-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem}
 .gr-grid:empty{display:none}
@@ -1587,10 +1599,32 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
         +(g.location?'<li><span class="gr-ic">'+icPin+'</span><span>'+acEsc(g.location)+'</span></li>':'')
         +'</ul><button type="button" class="btn btn-river gr-join" data-group="'+acEsc(acGroupValue(g))+'">Join this group<span class="ac-sronly">: '+acEsc(g.name)+'</span></button></article>';
     }
-    var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-groups'; sec.setAttribute('aria-labelledby','ac-groups-h');
-    sec.innerHTML='<div class="wrap"><div class="gr-head"><p class="eyebrow ac-rev">Connect groups</p><h2 class="h2 ac-rev" id="ac-groups-h">Find your <em>group.</em></h2><p class="lead ac-rev">Every group talks through Sunday&rsquo;s message, prays for one another, and does life together. Pick one that fits your week &mdash; or tell us you&rsquo;re not sure and we&rsquo;ll help you find one.</p></div>'
+    /* this section IS the top of the page now (Dakota, 2026-10-24): the native intro (H1, a paragraph, a JOIN A GROUP
+       button that only scrolled down) is hidden by CSS (.ac-gr-native, and by its section id so it never flashes first),
+       not deleted, and it still shows in the Squarespace editor. Its photo moves in here and its H1 becomes the eyebrow,
+       so the page still has one "Connect groups" H1. Swap the photo in Squarespace and this follows it. */
+    var heroImg=intro.querySelector('img'), photo=heroImg?(heroImg.getAttribute('data-src')||heroImg.currentSrc||heroImg.src||''):'';
+    if(!/^https:\/\//.test(photo)) photo='https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/f52a08fb-45fd-4b58-bfb0-064a4acad7ca/503251240_17970029975899813_3744320071993253638_n.jpg';
+    /* the same ?format= variants as Squarespace's own srcset, so the browser can reuse the one it already fetched
+       (no 2500w: the original is 1440px wide, so the CDN's "2500w" is really 1440 and the browser misjudges it) */
+    var pBase=photo.split('?')[0], pSet=[750,1000,1500].map(function(w){ return pBase+'?format='+w+'w '+w+'w'; }).join(', ');
+    var sec=document.createElement('section'); sec.className='ac-sec gr-first'; sec.id='ac-groups'; sec.setAttribute('aria-labelledby','ac-groups-h');
+    sec.innerHTML='<div class="wrap"><div class="gr-top"><div class="gr-head"><h1 class="eyebrow ac-rev">Connect groups</h1><h2 class="h2 ac-rev" id="ac-groups-h">Find your <em>group.</em></h2><p class="lead ac-rev">Every group talks through Sunday&rsquo;s message, prays for one another, and does life together. Pick one that fits your week &mdash; or tell us you&rsquo;re not sure and we&rsquo;ll help you find one.</p></div>'
+      +'<figure class="gr-hero ac-rev"><img src="'+acEsc(pBase+'?format=1500w')+'" srcset="'+acEsc(pSet)+'" sizes="(min-width:1305px) 540px, (min-width:900px) 44vw, 92vw" alt="A connect group gathering at Arroyo Church" decoding="async" fetchpriority="high"></figure></div>'
       +'<div class="gr-grid"></div><p class="gr-foot"><span class="gr-foot-t">Not sure which one fits?</span> <button type="button" class="gr-help">We&rsquo;ll help you find one &rarr;</button></p>'+joinFormHtml()+'</div>';
     intro.parentNode.insertBefore(sec, intro.nextSibling);
+    intro.classList.add('ac-gr-native');
+    /* the header floats over the first section (Squarespace padded the native intro for it): clear it here instead. An
+       absolute header is the same height at any scroll (a reload can land mid-page), so only a fixed one waits for the
+       top; 260+ = the phone menu is open. The ResizeObserver follows the event bar coming and going. */
+    var grFit=function(){
+      var hd=document.querySelector('.header'), pos=hd?getComputedStyle(hd).position:'';
+      if(pos==='fixed'&&(window.scrollY||0)>60) return;
+      var h=(pos==='absolute'||pos==='fixed')?Math.round(hd.getBoundingClientRect().height):0;
+      if(h<260) sec.style.setProperty('--gr-hdr',h+'px');
+    };
+    grFit(); setTimeout(grFit,400); setTimeout(grFit,1500); addEventListener('resize',grFit,{passive:true});
+    var grHd=document.querySelector('.header'); if(grHd&&window.ResizeObserver){ try{ new ResizeObserver(grFit).observe(grHd); }catch(e){} }
     var jf=wireJoinForm(sec,'connect_group'), grid=sec.querySelector('.gr-grid');
     sec.querySelector('.gr-help').addEventListener('click',function(){ if(jf) jf.open(''); });
     grid.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.gr-join'); if(b&&jf) jf.open(b.getAttribute('data-group')); });
@@ -2238,10 +2272,16 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var now=Date.now(), byKey={}, out=[];
     list.map(function(e){ try{ return acEvNorm(e,now); }catch(x){ return null; } }).filter(Boolean).sort(function(a,b){ return a.s.t-b.s.t; }).forEach(function(ev){
       var k=ev.name.toLowerCase()+'|'+ev.tod+'|'+(ev.multi?'m':''), g=byKey[k];
-      if(!g){ byKey[k]=ev; out.push(ev); return; }
+      if(!g){ ev.recAny=ev.rec; byKey[k]=ev; out.push(ev); return; }
       g.more.push(ev); if(ev.featured) g.featured=true; if(ev.id) g.ids.push(ev.id); /* a link to any of its dates opens this card */
-      ['sum','sumFull','desc','loc','img','url','reg','rec'].forEach(function(f){ if(!g[f]&&ev[f]) g[f]=ev[f]; });
+      ['sum','sumFull','desc','loc','img','url','reg'].forEach(function(f){ if(!g[f]&&ev[f]) g[f]=ev[f]; });
+      if(ev.rec!==g.rec) g.recMixed=true;
+      if(!g.recAny&&ev.rec) g.recAny=ev.rec;
     });
+    /* `rec` has to be true of every date on the card: Connect class folds a 2nd-Sunday series with one-off 4th Sundays
+       (Oct 25, Feb 28, Apr 25), so a mixed card drops it (Dakota, 2026-10-24). `recAny` keeps the series' pattern: the
+       sync sends only its next 4 dates, so the date list is NOT complete and the card says "Also …" instead (acEvRepeat) */
+    out.forEach(function(g){ if(g.recMixed) g.rec=''; });
     return out;
   }
   function acEvCta(ev){
@@ -2252,11 +2292,17 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
   /* one card; compact = the home strip (no image, summary or extra dates; text links instead of buttons). An /events card:
      [Register / Save my spot] [View details] [Add to calendar] (the last one hidden on a phone; it is in the panel too).
      A home card is one big link to that event's panel on /events (/events#event-<id>), plus its sign-up link. */
+  /* the card's repeat line: the series pattern, or on a mixed card "Also the second Sunday of every month" (acEvFold) */
+  function acEvRepeat(ev){
+    if(ev.rec) return ev.rec; var r=ev.recAny||''; if(!r) return '';
+    return 'Also '+(/^(sun|mon|tue|wed|thu|fri|sat)/i.test(r)?r:r.charAt(0).toLowerCase()+r.slice(1));
+  }
   function acEvCard(ev,i,compact){
     var s=ev.s.day, range=ev.multi&&ev.last.m===s.m&&ev.last.y===s.y, cta=acEvCta(ev), more='', btn='', acts;
     if(!compact&&ev.more.length){
+      /* no "+N more" count when a series is in the card: the sync cut it to 4 dates, so the count would be short */
       more='<p class="evl-more"><strong>More dates:</strong> '+ev.more.slice(0,3).map(function(x){ return AC_MON[x.s.day.m-1]+' '+x.s.day.d; }).join(' &middot; ')
-        +(ev.more.length>3&&!ev.rec?' &middot; +'+(ev.more.length-3)+' more':'')+'</p>';
+        +(ev.more.length>3&&!(ev.rec||ev.recAny)?' &middot; +'+(ev.more.length-3)+' more':'')+'</p>';
     }
     if(cta){
       var attrs=' href="'+acEsc(cta.href)+'"'+(cta.ext?' target="_blank" rel="noopener"':'')+' data-ev-cta="'+cta.kind+'" data-ev-name="'+acEsc(ev.name)+'" aria-label="'+acEsc(cta.label+': '+ev.name)+(cta.ext?' (opens in a new tab)':'')+'"';
@@ -2270,7 +2316,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
       +'<div class="evl-row"><div class="evl-date" aria-hidden="true"><span class="evl-mo">'+AC_MON[s.m-1]+'</span><span class="evl-day'+(range?' is-range':'')+'">'+s.d+(range?'&ndash;'+ev.last.d:'')+'</span></div>'
       +'<div class="evl-body"><h3 class="evl-name">'+acEsc(ev.name)+(compact&&acEvRecWord(ev.rec)?' <span class="evl-rec">'+acEsc(acEvRecWord(ev.rec))+'</span>':'')+'</h3>'
       +'<p class="evl-when"><time datetime="'+acEsc(ev.iso)+'">'+(ev.multi?'':'<span class="ac-sronly">'+AC_MONTH[s.m-1]+' '+s.d+', </span>')+ev.when+'</time></p>'
-      +(!compact&&ev.rec?'<p class="evl-loc evl-repeat">'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></p>':'')
+      +(!compact&&acEvRepeat(ev)?'<p class="evl-loc evl-repeat">'+acEvIcRep+'<span>'+acEsc(acEvRepeat(ev))+'</span></p>':'')
       +(ev.loc?'<p class="evl-loc">'+acEvIcPin+'<span>'+acEsc(ev.loc)+'</span></p>':'')
       +(!compact&&ev.sum?'<p class="evl-sum">'+acEsc(ev.sum)+'</p>':'')
       +more+acts+'</div></div>'
@@ -2382,7 +2428,7 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     return (ev.img?'<img class="evd-img" src="'+acEsc(ev.img)+'" alt="" decoding="async" onerror="var d=this.closest&amp;&amp;this.closest(\'.evd\');if(d)d.classList.remove(\'has-img\');this.remove()">':'')
       +'<div class="evd-body"><h2 class="evd-h" id="evd-h">'+acEsc(ev.name)+'</h2><ul class="evd-facts">'
       +'<li>'+acEvIcCal+'<span><strong id="evd-when"><time datetime="'+acEsc(ev.iso)+'">'+acEvdWhen(ev)+'</time></strong>'+more+'</span></li>'
-      +(ev.rec?'<li>'+acEvIcRep+'<span>'+acEsc(ev.rec)+'</span></li>':'')
+      +(acEvRepeat(ev)?'<li>'+acEvIcRep+'<span>'+acEsc(acEvRepeat(ev))+'</span></li>':'')
       +(pl?'<li>'+acEvIcPin+'<span>'+acEsc(pl.name)+(pl.addr?'<small>'+pl.addr+'</small>':'')
         +(pl.dir?'<a class="evd-dir" href="'+acEsc(acEvdMaps(pl.q))+'" target="_blank" rel="noopener" data-evd-dir>Get directions <span aria-hidden="true">&rarr;</span>'+sr+'</a>':'')+'</span></li>':'')
       +'</ul><div class="evd-desc" id="evd-desc"></div><div class="evd-acts">'
@@ -2775,6 +2821,9 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     });
   }
   function acInitSections(){ buildHero(); buildCountdown(); buildVisitTeaser(); buildSermons(); buildComingUp(); buildMission(); buildStory(); buildBeliefsValues(); buildTeam(); buildReviews(); buildConnect(); buildConnectClass(); buildGroupDirectory(); buildGive(); buildVisit(); buildCTA(); buildFooter(); buildEventCard(); buildEventBar(); wireNav(); wireMobileNav(); buildConnectTag(); buildPCForms(); buildGivePage(); buildEventsPage(); buildVisitPageForm(); buildPageCTA(); buildPostNextSteps(); wireScrollLinks(); }
+  /* /connect's top section is built now, not after Squarespace's deferred scripts (DOMContentLoaded): the native intro
+     above this footer is already parsed, and the page shouldn't sit with no top while it waits (idempotent) */
+  if(document.readyState==='loading'){ try{ buildGroupDirectory(); }catch(e){} }
   if(document.readyState!=='loading')acInitSections();else addEventListener('DOMContentLoaded',acInitSections);
   /* Squarespace renders the native form block late on some loads; retry so the swap still lands (both are idempotent) */
   setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },600); setTimeout(function(){ buildVisitPageForm(); buildPageCTA(); },1800);
