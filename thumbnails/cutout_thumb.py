@@ -24,11 +24,11 @@ AVENIR = "/System/Library/Fonts/Avenir Next.ttc"
 WHITE, GOLD = (255, 255, 255), (227, 189, 106)
 
 
-def cutout(src):
+def cutout(src, model="isnet-general-use"):
     """rembg isnet mask, cleaned: keep the largest blob + a 6px edge so stray alpha can't show through letters."""
     from rembg import remove, new_session
     import cv2
-    rgba = remove(src, session=new_session("isnet-general-use"))
+    rgba = remove(src, session=new_session(model))
     a = np.array(rgba.split()[-1])
     solid = (a > 40).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(solid)
@@ -102,10 +102,13 @@ def main():
     ap.add_argument("--smooth", type=float, default=0.7, help="0..1 skin smoothing blend; keep low on real video frames")
     ap.add_argument("--sharpen", type=int, default=45, help="UnsharpMask percent")
     ap.add_argument("--overlap", type=int, default=22, help="px the text may run behind the pastor")
+    ap.add_argument("--model", default="isnet-general-use",
+                    help="rembg model; birefnet-general keeps a dark sweater against the dark wall that isnet "
+                         "drops (2026-10-25: isnet lost half of Josh)")
     a = ap.parse_args()
 
     src = Image.open(a.src).convert("RGB")
-    person, alpha = cutout(src)
+    person, alpha = cutout(src, a.model)
     top, hw, cx = head_box(alpha)
     s = a.head_w / hw
     print(f"crown y={top}  head width={hw}px  face x={cx:.0f}  scale={s:.2f}")
