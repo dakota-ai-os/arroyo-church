@@ -269,6 +269,9 @@ function clean(s) {
   return t || null;
 }
 
+// PC's saved locations come back with a space before each comma ("Arroyo Church  - 945 Concannon Blvd. , Livermore , CA")
+export const cleanLocation = s => { const t = clean(s); return t && t.replace(/ ,/g, ','); };
+
 const iso = t => new Date(t).toISOString().replace(/\.000Z$/, 'Z');
 
 // A timestamp with an explicit zone ("…Z" / "…-07:00" / "…-0700") -> ms; anything else -> null. A
@@ -513,7 +516,7 @@ function toRow(instance, event, included) {
       starts: iso(times.starts),
       ends: times.ends === null ? null : iso(times.ends),
       allDay: a.all_day_event === true,
-      location: clean(a.location),
+      location: cleanLocation(a.location),
       image: httpUrl(a.image_url) || httpUrl(e.image_url),
       url: httpUrl(a.church_center_url),
       registerUrl: httpUrl(e.registration_url),

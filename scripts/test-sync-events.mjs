@@ -13,7 +13,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import {
   run, buildEvents, plainText, descriptionText, isPublic, firstPageUrl, urlExpiry, publicTimes, utcTime, imageRefreshDue,
-  icsText, icsFold, icsEvent, icsDescription, icsSequence, allDayDates, calendarText, writeCalendars,
+  icsText, icsFold, icsEvent, icsDescription, icsSequence, allDayDates, calendarText, writeCalendars, cleanLocation,
   API, API_VERSION, WINDOW_DAYS, SERIES_ROWS, HELD_BACK_SCOPE,
 } from './sync-events.mjs';
 
@@ -794,6 +794,12 @@ test('un-publishing an event deletes its file and drops it from the feed; other 
   assert.equal(r2.calendars.removed, EXPECTED.length - 1);
   assert.deepEqual(icsFiles(file), ['README.txt']);
   assert.ok(!readFileSync(feedOf(file), 'utf8').includes('BEGIN:VEVENT'));
+});
+
+test("a PC saved location loses the space before each comma", () => {
+  assert.equal(cleanLocation('Arroyo Church  - 945 Concannon Blvd. , Livermore , CA 94550'), 'Arroyo Church - 945 Concannon Blvd., Livermore, CA 94550');
+  assert.equal(cleanLocation('  '), null);
+  assert.equal(cleanLocation(null), null);
 });
 
 test('an id that is not a safe file name gets no file and no ics path', async () => {
