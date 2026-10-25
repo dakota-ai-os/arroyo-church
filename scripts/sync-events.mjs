@@ -269,8 +269,14 @@ function clean(s) {
   return t || null;
 }
 
-// PC's saved locations come back with a space before each comma ("Arroyo Church  - 945 Concannon Blvd. , Livermore , CA")
-export const cleanLocation = s => { const t = clean(s); return t && t.replace(/ ,/g, ','); };
+// PC's saved locations come back with a space before each comma ("Arroyo Church  - 945 Concannon Blvd. , Livermore , CA").
+// The church's own saved location becomes plain "Arroyo Church": the panel adds the street address under that name and
+// icsLocation expands it, so keeping PC's copy showed the address twice.
+export const cleanLocation = s => {
+  const t = clean(s);
+  if (t && /^arroyo church\b/i.test(t) && /\b945 concannon\b/i.test(t)) return 'Arroyo Church';
+  return t && t.replace(/ ,/g, ',');
+};
 
 const iso = t => new Date(t).toISOString().replace(/\.000Z$/, 'Z');
 

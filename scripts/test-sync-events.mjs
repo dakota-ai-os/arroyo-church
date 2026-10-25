@@ -796,8 +796,10 @@ test('un-publishing an event deletes its file and drops it from the feed; other 
   assert.ok(!readFileSync(feedOf(file), 'utf8').includes('BEGIN:VEVENT'));
 });
 
-test("a PC saved location loses the space before each comma", () => {
-  assert.equal(cleanLocation('Arroyo Church  - 945 Concannon Blvd. , Livermore , CA 94550'), 'Arroyo Church - 945 Concannon Blvd., Livermore, CA 94550');
+test("PC saved locations: the church's own becomes plain 'Arroyo Church'; others lose the space before each comma", () => {
+  assert.equal(cleanLocation('Arroyo Church  - 945 Concannon Blvd. , Livermore , CA 94550'), 'Arroyo Church');
+  assert.equal(cleanLocation('Arroyo Church Kids Wing'), 'Arroyo Church Kids Wing');
+  assert.equal(cleanLocation('Lester J. Knott Park , Livermore , CA'), 'Lester J. Knott Park, Livermore, CA');
   assert.equal(cleanLocation('  '), null);
   assert.equal(cleanLocation(null), null);
 });
