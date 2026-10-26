@@ -6,6 +6,12 @@
   },
   "videos": [
     {
+      "id": "q3mRajecFHU",
+      "title": "Can God Use Me After What I've Done? | Ephesians 3 | Arroyo Church",
+      "published": "2026-10-26T06:38:58+00:00",
+      "service": "2026-10-25"
+    },
+    {
       "id": "R2h61C2DHGk",
       "title": "Can God Restore a Broken Relationship? Ephesians 2 | Arroyo Church",
       "published": "2026-10-19T06:50:18+00:00",
@@ -36,5 +42,5 @@
       "service": "2026-09-13"
     }
   ],
-  "updated": "2026-10-25"
+  "updated": "2026-10-26"
 }
