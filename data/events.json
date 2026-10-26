@@ -1,23 +1,6 @@
 {
-  "updated": "2026-10-25T19:59:22.713Z",
+  "updated": "2026-10-26T13:36:26.092Z",
   "events": [
-    {
-      "id": "240733611",
-      "eventId": "23155232",
-      "name": "Baptisms",
-      "summary": null,
-      "description": null,
-      "starts": "2026-10-25T07:00:00Z",
-      "ends": "2026-10-26T06:59:59Z",
-      "allDay": true,
-      "location": null,
-      "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733611",
-      "registerUrl": null,
-      "featured": false,
-      "recurrence": null,
-      "ics": "data/events/ics/240733611.ics"
-    },
     {
       "id": "240733610",
       "eventId": "23155230",
