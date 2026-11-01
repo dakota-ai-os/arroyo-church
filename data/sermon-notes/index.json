@@ -1,6 +1,13 @@
 {
-  "updated": "2026-10-24T20:00:13-07:00",
+  "updated": "2026-11-01T07:09:19-08:00",
   "weeks": [
+    {
+      "service": "2026-11-01",
+      "title": "The Most Powerful Prayer You Could Pray",
+      "speaker": "Pastor Josh Smith",
+      "release_at": "2026-11-01T06:45:00-08:00",
+      "file": "2026-11-01.json"
+    },
     {
       "service": "2026-10-25",
       "title": "How Grace Gets You to GO",
