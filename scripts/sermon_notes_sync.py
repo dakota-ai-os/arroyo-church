@@ -1606,16 +1606,27 @@ def update_note(note_id, outline):
     while i < len(blocks):
         kind, val = blocks[i]
         if kind == "sub":                      # indented, normal weight -- a real list is
-            group = []                          # the only indentation Notes preserves
-            while i < len(blocks) and blocks[i][0] == "sub":
-                group.append(blocks[i][1]); i += 1
+            # the only indentation Notes preserves. A verse between (or right after) sub points
+            # belongs to the point above it, so it is NESTED under that item: Notes keeps one
+            # list and the numbering runs on. As separate lists, the point after a verse
+            # restarted at "1." (11/1: "The Spirit empowers bold witness" read 1., not 3.), and
+            # Notes drops an <ol start="3">.
+            group = []                          # [sub text, [its verses]]
+            while i < len(blocks) and blocks[i][0] in ("sub", "quote"):
+                if blocks[i][0] == "sub":
+                    group.append([blocks[i][1], []])
+                else:
+                    group[-1][1].append(blocks[i][1])
+                i += 1
             def _li(g):
                 # Dakota's original bolded the label and left the quote regular:
                 #   **Understand the weight of your words:** "Death and life..."
-                lbl, sep, rest = g.partition(":")
-                if sep and len(lbl) < 60 and '"' not in lbl:
-                    return f"<li><b>{esc(lbl)}:</b>{esc(rest)}</li>"
-                return f"<li>{esc(g)}</li>"
+                text, verses = g
+                lbl, sep, rest = text.partition(":")
+                head = (f"<b>{esc(lbl)}:</b>{esc(rest)}" if sep and len(lbl) < 60 and '"' not in lbl
+                        else esc(text))
+                nested = ("<ul>" + "".join(f"<li>{esc(v)}</li>" for v in verses) + "</ul>") if verses else ""
+                return f"<li>{head}{nested}</li>"
             parts.append("<ol>" + "".join(_li(g) for g in group) + "</ol>")
             parts.append("<div><br></div>")   # blank line after a list, so the next main
             continue                          # point is not flush against the sub-points

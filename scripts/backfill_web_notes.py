@@ -95,12 +95,29 @@ def note_tokens(body_html):
         pos = m.end()
         tag, inner = m.group(1).lower(), m.group(2)
         level = _level(tag, inner)
-        text = [t for t in map(_text, LI.findall(inner)) if t] if level == "list" else _text(inner)
+        text = _list_items(inner) if level == "list" else _text(inner)
         if text:
             toks.append((level, text))
     if re.sub(r"<br\s*/?>|\s", "", body_html[pos:], flags=re.I):
         raise ValueError(f"unexpected markup after the last block: {body_html[pos:].strip()[:80]!r}")
     return toks
+
+
+def _list_items(inner):
+    """A list's items in order: a plain string per item, and ("nested", text) per item of a list
+    nested inside it -- update_note() nests the verse under its sub point (since 2026-11-01) so
+    the numbering runs on. Notes reads a nested list back as a sibling <ul> INSIDE the <ol>
+    rather than inside the <li>; both shapes come out the same here."""
+    inner = re.sub(r"(<ul\b[^>]*>.*?</ul>)\s*</li>", r"</li>\1", inner, flags=re.S | re.I)
+    out = []
+    for m in re.finditer(r"<ul\b[^>]*>(.*?)</ul>|<li\b[^>]*>(.*?)</li>", inner, re.S | re.I):
+        if m.group(1) is not None:
+            out += [("nested", x) for x in map(_text, LI.findall(m.group(1))) if x]
+        else:
+            x = _text(m.group(2))
+            if x:
+                out.append(x)
+    return out
 
 
 VERSE_SEP = " · "                                                  # between two verses folded into one point
@@ -154,7 +171,15 @@ def note_to_outline(body_html):
             after_prompt = True
             continue
         if lv == "list":
-            blocks += [("sub", x) for x in _fold_labels(t)]
+            run = []
+            for x in t + [None]:            # sub items, with any nested verse after its point
+                if isinstance(x, str):
+                    run.append(x)
+                    continue
+                blocks += [("sub", y) for y in _fold_labels(run)]
+                run = []
+                if x is not None:
+                    blocks.append(("quote" if x[1].startswith('"') else "para", x[1]))
         elif t.startswith(TAKEAWAY_LEAD) and not takeaway:
             takeaway = t[len(TAKEAWAY_LEAD):].strip()
         elif lv in ("h1", "h2") and (after_prompt or i == first_main if prompts else s.AUTHOR_NUM.match(t)):

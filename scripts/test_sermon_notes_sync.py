@@ -1045,6 +1045,24 @@ for name, fx in (("lone-N. outline", o), ("unnumbered outline: subheads + labell
     check(f"round trip, {name}: same title, date, blocks, takeaway, version",
           back["title"] == fx["title"] and back["service"] == fx["service"] and back["blocks"] == list(fx["blocks"])
           and back["takeaway"] == fx["takeaway"] and back["version"] == fx["version"] and back["format"] == "outline")
+# 11/1: a verse between sub points, and one right after the last, are nested under their point, so
+# Notes keeps ONE list and the third truth reads "3.", not a restarted "1."
+NOV1 = dict(o, title="The Most Powerful Prayer You Could Pray", blocks=[
+    ("main", "1. Pray to be strengthened by the Spirit"), ("subhead", "3 Truths About Being Strengthened By The Spirit"),
+    ("sub", "You walk closer to Christ"), ("sub", "The Spirit empowers godly character"),
+    ("quote", '"But the fruit of the Spirit is love..." -Galatians 5:22-23'), ("sub", "The Spirit empowers bold witness"),
+    ("quote", '"After they prayed, the place where they were meeting was shaken." -Acts 4:31'),
+    ("main", "2. Pray for the power to know God's love")])
+NOV1["version"] = s.outline_version(NOV1["title"], NOV1["blocks"])
+nb = render_note(NOV1)["body"]
+check("a verse between sub points is nested under its point: ONE list, so the numbering runs on",
+      nb.count("<ol>") == 1 and "godly character<ul><li>" in nb and "bold witness<ul><li>" in nb)
+back = bf.note_to_outline(note_html(NOV1))
+check("round trip with nested verses: the same blocks come back", back["blocks"] == list(NOV1["blocks"]))
+# Notes reads a nested list back as a sibling <ul> INSIDE the <ol>, not inside the <li>
+resaved = note_html(NOV1).replace("<ul>", "</li><ul>").replace("</ul></li>", "</ul>")
+check("...and from Notes' own read-back shape (sibling <ul> inside the <ol>)",
+      bf.note_to_outline(resaved)["blocks"] == list(NOV1["blocks"]))
 check("round trip: the byline gives the speaker back",
       bf.note_to_outline(note_html(o))["speaker"] == "Pastor Josh Smith"
       and bf.note_to_outline(note_html(o_guest))["speaker"] == "Cristian Ayquipa")
