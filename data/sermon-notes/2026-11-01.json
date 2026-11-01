@@ -3,10 +3,10 @@
   "title": "The Most Powerful Prayer You Could Pray",
   "speaker": "Pastor Josh Smith",
   "release_at": "2026-11-01T06:45:00-08:00",
-  "published_at": "2026-11-01T07:09:19-08:00",
+  "published_at": "2026-11-01T07:11:59-08:00",
   "takeaway": "The most powerful prayer draws us deeper into God — approaching the Father with humble confidence, being strengthened by the Spirit, grasping the immeasurable love of Christ, and praising the God who does more than we ask or imagine.",
   "format": "outline",
-  "version": "35411e3d063b",
+  "version": "e5be3eaf119b",
   "blocks": [
     {
       "kind": "main",
@@ -18,7 +18,11 @@
     },
     {
       "kind": "main",
-      "text": "2. Pray to be strengthened by the Spirit: \"I pray that out of his glorious riches he may strengthen you with power through his Spirit in your inner being, so that Christ may dwell in your hearts through faith.\" -Ephesians 3:16-17a"
+      "text": "2. Pray to be strengthened by the Spirit"
+    },
+    {
+      "kind": "quote",
+      "text": "\"I pray that out of his glorious riches he may strengthen you with power through his Spirit in your inner being, so that Christ may dwell in your hearts through faith.\" -Ephesians 3:16-17a"
     },
     {
       "kind": "subhead",
