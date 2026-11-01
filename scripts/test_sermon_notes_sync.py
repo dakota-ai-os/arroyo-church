@@ -295,6 +295,13 @@ check("Friday email -> that Sunday", s.sunday_from_subject("Sermon Notes", fri).
 sun = datetime(2026, 10, 11, 13, 30, tzinfo=timezone.utc)    # Sun 6:30 AM Pacific
 check("Sunday-morning email -> the same Sunday", s.sunday_from_subject("Re: Sermon Notes", sun).date().isoformat() == "2026-10-11")
 check("a dated subject still wins", s.sunday_from_subject("Sermon Notes for 10/18/26", fri).date().isoformat() == "2026-10-18")
+sat = datetime(2026, 11, 1, 5, 49, tzinfo=timezone.utc)     # Sat 10/31 10:49 PM Pacific
+check("2026-11-01: a year typo in the subject ('11/1/25') is corrected to the year it was sent",
+      s.sunday_from_subject("Sermon Notes for 11/1/25", sat).date().isoformat() == "2026-11-01")
+check("...a December email for a January Sunday keeps next year",
+      s.sunday_from_subject("Sermon Notes for 1/3/27", datetime(2026, 12, 31, 20, 0, tzinfo=timezone.utc)).date().isoformat() == "2027-01-03")
+check("...and a subject date that fits no year falls back to the Sunday after it was sent",
+      s.sunday_from_subject("Sermon Notes for 6/1/26", sat).date().isoformat() == "2026-11-01")
 
 print("parse_structure: Josh's lone-'N.' Google-Docs outline")
 _, rest = s.split_title_and_body(OUTLINE)
@@ -326,6 +333,13 @@ check("a two-sentence line or a '#N'/'-' item is never a subheading",
       and s._is_subheading("3 Ways to Communicate Like Christ"))
 check("unnumbered: a short two-sentence line is body text, not a subhead",
       ("text", "Why go? Because grace sends us") in s.parse_unnumbered("Why go? Because grace sends us\n\nGo boldly\n\n\u201cVerse\u201d -Acts 1:8"))
+
+check("11/1: a verse typed into its point's paragraph is split off as the point's scripture",
+      s.split_point_verse([("main", "2. Pray to be strengthened by the Spirit:  \u201cI pray that out of his glorious riches he may strengthen you.\u201d -Ephesians 3:16-17a")])
+      == [("main", "2. Pray to be strengthened by the Spirit"), ("text", "\u201cI pray that out of his glorious riches he may strengthen you.\u201d -Ephesians 3:16-17a")])
+check("...but a point that merely has a colon, or a labelled sub item, is left alone",
+      s.split_point_verse([("main", "1. Grace: what it is"), ("sub", "Same citizenship: \u201cOur citizenship is in heaven\u201d -Philippians 3:20")])
+      == [("main", "1. Grace: what it is"), ("sub", "Same citizenship: \u201cOur citizenship is in heaven\u201d -Philippians 3:20")])
 
 print("parse_slides: a guest's slide deck (shape of Cristian Ayquipa, 2026-09-06)")
 SLIDES = ("1. Title- STAYING CONNECTED\n2. THE TRUE VINE\n“I am the true vine, and my Father\nis the gardener.”\n"

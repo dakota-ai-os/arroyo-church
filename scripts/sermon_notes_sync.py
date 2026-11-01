@@ -838,15 +838,13 @@ def parse_slides(text):
 
 def sunday_from_subject(subject, fallback):
     """'Sermon Notes 8/16/26' -> the service date. Byline uses the SERVICE date, not the
-    date Josh happened to send the email (he writes them days ahead)."""
-    m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{2,4})", subject or "")
-    if m:
-        mo, d, y = (int(x) for x in m.groups())
-        y += 2000 if y < 100 else 0
-        try:
-            return datetime(y, mo, d)
-        except ValueError:
-            pass
+    date Josh happened to send the email (he writes them days ahead).
+
+    The subject's date must be plausible for when the email was SENT (no more than a week
+    before it, no more than ~6 months after). 2026-11-01: Josh's subject said "11/1/25" -- a year typo -- so the outline
+    read as last year's, lost to 10/25/26 as "newest", and the note kept the old sermon all
+    weekend. A typo'd year is corrected to the nearest year that fits; a date that fits no
+    year falls back to the send date, the same as a subject with no date."""
     # No date in the subject (Josh's 10/9 email was just "Sermon Notes"): the service is the
     # Sunday on or after the day it was sent, in local time. Returning the send date itself
     # put "October 9th" in the byline of a Friday email.
@@ -855,6 +853,20 @@ def sunday_from_subject(subject, fallback):
     sunday = sent.date() + timedelta(days=(6 - sent.weekday()) % 7)
     if sent.weekday() == 6 and sent.hour >= 12:
         sunday += timedelta(days=7)
+    m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{2,4})", subject or "")
+    if m:
+        mo, d, y = (int(x) for x in m.groups())
+        y += 2000 if y < 100 else 0
+        fits = []
+        for yy in (y, sent.year, sent.year + 1, sent.year - 1):
+            try:
+                cand = datetime(yy, mo, d)
+            except ValueError:
+                continue
+            if -7 <= (cand.date() - sent.date()).days <= 180:
+                fits.append(cand)
+        if fits:
+            return fits[0]                    # the subject's own year first, when it fits
     return datetime(sunday.year, sunday.month, sunday.day)
 
 
@@ -1479,6 +1491,24 @@ def cached_takeaway(version, title, body):
     return out
 
 
+POINT_VERSE = re.compile(r'^(\d+\.\s+[^:"“]{3,90}?)\s*:\s*(["“].+)$', re.S)
+
+
+def split_point_verse(blocks):
+    """'2. Pray to be strengthened by the Spirit: "I pray that..." -Ephesians 3:16-17a' -> the
+    point, then its verse as scripture. (2026-11-01: Josh typed the verse into the point's own
+    paragraph, so the whole verse became one long Heading.) Only a numbered main point whose
+    tail is a quote carrying a -Book c:v citation is split; labelled sub items stay as they are."""
+    out = []
+    for k, v in blocks:
+        m = POINT_VERSE.match(v) if k == "main" else None
+        if m and SCRIPTURE_REF.search(m.group(2)):
+            out += [("main", m.group(1).strip()), ("text", m.group(2).strip())]
+        else:
+            out.append((k, v))
+    return out
+
+
 def build_outline(subject, when, text, sender=None):
     """Parse an outline email ONCE into what both the Note and the web copy render:
     {"title", "service" (a date), "blocks" [(kind, text)], "takeaway" ("" when none),
@@ -1496,6 +1526,7 @@ def build_outline(subject, when, text, sender=None):
         else:
             log("no 'N.' markers -- using the unnumbered-outline parser")
             blocks = parse_unnumbered(rest)
+    blocks = split_point_verse(blocks)
     service = sunday_from_subject(subject, when).date()
     straighten = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
     blocks = [(k, v.translate(straighten)) for k, v in blocks]
