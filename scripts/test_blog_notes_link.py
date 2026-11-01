@@ -125,7 +125,13 @@ drafts = sorted((REPO / "blog-drafts").glob("*.json"))
 LINK = f'<a href="{URL}">Sermon notes</a>'
 bad = []
 for f in drafts:
-    body = json.loads(f.read_text(encoding="utf-8"))["bodyHtml"]
+    d = json.loads(f.read_text(encoding="utf-8")); body = d["bodyHtml"]
+    if d.get("notesUrl") and d["notesUrl"] in body:
+        # drafts made since the generator adds the link itself (10/25 on): already linked, so
+        # adding it again must change nothing
+        if body.count(d["notesUrl"]) != 1 or b.add_notes_link(body, d["notesUrl"]) != body:
+            bad.append(f.name)
+        continue
     out = b.add_notes_link(body, URL)
     head, _, tail = body.rpartition('<a href="/plan-your-visit">')
     sep = head[head.rfind("</a>") + 4:]                # whatever separated the two links
