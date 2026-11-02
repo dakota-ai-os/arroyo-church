@@ -68,6 +68,20 @@ def tame_red(img, k):
     return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
 
+def skin_balance(img, k):
+    """Warm stage light leaves the whole face magenta-red, not just the highlights (2026-11-01: Dakota,
+    "he looks too red"). Pull LAB a* (red-magenta) back toward neutral by k and add a touch of b*
+    (yellow) so skin stays warm; dark pixels (jacket, hair) are left alone. Colour only, no detail change."""
+    if k <= 0: return img
+    import cv2
+    lab = cv2.cvtColor(np.array(img.convert("RGB")), cv2.COLOR_RGB2LAB).astype(np.float32)
+    L, A, B = lab[..., 0] / 255, lab[..., 1] - 128, lab[..., 2] - 128
+    w = k * np.clip((L - 0.2) / 0.25, 0, 1) * (A > 0)
+    lab[..., 1] = 128 + A * (1 - w)
+    lab[..., 2] = 128 + B + w * A * 0.25
+    return Image.fromarray(cv2.cvtColor(np.clip(lab, 0, 255).astype(np.uint8), cv2.COLOR_LAB2RGB))
+
+
 def soften_skin(img, amount=0.7, sharpen=45):
     """The 'balanced' treatment Dakota approved: gentle bilateral smoothing, light sharpen (not 170%)."""
     import cv2
@@ -99,6 +113,7 @@ def main():
     ap.add_argument("--mirror", action="store_true", help="widen the wall crop with its own mirror image")
     ap.add_argument("--wall-bright", type=float, default=0.8)
     ap.add_argument("--tame-red", type=float, default=0.0, help="0..1, calm pink stage-light highlights on skin")
+    ap.add_argument("--skin-balance", type=float, default=0.0, help="0..1, pull the overall red-magenta cast off skin")
     ap.add_argument("--smooth", type=float, default=0.7, help="0..1 skin smoothing blend; keep low on real video frames")
     ap.add_argument("--sharpen", type=int, default=45, help="UnsharpMask percent")
     ap.add_argument("--overlap", type=int, default=22, help="px the text may run behind the pastor")
@@ -140,7 +155,7 @@ def main():
     # --- pastor layer, scaled and placed ---
     pw, ph = int(src.width * s), int(src.height * s)
     pl = person.resize((pw, ph), Image.LANCZOS)
-    rgb = soften_skin(tame_red(pl.convert("RGB"), a.tame_red), a.smooth, a.sharpen)
+    rgb = soften_skin(skin_balance(tame_red(pl.convert("RGB"), a.tame_red), a.skin_balance), a.smooth, a.sharpen)
     rgb.putalpha(pl.split()[-1])
     ox = int(a.face_x - cx * s)
     oy = int(a.head_top - top * s)
