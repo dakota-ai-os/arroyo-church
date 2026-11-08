@@ -10,25 +10,6 @@ X-WR-CALDESC:Upcoming events at Arroyo Church in Livermore\, CA
 REFRESH-INTERVAL;VALUE=DURATION:PT6H
 X-PUBLISHED-TTL:PT6H
 BEGIN:VEVENT
-UID:240733648@arroyochurch.com
-DTSTAMP:20261025T033031Z
-LAST-MODIFIED:20261025T033031Z
-SEQUENCE:427890
-DTSTART:20261108T193000Z
-DTEND:20261108T203000Z
-SUMMARY:Connect class
-LOCATION:Arroyo Church\, 945 Concannon Blvd\, Livermore\, CA 94550
-DESCRIPTION:The best place to start at Arroyo. You'll hear our mission and 
- beliefs\, learn about baptism and Connect Groups\, discover how God has wi
- red you to serve\, and find out how to become a member of the family.\nIn 
- one class:\n\n• Connect to God: the good news of Jesus\, baptism\, our m
- ission\, and what we believe.\n• Connect to others: find real community 
- and get into a weeknight Connect Group.\n• Connect to your gifts: discov
- er your God-given S.H.A.P.E. and where you can serve.\n\nDetails: https://
- www.arroyochurch.com/events#event-240733648
-URL:https://www.arroyochurch.com/events#event-240733648
-END:VEVENT
-BEGIN:VEVENT
 UID:240733616@arroyochurch.com
 DTSTAMP:20261024T191219Z
 LAST-MODIFIED:20261024T191219Z
@@ -153,6 +134,25 @@ DTEND:20270228T203000Z
 SUMMARY:Connect class
 DESCRIPTION:Details: https://www.arroyochurch.com/events#event-240733619
 URL:https://www.arroyochurch.com/events#event-240733619
+END:VEVENT
+BEGIN:VEVENT
+UID:240733652@arroyochurch.com
+DTSTAMP:20261108T222954Z
+LAST-MODIFIED:20261108T222954Z
+SEQUENCE:449189
+DTSTART:20270314T183000Z
+DTEND:20270314T193000Z
+SUMMARY:Connect class
+LOCATION:Arroyo Church\, 945 Concannon Blvd\, Livermore\, CA 94550
+DESCRIPTION:The best place to start at Arroyo. You'll hear our mission and 
+ beliefs\, learn about baptism and Connect Groups\, discover how God has wi
+ red you to serve\, and find out how to become a member of the family.\nIn 
+ one class:\n\n• Connect to God: the good news of Jesus\, baptism\, our m
+ ission\, and what we believe.\n• Connect to others: find real community 
+ and get into a weeknight Connect Group.\n• Connect to your gifts: discov
+ er your God-given S.H.A.P.E. and where you can serve.\n\nDetails: https://
+ www.arroyochurch.com/events#event-240733652
+URL:https://www.arroyochurch.com/events#event-240733652
 END:VEVENT
 BEGIN:VEVENT
 UID:240733623@arroyochurch.com

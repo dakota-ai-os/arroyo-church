@@ -1,23 +1,6 @@
 {
-  "updated": "2026-11-08T13:26:22.444Z",
+  "updated": "2026-11-08T22:29:54.141Z",
   "events": [
-    {
-      "id": "240733648",
-      "eventId": "23155247",
-      "name": "Connect class",
-      "summary": "The best place to start at Arroyo. In one class we'll help you connect to God, others, and your gifts.",
-      "description": "The best place to start at Arroyo. You'll hear our mission and beliefs, learn about baptism and Connect Groups, discover how God has wired you to serve, and find out how to become a member of the family.\nIn one class:\n\n• Connect to God: the good news of Jesus, baptism, our mission, and what we believe.\n• Connect to others: find real community and get into a weeknight Connect Group.\n• Connect to your gifts: discover your God-given S.H.A.P.E. and where you can serve.",
-      "starts": "2026-11-08T19:30:00Z",
-      "ends": "2026-11-08T20:30:00Z",
-      "allDay": false,
-      "location": "Arroyo Church",
-      "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733648",
-      "registerUrl": null,
-      "featured": false,
-      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
-      "ics": "data/events/ics/240733648.ics"
-    },
     {
       "id": "240733616",
       "eventId": "23155237",
@@ -170,6 +153,23 @@
       "featured": false,
       "recurrence": null,
       "ics": "data/events/ics/240733619.ics"
+    },
+    {
+      "id": "240733652",
+      "eventId": "23155247",
+      "name": "Connect class",
+      "summary": "The best place to start at Arroyo. In one class we'll help you connect to God, others, and your gifts.",
+      "description": "The best place to start at Arroyo. You'll hear our mission and beliefs, learn about baptism and Connect Groups, discover how God has wired you to serve, and find out how to become a member of the family.\nIn one class:\n\n• Connect to God: the good news of Jesus, baptism, our mission, and what we believe.\n• Connect to others: find real community and get into a weeknight Connect Group.\n• Connect to your gifts: discover your God-given S.H.A.P.E. and where you can serve.",
+      "starts": "2027-03-14T18:30:00Z",
+      "ends": "2027-03-14T19:30:00Z",
+      "allDay": false,
+      "location": "Arroyo Church",
+      "image": null,
+      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733652",
+      "registerUrl": null,
+      "featured": false,
+      "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
+      "ics": "data/events/ics/240733652.ics"
     },
     {
       "id": "240733623",
