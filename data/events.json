@@ -1,23 +1,6 @@
 {
-  "updated": "2026-11-01T22:26:59.774Z",
+  "updated": "2026-11-08T13:26:22.444Z",
   "events": [
-    {
-      "id": "240733613",
-      "eventId": "23155234",
-      "name": "Men's Event",
-      "summary": null,
-      "description": null,
-      "starts": "2026-11-07T08:00:00Z",
-      "ends": "2026-11-08T07:59:59Z",
-      "allDay": true,
-      "location": null,
-      "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733613",
-      "registerUrl": null,
-      "featured": false,
-      "recurrence": null,
-      "ics": "data/events/ics/240733613.ics"
-    },
     {
       "id": "240733648",
       "eventId": "23155247",
