@@ -223,6 +223,31 @@ spend, clicks per week, conversions) are still open. No account settings were ch
 problems, Grants warnings or auto-applied-change notices. One Google Ads email (10/26): **passkey required as early as Nov 11** for
 sensitive actions such as adding users and linking accounts; sign-in is not affected, and a passkey can take up to 7 days to work.
 
+**Review 2026-11-09, completed same day after Dakota re-signed in (Oct 10–Nov 8, read-only):**
+- **Totals:** $121.78 · 1,355 impressions · 131 clicks · **CTR 9.67%** (was 8.50%) · avg CPC $0.93 (was $0.87) ·
+  **0 conversions** (was 2) · optimization score 84.5%.
+- **By ad group:**
+  - Church in Livermore: 65 clicks, $59.39.
+  - Christian / Bible church: 47 clicks, CTR 16.8%, $40.22.
+  - Tri-Valley neighbors: 19 clicks, $22.17 (was $9).
+- **Exclusions worked:**
+  - 217 search terms (was 353).
+  - **Off-target spend in the visible terms fell to $13.70 of $68.25 (20%)**, from $35.09 (52%). What's left is mostly
+    denominations and churches the list didn't cover: Reformed, ELCA, SDA, Congregational, Zionist, Latin, Transfiguration,
+    Gospel Community.
+  - Brand "arroyo church livermore": 26 clicks, $4.60.
+- **Zero conversions is real, not broken tracking.**
+  - "Submit lead form" status is "No recent conversions", not inactive, and the AW tag is live on the site.
+  - GA4 (Oct 12–Nov 8) shows plan_visit_submit 4, join_group_submit 5 and connect_tag_submit 5 site-wide, from the same code
+    that sends the Ads conversion.
+  - So no ad visitor submitted a form this month. Over 60 days the campaign has 2 conversions for ~$247 (~$124 each).
+- **Assets:**
+  - "Upcoming Events" (211 impr, CTR 15.6%) and "What to Expect" (203 impr, CTR 13.8%) are approved and serving.
+  - Google AI added an ad-group sitelink "Meet Our Leadership" on 10/21 (3 impr). Harmless, left alone.
+- **Email:** no Ads, Nonprofits or policy emails in 35 days.
+- **Proposed (not applied):** round-2 negatives in `google/ads-negatives-2026-11-09.txt` (52 terms). Tested against all 35
+  clicked terms: they block the 9 off-target ones ($13.70) and none of the good ones.
+
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
 $2.50 max-CPC cap** for the first 30–60 days ($4/day is too little for Smart Bidding to learn),

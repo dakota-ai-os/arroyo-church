@@ -1,0 +1,56 @@
+# PROPOSED campaign-level negative keywords (broad), round 2, from the Oct 10–Nov 8 search terms (217 terms).
+# Tested against all 35 clicked terms: blocks only the off-target denominations/named churches; keeps every good term.
+# Not included on purpose: outreach (ambiguous), mega ("mega church near me" is a fair visitor), black (sensitive, tiny volume).
+# Status: PROPOSED — apply only after Dakota approves.
+reformed
+calvinist
+zionist
+latin
+elca
+lutheran
+lutherans
+congregational
+transfiguration
+sda
+nazarene
+maronite
+messianic
+moravian
+unitarian
+u u
+ame
+bethel
+basilica
+bishop
+borromeo
+all saints
+christ the light
+church of the valley
+discovery
+deliverance
+kjv
+lighthouse
+light house
+new destiny
+northside
+parroquia
+catolica
+pathway
+redeem
+redeemed
+river of life
+rlcc
+tpm
+truth of god
+vbc
+victory city
+vineyard
+wellspring
+world harvest
+gospel community
+blue oaks
+well church
+progressive
+afternoon
+华人
+教会
