@@ -217,6 +217,12 @@ action's tag and wire its AW-id/label into `acTrack()`; link GA4 a407495086/p553
   "Show rows" to 500, then scroll the tallest `div.main` and collect `[role=row]` cells. A full page navigation clears any
   data held in `window`.
 
+**Status 2026-11-09 (monthly review, NOT COMPLETED):** the scheduled read-only run stopped at Google's "Verify it's you" on
+av@ for both Google Ads and GA4, which only Dakota can clear. No Ads or GA4 numbers were read, so the Nov 9 watch items (off-target
+spend, clicks per week, conversions) are still open. No account settings were changed. Gmail, last 35 days: no disapprovals, billing
+problems, Grants warnings or auto-applied-change notices. One Google Ads email (10/26): **passkey required as early as Nov 11** for
+sensitive actions such as adding users and linking accounts; sign-in is not affected, and a passkey can take up to 7 days to work.
+
 **Goal — yes, set one.** Campaign goal = Leads. Primary conversion = **Plan a Visit form submit**.
 Secondary = Join a Group submit, Directions click, Call click. Bidding: **Maximize Clicks with a
 $2.50 max-CPC cap** for the first 30–60 days ($4/day is too little for Smart Bidding to learn),
