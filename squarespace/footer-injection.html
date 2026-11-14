@@ -492,7 +492,7 @@ html.ac-evd-lock #ac-cur-dot,html.ac-evd-lock #ac-cur-ring{opacity:0} /* the cus
 .ac-sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .elders{margin-top:4.5rem}
 .elders .lead{max-width:72ch;color:rgba(22,36,43,.66);margin-top:1rem}
-.elder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.2rem}
+.elder-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:880px;gap:1.2rem;margin-top:2.2rem}
 .ecard{text-align:center}
 .ecard .e-img{border-radius:18px;overflow:hidden;aspect-ratio:1/1.05;background:#dfd7c6;box-shadow:0 10px 24px -16px rgba(22,36,43,.35);transition:transform .35s,box-shadow .35s}
 .ecard:hover .e-img{transform:translateY(-5px);box-shadow:0 22px 40px -18px rgba(22,36,43,.4)}
@@ -1326,7 +1326,6 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     var elders=[
       ['Josh Smith','Elder &middot; President',B+'d341cec6-03de-4fdc-a82a-58b313c05511/0T7A5422.jpg?format=600w'],
       ['Dakota Yates','Elder &middot; Vice President',B+'93b90642-39cb-4a5d-8d74-8b80b51be354/6.jpg?format=600w'],
-      ['Kelly Patchin','Elder &middot; Secretary',B+'cf71979c-c760-4657-b8ec-b7b491cbf4cf/7.jpg?format=600w'],
       ['Mason Fountain','Elder &middot; Treasurer',B+'d14d2d39-716e-4b74-a068-d6177126c1b9/IMG_9F380B7F72B9-1.jpeg?format=600w']
     ];
     var sHtml=staff.map(function(s){ return '<div class="tcard ac-rev"><img src="'+s[2]+'" alt="'+s[0]+'" loading="lazy"><div class="t-scrim"></div><button class="t-toggle" aria-expanded="false"><span class="t-name">'+s[0]+'</span><span class="role">'+s[1]+'</span></button><div class="t-facts"><h3>'+s[0]+'</h3><div class="role">'+s[1]+'</div>'+(s[3]?'<p><strong>Family fact:</strong> '+s[3]+'</p>':'')+'<p><strong>Fun fact:</strong> '+s[4]+'</p></div></div>'; }).join('');
