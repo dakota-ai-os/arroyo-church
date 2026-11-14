@@ -1316,20 +1316,20 @@ body.collection-68b739b28750bd7e337593bd .ac-page-cta{display:none!important}
     if(!anchor || document.getElementById('ac-team')) return;
     var B='https://images.squarespace-cdn.com/content/v1/68532fdd269d6a05dbb80b84/';
     var staff=[
-      ['Josh Smith','Lead Pastor',B+'6a2c5fd0-7b7a-4f65-aa91-f6ab83dc18b9/R6II2038.jpg?format=900w','I met my wife, Jamie, in elementary school. We now have three daughters that I adore!','I&rsquo;m a diehard 49ers and Warriors fan.'],
-      ['Cristian Ayquipa','Associate Pastor',B+'86c9ec5e-e920-4661-8b59-412f8e5f502b/R6II2019.jpg?format=900w','I met my wife at Bible college. We have two amazing sons!','I love making coffee!'],
-      ['Chris Rogers','Worship Pastor',B+'42167adb-77e9-41a3-b891-10cf2cf087c9/R6II2021.jpg?format=900w','My wife &amp; kids love the Tri-Valley!','Music has always been my passion!'],
-      ['Emily Fountain','Children&rsquo;s Ministry Director',B+'65d6fbc4-f15f-4783-bda1-9b46ca00a7b4/R6II2014.jpg?format=900w','I love being a mom!','I am the youngest of four sisters.'],
-      ['Elijah Merrell','Media Coordinator',B+'bbb854a4-37f6-475b-bf03-3436a3fe9a2b/R6II2030.jpg?format=900w','I am a pastor&rsquo;s kid.','I enjoy being creative with content and music!'],
+      ['Josh Smith','Lead Pastor',B+'d341cec6-03de-4fdc-a82a-58b313c05511/0T7A5422.jpg?format=900w','I met my wife, Jamie, in elementary school. We now have three daughters that I adore!','I&rsquo;m a diehard 49ers and Warriors fan.'],
+      ['Cristian Ayquipa','Associate Pastor',B+'ed4bc52c-86ca-4ecd-9ddd-5d4ecd94c090/0T7A5425.jpg?format=900w','I met my wife at Bible college. We have two amazing sons!','I love making coffee!'],
+      ['Chris Rogers','Worship Pastor',B+'41b94240-6986-4b91-b5e2-10ee2685869c/0T7A5431-2.jpg?format=900w','My wife &amp; kids love the Tri-Valley!','Music has always been my passion!'],
+      ['Adi Cagle','Children&rsquo;s Ministry Director',B+'caaf53b7-b673-46b6-8394-af69aeba65ef/0T7A5428.jpg?format=900w','','I love baking cookies!'],
+      ['Elijah Merrell','Media Coordinator',B+'fbd2704f-568d-4dbb-a302-a491f5f6f28e/0T7A5433.jpg?format=900w','I am a pastor&rsquo;s kid.','I enjoy being creative with content and music!'],
       ['Janna Chestnut','Women&rsquo;s Ministry Director',B+'d26f2702-88a5-4707-8a64-2d3f2bf8a9e0/201225612_10225910144448549_5580392780219787886_n.jpg?format=900w','I have five grown up children!','I have lived in the East Bay my whole life.']
     ];
     var elders=[
-      ['Josh Smith','Elder &middot; President',B+'01dd48be-491c-4b6b-801d-cd1c431cc6c5/IMG_0585.jpg?format=600w'],
+      ['Josh Smith','Elder &middot; President',B+'d341cec6-03de-4fdc-a82a-58b313c05511/0T7A5422.jpg?format=600w'],
       ['Dakota Yates','Elder &middot; Vice President',B+'93b90642-39cb-4a5d-8d74-8b80b51be354/6.jpg?format=600w'],
       ['Kelly Patchin','Elder &middot; Secretary',B+'cf71979c-c760-4657-b8ec-b7b491cbf4cf/7.jpg?format=600w'],
       ['Mason Fountain','Elder &middot; Treasurer',B+'d14d2d39-716e-4b74-a068-d6177126c1b9/IMG_9F380B7F72B9-1.jpeg?format=600w']
     ];
-    var sHtml=staff.map(function(s){ return '<div class="tcard ac-rev"><img src="'+s[2]+'" alt="'+s[0]+'" loading="lazy"><div class="t-scrim"></div><button class="t-toggle" aria-expanded="false"><span class="t-name">'+s[0]+'</span><span class="role">'+s[1]+'</span></button><div class="t-facts"><h3>'+s[0]+'</h3><div class="role">'+s[1]+'</div><p><strong>Family fact:</strong> '+s[3]+'</p><p><strong>Fun fact:</strong> '+s[4]+'</p></div></div>'; }).join('');
+    var sHtml=staff.map(function(s){ return '<div class="tcard ac-rev"><img src="'+s[2]+'" alt="'+s[0]+'" loading="lazy"><div class="t-scrim"></div><button class="t-toggle" aria-expanded="false"><span class="t-name">'+s[0]+'</span><span class="role">'+s[1]+'</span></button><div class="t-facts"><h3>'+s[0]+'</h3><div class="role">'+s[1]+'</div>'+(s[3]?'<p><strong>Family fact:</strong> '+s[3]+'</p>':'')+'<p><strong>Fun fact:</strong> '+s[4]+'</p></div></div>'; }).join('');
     var eHtml=elders.map(function(e){ return '<div class="ecard ac-rev"><div class="e-img"><img src="'+e[2]+'" alt="'+e[0]+'" loading="lazy"></div><h3>'+e[0]+'</h3><div class="role">'+e[1]+'</div></div>'; }).join('');
     var eld='Each member of our elder board meets the qualifications for elders found in Titus 1:5&ndash;9 and 1 Timothy 3:1&ndash;7. The elders shepherd the church body, steward its resources, and provide support and accountability for our Lead Pastor. Our elders also serve as the board of directors for Arroyo Church since every non-profit corporation is required by law to have a board of directors.';
     var sec=document.createElement('section'); sec.className='ac-sec'; sec.id='ac-team';
