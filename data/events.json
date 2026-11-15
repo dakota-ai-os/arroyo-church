@@ -1,23 +1,6 @@
 {
-  "updated": "2026-11-08T22:29:54.141Z",
+  "updated": "2026-11-15T20:35:58.058Z",
   "events": [
-    {
-      "id": "240733616",
-      "eventId": "23155237",
-      "name": "Foundations class",
-      "summary": null,
-      "description": null,
-      "starts": "2026-11-15T19:00:00Z",
-      "ends": "2026-11-15T20:00:00Z",
-      "allDay": false,
-      "location": null,
-      "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733616",
-      "registerUrl": null,
-      "featured": false,
-      "recurrence": null,
-      "ics": "data/events/ics/240733616.ics"
-    },
     {
       "id": "240733612",
       "eventId": "23155233",
