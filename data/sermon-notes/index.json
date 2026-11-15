@@ -1,6 +1,13 @@
 {
-  "updated": "2026-11-07T23:00:13-08:00",
+  "updated": "2026-11-14T23:00:11-08:00",
   "weeks": [
+    {
+      "service": "2026-11-15",
+      "title": "God Can Renew You and Your Relationships",
+      "speaker": "Pastor Josh Smith",
+      "release_at": "2026-11-15T06:45:00-08:00",
+      "file": "2026-11-15.json"
+    },
     {
       "service": "2026-11-08",
       "title": "Keys for Spiritual Maturity and Relational Unity",
