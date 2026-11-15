@@ -1215,7 +1215,54 @@ def _ui(script, timeout=120):
     return r.stdout.strip()
 
 
+def same_note(editor_text, note_name):
+    """True when the editor's text belongs to the note called note_name. Notes names a note
+    after its first non-empty line, so compare that line, ignoring case and spacing."""
+    norm = lambda s: re.sub(r"\s+", " ", (s or "").replace("￼", "")).strip().casefold()
+    first = next((l for l in (editor_text or "").split("\n") if norm(l)), "")
+    return bool(norm(note_name)) and norm(first) == norm(note_name)
+
+
+def _editor_text():
+    """The note body the Notes window is showing right now (its only text area)."""
+    r = subprocess.run(
+        ["osascript", "-l", "JavaScript", "-e",
+         'let f = null;\n'
+         'for (const sa of Application("System Events").processes.byName("Notes").windows[0]'
+         '.splitterGroups[0].scrollAreas()) { if (sa.textAreas().length) { f = sa.textAreas[0]; break; } }\n'
+         'if (!f) throw new Error("no note is open in the Notes window");\n'
+         'String(f.value())'],
+        capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip()[:200])
+    return r.stdout[:-1] if r.stdout.endswith("\n") else r.stdout
+
+
 def _focus_note(note_id):
+    """Open the note, put keyboard focus in its body, and PROVE the window is showing it.
+
+    2026-11-15 (first Sunday on macOS 27): `show note` left a different note open, and every
+    keystroke after it went into that note -- Dakota's invoice note got the sermon outline
+    (undone by hand) while the shared note was never touched. So nothing is typed until the
+    open note's first line matches this note's name."""
+    want = run_osascript(f'tell application "Notes" to return name of note id "{note_id}"', timeout=60)
+    for attempt in range(3):
+        _show_and_focus(note_id, settle=1.5 + 1.5 * attempt)
+        got = _editor_text()
+        if same_note(got, want):
+            return
+        log(f'Notes is showing "{got.split(chr(10))[0][:60]}", not "{want[:60]}" -- trying again')
+    raise RuntimeError(f'Notes would not open the note "{want[:60]}" -- refusing to type into another note')
+
+
+def _assert_showing(note_id):
+    """Raise unless the Notes window is showing this note (see _focus_note)."""
+    want = run_osascript(f'tell application "Notes" to return name of note id "{note_id}"', timeout=60)
+    if not same_note(_editor_text(), want):
+        raise RuntimeError(f'Notes is not showing the note "{want[:60]}" -- refusing to type into another note')
+
+
+def _show_and_focus(note_id, settle=1.5):
     # A wide window keeps the title/byline on one visual line each, so the arrow-key line
     # count used below stays accurate.
     _ui(
@@ -1223,7 +1270,7 @@ def _focus_note(note_id):
         '  activate\n'
         '  show note id "' + note_id + '"\n'
         'end tell\n'
-        'delay 1.5\n'
+        f'delay {settle}\n'
         'tell application "System Events" to tell process "Notes"\n'
         '  set frontmost to true\n'
         '  delay 0.6\n'
@@ -1704,6 +1751,8 @@ def _apply_heading_styles(note_id, blocks, focus=False):
     try:
         if focus:
             _focus_note(note_id)
+        else:
+            _assert_showing(note_id)
         styled, wanted = style_headings(blocks)
         if wanted:
             got, _ = styled_heading_count(note_id, blocks)

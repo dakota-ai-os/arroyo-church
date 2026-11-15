@@ -556,6 +556,8 @@ finally:
     s.run_osascript = keep
 check("read-back: <h2> = Heading, <h3> = Subheading, Notes' &quot without a semicolon; bold body text is not a heading",
       got == (2, 3))
+REAL_ASSERT_SHOWING = s._assert_showing
+s._assert_showing = lambda nid: None       # the styling tests below assume the right note is open
 keep = (s.style_headings, s.log)
 logged = []
 s.style_headings = lambda blocks: (_ for _ in ()).throw(RuntimeError("Notes is not frontmost"))
@@ -579,6 +581,44 @@ except s.NoteChangedWhileStyling:
 finally:
     s.style_headings = keep
 check("...but a CHANGED note is re-raised, so the run fails and a later attempt rewrites it", reraised)
+
+# 2026-11-15 (macOS 27): `show note` left Dakota's invoice note open and the whole outline was
+# pasted into it. Nothing may be typed until the open note is provably the shared one.
+SHARED = "Keys for Spiritual Maturity and Relational Unity"
+check("same_note: the open note's first line is the note's name",
+      s.same_note(SHARED + "\nPastor Josh Smith | November 8th, 2026\n \nbody", SHARED))
+check("same_note: ignores case, spacing and the graphic's placeholder",
+      s.same_note("\n  keys for  spiritual maturity and relational unity \ufffc\nrest", SHARED))
+check("same_note: a different note is refused",
+      not s.same_note("\n\nHello Dakota Yates,\n\nPlease find attached invoice", SHARED))
+check("same_note: an empty name never matches", not s.same_note("", "") and not s.same_note("text", ""))
+
+def _err(fn):
+    try:
+        fn()
+    except Exception as e:
+        return e
+
+keep = (s.run_osascript, s._editor_text, s._show_and_focus, s.log)
+shows, logged = [], []
+s.run_osascript = lambda script, timeout=90: SHARED if "return name" in script else ""
+s._show_and_focus = lambda nid, settle=1.5: shows.append(settle)
+s.log = lambda m: logged.append(m)
+try:
+    s._editor_text = lambda: "\n\nHello Dakota Yates,\n\nPlease find attached invoice INV0042"
+    e = _err(lambda: s._focus_note("x-coredata://test"))
+    check("_focus_note: the wrong note stays open after 3 tries -> it refuses to type, with a clear error",
+          isinstance(e, RuntimeError) and "refusing to type into another note" in str(e) and len(shows) == 3)
+    reads = ["Some other note\nbody", SHARED + "\nbyline"]
+    shows.clear()
+    s._editor_text = lambda: reads.pop(0) if len(reads) > 1 else reads[0]
+    check("_focus_note: a slow switch is retried with a longer wait and then goes ahead",
+          _err(lambda: s._focus_note("x-coredata://test")) is None and shows == [1.5, 3.0])
+    s._editor_text = lambda: "Hello Dakota Yates,"
+    e = _err(lambda: REAL_ASSERT_SHOWING("x-coredata://test"))
+    check("the styling pass checks the open note too", isinstance(e, RuntimeError))
+finally:
+    s.run_osascript, s._editor_text, s._show_and_focus, s.log = keep
 
 def render_note_counts(counts):
     """update_note() with attachment_count() answering `counts` in turn; returns the error, if any."""
