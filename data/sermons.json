@@ -6,6 +6,12 @@
   },
   "videos": [
     {
+      "id": "wEjKkfzJQgQ",
+      "title": "God Can Renew You and Your Relationships| Sermon and Worship",
+      "published": "2026-11-16T07:39:07+00:00",
+      "service": "2026-11-15"
+    },
+    {
       "id": "wyXXD8YHCUw",
       "title": "How to Handle Conflict as a Christian | Ephesians 4 | Arroyo Church",
       "published": "2026-11-09T09:11:57+00:00",
@@ -34,13 +40,7 @@
       "title": "What Does it Mean to Be Saved? | Ephesians 2:1-10",
       "published": "2026-10-12T06:46:55+00:00",
       "service": "2026-10-11"
-    },
-    {
-      "id": "DNuGfYNwVxM",
-      "title": "How Do I Grow Closer to God? | Ephesians 1 Sermon | Arroyo Church",
-      "published": "2026-09-28T06:33:27+00:00",
-      "service": "2026-09-27"
     }
   ],
-  "updated": "2026-11-15"
+  "updated": "2026-11-16"
 }
