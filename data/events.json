@@ -1,22 +1,22 @@
 {
-  "updated": "2026-11-15T20:35:58.058Z",
+  "updated": "2026-11-18T18:10:08.805Z",
   "events": [
     {
-      "id": "240733612",
+      "id": "243308640",
       "eventId": "23155233",
       "name": "Worship Night",
       "summary": null,
       "description": null,
-      "starts": "2026-11-18T08:00:00Z",
-      "ends": "2026-11-19T07:59:59Z",
-      "allDay": true,
+      "starts": "2026-11-19T02:30:00Z",
+      "ends": "2026-11-19T04:00:00Z",
+      "allDay": false,
       "location": null,
       "image": null,
-      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/240733612",
+      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/243308640",
       "registerUrl": null,
       "featured": false,
       "recurrence": null,
-      "ics": "data/events/ics/240733612.ics"
+      "ics": "data/events/ics/243308640.ics"
     },
     {
       "id": "240733618",
