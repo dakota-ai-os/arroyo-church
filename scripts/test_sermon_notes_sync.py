@@ -316,6 +316,27 @@ check("a 3-item sub-list followed by main point 3 is not swapped with it",
                                      ("sub", "Third sub"), ("main", "3. Point three"),
                                      ("subhead", "3 Ways to Communicate Like Christ")])
 
+# 11/22 (and 11/08): a counted heading ("2 Ways ...") whose list is numbered 1, 2 -- and the next
+# MAIN point arrives as "3.", which also continues the sub run. It was published as a third
+# sub-point under "2 Ways". The heading's count settles it.
+NOV22 = ("   1.\n\n   Let love lead to purity\n\n“Verse” -Ephesians 5:1-5\n\n"
+         "   2.\n\n   Live in the light\n\n“Verse” -Ephesians 5:7-14\n\n"
+         "2 Ways to Live in the Light\n\n"
+         "   1.\n\n   Don't be influenced by those in the dark\n\n"
+         "   2.\n\n   Let light reveal the truth\n\n“Verse” -1 John 1:7\n\n"
+         "   3.\n\n   Walk with wisdom\n\n“Verse” -Ephesians 5:15-21\n")
+check("11/22: after a '2 Ways' list has its 2 items, '3.' is main point 3, not a third way",
+      [(k, v) for k, v in s.parse_structure(NOV22) if k != "text"] ==
+      [("main", "1. Let love lead to purity"), ("main", "2. Live in the light"), ("subhead", "2 Ways to Live in the Light"),
+       ("sub", "Don't be influenced by those in the dark"), ("sub", "Let light reveal the truth"),
+       ("main", "3. Walk with wisdom")])
+COUNTED3 = SUBLIST.replace("   1.\n\n   Understand", "3 Truths About Words\n\n   1.\n\n   Understand")
+check("...while a '3 Truths' list keeps its own third item even when main point 3 comes next",
+      [(k, v) for k, v in s.parse_structure(COUNTED3)][:6] ==
+      [("main", "1. Point one"), ("main", "2. Point two"), ("subhead", "3 Truths About Words"),
+       ("sub", "Understand the weight of your words: x"), ("sub", "Second sub"), ("sub", "Third sub")]
+      and s.parse_structure(COUNTED3)[6] == ("main", "3. Point three"))
+
 # 10/25: a counted heading with "#1"/"#2" questions under it. "#2 ..." was 69 characters, so the old
 # length-only test made it a gold subhead while the 89-character "#1 ..." stayed body text.
 OCT25 = ("   1.\n\n   Grace get you to go even if it means suffering\n\n\u201cVerse one\u201d -Ephesians 3:1-3, 13\n\n"

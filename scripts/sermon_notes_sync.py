@@ -933,10 +933,15 @@ def parse_structure(body):
     # items reaches 3 exactly when the next MAIN point is also 3, which swaps them. So track
     # the sub-list's own run too -- stay in the nested list only while its numbering keeps
     # incrementing, then fall back and re-test against the main run.
-    out, expected, sub_n, in_sub = [], 1, 0, False
+    # The sub-list's run can also swallow the next MAIN point: Josh's mail numbers a counted list
+    # ("2 Ways to Live in the Light") 1, 2 and then the third main point "3.", which continues the
+    # sub run too (11/08 "2 Reasons...", 11/22 "2 Ways..."). A heading that announces its count
+    # settles it: once the list has that many items, a number that continues the MAIN run is main.
+    out, expected, sub_n, in_sub, list_count = [], 1, 0, False, None
     for kind, num, text in items:
         if kind == "num":
-            if in_sub and num == sub_n + 1:
+            full = list_count is not None and sub_n >= list_count and num == expected
+            if in_sub and num == sub_n + 1 and not full:
                 out.append(("sub", text))
                 sub_n = num
                 continue
@@ -944,6 +949,7 @@ def parse_structure(body):
             if num == expected:
                 out.append(("main", f"{num}. {text}"))
                 expected += 1
+                list_count = None
             elif num == 1 and expected > 1:     # numbering restarted => nested list opens
                 in_sub, sub_n = True, 1
                 out.append(("sub", text))
@@ -951,6 +957,8 @@ def parse_structure(body):
                 out.append(("sub", text))
         elif _is_subheading(text):
             out.append(("subhead", text))
+            m = LIST_COUNT.match(text)
+            list_count = (int(m.group(1)) if m.group(1).isdigit() else WORD_NUM[m.group(1).lower()]) if m else None
         else:
             out.append(("text", text))
     return out
