@@ -6,6 +6,12 @@
   },
   "videos": [
     {
+      "id": "p_eYa0b4LkQ",
+      "title": "Stand Out in a Sinful World | Ephesians 5:1-20 | Arroyo Church | Sermon and Worship",
+      "published": "2026-11-23T07:33:35+00:00",
+      "service": "2026-11-22"
+    },
+    {
       "id": "wEjKkfzJQgQ",
       "title": "How to Let Go of Bitterness and Forgive | Ephesians 4 | Arroyo Church",
       "published": "2026-11-16T07:39:07+00:00",
@@ -34,13 +40,7 @@
       "title": "Can God Restore a Broken Relationship? Ephesians 2 | Arroyo Church",
       "published": "2026-10-19T06:50:18+00:00",
       "service": "2026-10-18"
-    },
-    {
-      "id": "D6simuUfX4k",
-      "title": "What Does it Mean to Be Saved? | Ephesians 2:1-10",
-      "published": "2026-10-12T06:46:55+00:00",
-      "service": "2026-10-11"
     }
   ],
-  "updated": "2026-11-22"
+  "updated": "2026-11-23"
 }
