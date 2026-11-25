@@ -52,6 +52,18 @@ DESCRIPTION:The best place to start at Arroyo. You'll hear our mission and
 URL:https://www.arroyochurch.com/events#event-240733649
 END:VEVENT
 BEGIN:VEVENT
+UID:243919206@arroyochurch.com
+DTSTAMP:20261125T223342Z
+LAST-MODIFIED:20261125T223342Z
+SEQUENCE:473673
+DTSTART:20261225T000000Z
+DTEND:20261225T010000Z
+SUMMARY:Christmas Eve Service
+LOCATION:Arroyo Church\, 945 Concannon Blvd\, Livermore\, CA 94550
+DESCRIPTION:Details: https://www.arroyochurch.com/events#event-243919206
+URL:https://www.arroyochurch.com/events#event-243919206
+END:VEVENT
+BEGIN:VEVENT
 UID:240733650@arroyochurch.com
 DTSTAMP:20261025T033031Z
 LAST-MODIFIED:20261025T033031Z

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-19T07:57:37.994Z",
+  "updated": "2026-11-25T22:33:42.531Z",
   "events": [
     {
       "id": "240733618",
@@ -51,6 +51,23 @@
       "featured": false,
       "recurrence": "The second Sunday of every month from 11:30am to 12:30pm beginning 11/08/2026",
       "ics": "data/events/ics/240733649.ics"
+    },
+    {
+      "id": "243919206",
+      "eventId": "23565434",
+      "name": "Christmas Eve Service",
+      "summary": null,
+      "description": null,
+      "starts": "2026-12-25T00:00:00Z",
+      "ends": "2026-12-25T01:00:00Z",
+      "allDay": false,
+      "location": "Arroyo Church",
+      "image": null,
+      "url": "https://arroyo-church-434989.churchcenter.com/calendar/event/243919206",
+      "registerUrl": null,
+      "featured": false,
+      "recurrence": null,
+      "ics": "data/events/ics/243919206.ics"
     },
     {
       "id": "240733650",
