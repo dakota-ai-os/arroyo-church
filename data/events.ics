@@ -10,6 +10,17 @@ X-WR-CALDESC:Upcoming events at Arroyo Church in Livermore\, CA
 REFRESH-INTERVAL;VALUE=DURATION:PT6H
 X-PUBLISHED-TTL:PT6H
 BEGIN:VEVENT
+UID:243919192@arroyochurch.com
+DTSTAMP:20261126T042542Z
+LAST-MODIFIED:20261126T042542Z
+SEQUENCE:474025
+DTSTART:20261205T013000Z
+DTEND:20261205T033000Z
+SUMMARY:Parents' Night Out
+DESCRIPTION:Details: https://www.arroyochurch.com/events#event-243919192
+URL:https://www.arroyochurch.com/events#event-243919192
+END:VEVENT
+BEGIN:VEVENT
 UID:240733618@arroyochurch.com
 DTSTAMP:20261024T191219Z
 LAST-MODIFIED:20261024T191219Z
@@ -53,14 +64,17 @@ URL:https://www.arroyochurch.com/events#event-240733649
 END:VEVENT
 BEGIN:VEVENT
 UID:243919206@arroyochurch.com
-DTSTAMP:20261125T223342Z
-LAST-MODIFIED:20261125T223342Z
-SEQUENCE:473673
+DTSTAMP:20261126T042542Z
+LAST-MODIFIED:20261126T042542Z
+SEQUENCE:474025
 DTSTART:20261225T000000Z
 DTEND:20261225T010000Z
 SUMMARY:Christmas Eve Service
 LOCATION:Arroyo Church\, 945 Concannon Blvd\, Livermore\, CA 94550
-DESCRIPTION:Details: https://www.arroyochurch.com/events#event-243919206
+DESCRIPTION:Join us for a candlelight service on Christmas Eve as we celebr
+ ate the birth of Jesus. We'll have hot chocolate and cookies too. Everyone
+  is welcome\, so bring your family and friends.\n\nDetails: https://www.ar
+ royochurch.com/events#event-243919206
 URL:https://www.arroyochurch.com/events#event-243919206
 END:VEVENT
 BEGIN:VEVENT
